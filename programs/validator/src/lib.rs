@@ -4,7 +4,7 @@ use squads_mpl::state::*;
 use squads_mpl::errors::*;
 pub mod state;
 
-declare_id!("SMPLbiNbsa19gf9jz8x9uHSvSn9VLFJB38dGy46kqJ7");
+declare_id!("7buZc8fbFPezGdGWFaV6hLu7UrHpGD35W3E4u6575Rez");
 
 #[program]
 pub mod validator {
