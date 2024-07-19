@@ -1,6 +1,11 @@
 # Squads Multisig Program Library
 
 solana-cli 1.14.17
+
+sh -c "$(curl -sSfL https://release.solana.com/v1.14.17/install)"
+
+solana config set --keypair ~/.config/solana/id.json
+
 <img width="2500" alt="Frame 13" src="https://user-images.githubusercontent.com/81624955/182874414-98d63f58-450d-4520-a440-4bfda8f5329f.png">
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
