@@ -53,6 +53,7 @@ pub mod squads_mpl {
         create_key: Pubkey,   // the public key used to seed the original multisig creation
         members: Vec<Pubkey>, // a list of members (Public Keys) to use for the multisig
         _meta: String,        // a string of metadata that can be used to describe the multisig on-chain as a memo ie. '{"name":"My Multisig","description":"This is a my multisig"}'
+        time_lock: u32, // Add time_lock parameter
     ) -> Result<()> {
         // sort the members and remove duplicates
         let mut members = members;
@@ -80,6 +81,7 @@ pub mod squads_mpl {
             create_key,
             members,
             *ctx.bumps.get("multisig").unwrap(),
+            time_lock
         )
     }
 
@@ -301,6 +303,7 @@ pub mod squads_mpl {
         // if current number of signers reaches threshold, mark the transaction as execute ready
         if ctx.accounts.transaction.approved.len() >= usize::from(ctx.accounts.multisig.threshold) {
             ctx.accounts.transaction.ready_to_execute()?;
+            ctx.accounts.transaction.approval_time = Some(Clock::get()?.unix_timestamp);
         }
         Ok(())
     }
@@ -381,6 +384,13 @@ pub mod squads_mpl {
             // if no instructions were found, mark it as executed and move on
             ctx.accounts.transaction.set_executed()?;
             return Ok(());
+        }
+
+        let time_lock = ctx.accounts.multisig.time_lock;
+        let current_time = Clock::get()?.unix_timestamp;
+        let approval_time = ctx.accounts.transaction.approval_time.ok_or(MsError::InvalidTransactionState)?;
+        if current_time - approval_time < i64::from(time_lock) {
+            return err!(MsError::TimeLockNotSatisfied);
         }
 
         // use for derivation for the authority

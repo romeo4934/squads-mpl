@@ -21,4 +21,5 @@ pub enum MsError {
     EmptyMembers,
     PartialExecution,
     NotEnoughLamports,
+    TimeLockNotSatisfied, // Custom error for time lock condition
 }

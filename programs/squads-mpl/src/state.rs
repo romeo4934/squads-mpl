@@ -30,6 +30,7 @@ pub struct Ms {
     pub allow_external_execute: bool,   // DEPRECATED - allow non-member keys to execute txs
 
     pub keys: Vec<Pubkey>,              // keys of the members/owners of the multisig.
+    pub time_lock: u32,                 // Time lock in seconds, 0 for no delay
 }
 
 impl Ms {
@@ -41,10 +42,11 @@ impl Ms {
     1 +         // PDA bump
     32 +        // creator
     1 +         // allow external execute
-    4;          // for vec length
+    4 +          // for vec length
+    4;          // time lock
 
     /// Initializes the new multisig account
-    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, bump: u8) -> Result<()> {
+    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, bump: u8, time_lock: u32) -> Result<()> {
         self.threshold = threshold;
         self.keys = members;
         self.authority_index = 1;   // default vault is the first authority
@@ -53,6 +55,7 @@ impl Ms {
         self.bump = bump;
         self.create_key = create_key;
         self.allow_external_execute = false;
+        self.time_lock = time_lock; // Initialize with the time_lock
         Ok(())
     }
 
@@ -132,8 +135,9 @@ pub struct MsTransaction {
     pub approved: Vec<Pubkey>,          // keys that have approved/signed
     pub rejected: Vec<Pubkey>,          // keys that have rejected
     pub cancelled: Vec<Pubkey>,         // keys that have cancelled (ExecuteReady only)
-    pub executed_index: u8              // if Tx is executed sequentially, tracks which ix
-                                        // has been executed so far.
+    pub executed_index: u8,              // if Tx is executed sequentially, tracks which ix has been executed so far.
+    pub approval_time: Option<i64>,      // Timestamp when the transaction was approved                                   
+                                    
 }
 
 impl MsTransaction {
@@ -146,7 +150,8 @@ impl MsTransaction {
         (1 + 12) +                          // the enum size
         1 +                                 // the number of instructions (attached)
         1 +                                 // space for tx bump
-        1;                                  // track index if executed sequentially
+        1 +                                 // track index if executed sequentially
+        9;                                  // track approval time
 
     pub fn initial_size_with_members(members_len: usize) -> usize {
         MsTransaction::MINIMUM_SIZE + (3 * (4 + (members_len * 32) ) )
@@ -166,6 +171,7 @@ impl MsTransaction {
         self.cancelled = Vec::new();
         self.bump = bump;
         self.executed_index = 0;
+        self.approval_time = None; // Initialize with None
         Ok(())
     }
 

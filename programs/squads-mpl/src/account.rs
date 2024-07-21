@@ -19,7 +19,7 @@ use crate::errors::*;
 /// 3. members: Vec<Pubkey>
 /// 4. meta: String (for optional on-chain memo)
 #[derive(Accounts)]
-#[instruction(threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, meta: String)]
+#[instruction(threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, meta: String, time_lock: u32)]
 pub struct Create<'info> {
     #[account(
         init,
