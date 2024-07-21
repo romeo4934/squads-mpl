@@ -111,6 +111,7 @@ describe("Programs", function(){
     });
 
     let threshold = 1;
+    let timeLock = 0; // Set the time lock to 0 for no delay
 
     // test suite
     describe("SMPL Basic functionality", function(){

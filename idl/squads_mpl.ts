@@ -42,6 +42,10 @@ export type SquadsMpl = {
         {
           "name": "meta",
           "type": "string"
+        },
+        {
+          "name": "timeLock",
+          "type": "u32"
         }
       ]
     },
