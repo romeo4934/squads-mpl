@@ -94,6 +94,26 @@ pub mod squads_mpl {
         )
     }
 
+    /// The instruction to update the primary member of the multisig.
+    pub fn update_primary_member(ctx: Context<MsAuth>, new_primary_member: Option<Pubkey>) -> Result<()> {
+        // If a new primary member is provided, ensure it is in the member list
+        if let Some(ref primary_member) = new_primary_member {
+            if !ctx.accounts.multisig.keys.contains(primary_member) {
+                return err!(MsError::PrimaryMemberNotInMultisig);
+            }
+        }
+        
+        // Update the primary member
+        ctx.accounts.multisig.primary_member = new_primary_member;
+
+        // Mark the change by updating the change index to deprecate any active transactions
+        let new_index = ctx.accounts.multisig.transaction_index;
+        // set the change index, which will deprecate any active transactions
+        ctx.accounts.multisig.set_change_index(new_index)?;
+
+        Ok(())
+    }
+
     /// The instruction to add a new member to the multisig.
     /// Adds member/key to the multisig and reallocates space if neccessary
     /// If the multisig needs to be reallocated, it must be prefunded with
