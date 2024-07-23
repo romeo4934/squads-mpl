@@ -45,6 +45,8 @@ pub mod squads_mpl {
 
     use super::*;
 
+    pub const MAX_TIME_LOCK: u32 = 3 * 30 * 24 * 60 * 60; // 3 months
+
     /// Creates a new multisig account
     // instruction to create a multisig
     pub fn create(
@@ -84,6 +86,11 @@ pub mod squads_mpl {
             }
         }
 
+        // Ensure the time lock duration is within the maximum allowable duration
+        if time_lock > MAX_TIME_LOCK {
+            return err!(MsError::TimeLockExceedsMaximum);
+        }
+
         ctx.accounts.multisig.init(
             threshold,
             create_key,
@@ -105,6 +112,24 @@ pub mod squads_mpl {
         
         // Update the primary member
         ctx.accounts.multisig.primary_member = new_primary_member;
+
+        // Mark the change by updating the change index to deprecate any active transactions
+        let new_index = ctx.accounts.multisig.transaction_index;
+        // set the change index, which will deprecate any active transactions
+        ctx.accounts.multisig.set_change_index(new_index)?;
+
+        Ok(())
+    }
+
+    /// The instruction to update the time lock duration of the multisig.
+    pub fn update_time_lock(ctx: Context<MsAuth>, new_time_lock: u32) -> Result<()> {
+        // Ensure the new time lock is within the maximum allowable duration
+        if new_time_lock > MAX_TIME_LOCK {
+            return err!(MsError::TimeLockExceedsMaximum);
+        }
+
+        // Update the time lock duration
+        ctx.accounts.multisig.time_lock = new_time_lock;
 
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
