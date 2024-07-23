@@ -296,6 +296,7 @@ pub struct ExecuteTransaction<'info> {
         ], bump = transaction.bump,
         constraint = matches!(transaction.status, MsTransactionStatus::ExecuteReady { .. }) @MsError::InvalidTransactionState,
         constraint = transaction.ms == multisig.key() @MsError::InvalidInstructionAccount,
+        constraint = transaction.transaction_index > multisig.ms_change_index @MsError::DeprecatedTransaction,
         // if they've already started sequential execution, they must continue
         constraint = transaction.executed_index < 1 @MsError::PartialExecution,
     )]
