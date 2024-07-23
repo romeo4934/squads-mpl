@@ -19,12 +19,12 @@ use crate::errors::*;
 /// 3. members: Vec<Pubkey>
 /// 4. meta: String (for optional on-chain memo)
 #[derive(Accounts)]
-#[instruction(threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, meta: String, primary_member: Option<Pubkey>,  time_lock: u32)]
+#[instruction(threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, meta: String, primary_member: Option<Pubkey>,  time_lock: u32, guardians: Vec<Pubkey>)]
 pub struct Create<'info> {
     #[account(
         init,
         payer = creator,
-        space = Ms::SIZE_WITHOUT_MEMBERS + (members.len() * 32),
+        space = Ms::SIZE_WITHOUT_MEMBERS + (members.len() * 32)+ (guardians.len() * 32),
         seeds = [b"squad", create_key.as_ref(), b"multisig"], bump
     )]
     pub multisig: Account<'info, Ms>,
@@ -32,6 +32,24 @@ pub struct Create<'info> {
     #[account(mut)]
     pub creator: Signer<'info>,
     pub system_program: Program<'info, System>,
+}
+
+// In account.rs
+#[derive(Accounts)]
+pub struct MsAuthGuardian<'info> {
+    #[account(
+        mut,
+        seeds = [
+            b"squad",
+            multisig.create_key.as_ref(),
+            b"multisig"
+        ], bump = multisig.bump,
+        signer,
+        constraint = multisig.is_member(guardian.key()).is_some() || multisig.is_guardian(guardian.key()).is_some() @MsError::UnauthorizedMember,
+       // Member must be part of multisig or guardians list
+    )]
+    pub multisig: Box<Account<'info, Ms>>,
+    pub guardian: Signer<'info>,
 }
 
 /// The account context for creating a new multisig transaction

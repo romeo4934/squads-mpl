@@ -32,6 +32,7 @@ pub struct Ms {
     pub keys: Vec<Pubkey>,              // keys of the members/owners of the multisig.
     pub primary_member: Option<Pubkey>, // Optional primary member
     pub time_lock: u32,                 // Time lock in seconds, 0 for no delay
+    pub guardians: Vec<Pubkey>,          // List of guardians
 }
 
 impl Ms {
@@ -45,10 +46,13 @@ impl Ms {
     1 +         // allow external execute
     4 +          // for vec length
     33 +        // primary member (one byte for option + 32 for Pubkey)
-    4;          // time lock
+    4 +        // time lock
+    4 +         // for guardians vec length
+    32;         // padding alignment - base guardians length
+
 
     /// Initializes the new multisig account
-    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, primary_member: Option<Pubkey>, bump: u8, time_lock: u32) -> Result<()> {
+    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, primary_member: Option<Pubkey>, bump: u8, time_lock: u32,guardians: Vec<Pubkey>) -> Result<()> {
         self.threshold = threshold;
         self.keys = members;
         self.authority_index = 1;   // default vault is the first authority
@@ -59,6 +63,7 @@ impl Ms {
         self.allow_external_execute = false;
         self.time_lock = time_lock; // Initialize with the time_lock
         self.primary_member = primary_member;
+        self.guardians = guardians;
         Ok(())
     }
 
@@ -68,6 +73,20 @@ impl Ms {
             Ok(ind)=> Some(ind),
             _ => None
         }
+    }
+
+    /// Checks to see if the key is a guardian
+    pub fn is_guardian(&self, guardian: Pubkey) -> Option<usize> {
+        match self.guardians.binary_search(&guardian) {
+            Ok(ind)=> Some(ind),
+            _ => None
+        }
+    }
+
+    /// remove the primary member
+    pub fn remove_primary_member(&mut self) -> Result<()> {
+        self.primary_member = None;
+        Ok(())
     }
 
     /// Updates the change index, deprecating any active/draft transactions

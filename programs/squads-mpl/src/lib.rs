@@ -57,6 +57,7 @@ pub mod squads_mpl {
         _meta: String,        // a string of metadata that can be used to describe the multisig on-chain as a memo ie. '{"name":"My Multisig","description":"This is a my multisig"}'
         primary_member: Option<Pubkey>, // Optional primary member
         time_lock: u32, // Add time_lock parameter
+        guardians: Vec<Pubkey>  // Add guardians parameter
     ) -> Result<()> {
         // sort the members and remove duplicates
         let mut members = members;
@@ -97,7 +98,8 @@ pub mod squads_mpl {
             members,
             primary_member,
             *ctx.bumps.get("multisig").unwrap(),
-            time_lock
+            time_lock,
+            guardians, 
         )
     }
 
@@ -119,6 +121,14 @@ pub mod squads_mpl {
         ctx.accounts.multisig.set_change_index(new_index)?;
 
         Ok(())
+    }
+
+    pub fn remove_primary_member(ctx: Context<MsAuthGuardian>) -> Result<()> {
+        // Mark the change by updating the change index to deprecate any active transactions
+        let new_index = ctx.accounts.multisig.transaction_index;
+        // set the change index, which will deprecate any active transactions
+        ctx.accounts.multisig.set_change_index(new_index)?;
+        ctx.accounts.multisig.remove_primary_member()
     }
 
     /// The instruction to update the time lock duration of the multisig.
@@ -156,7 +166,7 @@ pub mod squads_mpl {
         }
         let curr_data_size = multisig_account_info.data.borrow().len();
         let spots_left =
-            ((curr_data_size - Ms::SIZE_WITHOUT_MEMBERS) / 32) - ctx.accounts.multisig.keys.len();
+            ((curr_data_size - Ms::SIZE_WITHOUT_MEMBERS) / 32) - ctx.accounts.multisig.keys.len() - ctx.accounts.multisig.guardians.len(); // Include guardians space
 
         // if not enough, add (10 * 32) to size - bump it up by 10 accounts
         if spots_left < 1 {
