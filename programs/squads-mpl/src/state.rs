@@ -30,6 +30,7 @@ pub struct Ms {
     pub allow_external_execute: bool,   // DEPRECATED - allow non-member keys to execute txs
 
     pub keys: Vec<Pubkey>,              // keys of the members/owners of the multisig.
+    pub primary_member: Option<Pubkey>, // Optional primary member
     pub time_lock: u32,                 // Time lock in seconds, 0 for no delay
 }
 
@@ -43,10 +44,11 @@ impl Ms {
     32 +        // creator
     1 +         // allow external execute
     4 +          // for vec length
+    33 +        // primary member (one byte for option + 32 for Pubkey)
     4;          // time lock
 
     /// Initializes the new multisig account
-    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, bump: u8, time_lock: u32) -> Result<()> {
+    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, primary_member: Option<Pubkey>, bump: u8, time_lock: u32) -> Result<()> {
         self.threshold = threshold;
         self.keys = members;
         self.authority_index = 1;   // default vault is the first authority
@@ -56,6 +58,7 @@ impl Ms {
         self.create_key = create_key;
         self.allow_external_execute = false;
         self.time_lock = time_lock; // Initialize with the time_lock
+        self.primary_member = primary_member;
         Ok(())
     }
 
@@ -121,6 +124,12 @@ pub enum MsTransactionStatus {
     Cancelled { timestamp: i64 },      // Transaction has been cancelled
 }
 
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub enum ApprovalMode {
+    ApprovalByPrimaryMember,
+    ApprovalByMultisig,
+}
+
 /// The MsTransaction is the state account for a multisig transaction
 #[account]
 pub struct MsTransaction {
@@ -135,7 +144,8 @@ pub struct MsTransaction {
     pub approved: Vec<Pubkey>,          // keys that have approved/signed
     pub rejected: Vec<Pubkey>,          // keys that have rejected
     pub cancelled: Vec<Pubkey>,         // keys that have cancelled (ExecuteReady only)
-    pub executed_index: u8,              // if Tx is executed sequentially, tracks which ix has been executed so far.                             
+    pub executed_index: u8,              // if Tx is executed sequentially, tracks which ix has been executed so far.      
+    pub mode: ApprovalMode,             // mode for approval                       
                                     
 }
 
@@ -149,14 +159,16 @@ impl MsTransaction {
         (8 * 6) +                          // the timestamp for each status variant
         1 +                                 // the number of instructions (attached)
         1 +                                 // space for tx bump
-        1;                                // track index if executed sequentially
+        1 +                                // track index if executed sequentially
+        4 +                                // ApprovalMode (4 bytes for enum on-chain)
+        32;                                // padding alignment
 
     pub fn initial_size_with_members(members_len: usize) -> usize {
         MsTransaction::MINIMUM_SIZE + (3 * (4 + (members_len * 32) ) )
     }
 
     /// initializes the transaction account
-    pub fn init(&mut self, creator: Pubkey, multisig: Pubkey, transaction_index: u32, bump: u8, authority_index: u32, authority_bump: u8) -> Result<()>{
+    pub fn init(&mut self, creator: Pubkey, multisig: Pubkey, transaction_index: u32, bump: u8, authority_index: u32, authority_bump: u8, mode: ApprovalMode,) -> Result<()>{
         self.creator = creator;
         self.ms = multisig;
         self.transaction_index = transaction_index;
@@ -169,6 +181,7 @@ impl MsTransaction {
         self.cancelled = Vec::new();
         self.bump = bump;
         self.executed_index = 0;
+        self.mode = mode; // Initialize transaction with the specified mode
         Ok(())
     }
 

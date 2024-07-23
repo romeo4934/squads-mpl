@@ -19,7 +19,7 @@ use crate::errors::*;
 /// 3. members: Vec<Pubkey>
 /// 4. meta: String (for optional on-chain memo)
 #[derive(Accounts)]
-#[instruction(threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, meta: String, time_lock: u32)]
+#[instruction(threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, meta: String, primary_member: Option<Pubkey>,  time_lock: u32)]
 pub struct Create<'info> {
     #[account(
         init,
@@ -43,6 +43,7 @@ pub struct Create<'info> {
 /// 3. creator account [signer]
 /// 4. system program
 #[derive(Accounts)]
+#[instruction(authority_index: u32, mode: ApprovalMode)]
 pub struct CreateTransaction<'info> {
     #[account(
         mut,

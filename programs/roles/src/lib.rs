@@ -3,7 +3,7 @@ use squads_mpl::errors::MsError;
 
 use state::roles::*;
 pub mod errors;
-pub use squads_mpl::state::{Ms, MsInstruction, MsTransaction};
+pub use squads_mpl::state::{Ms, MsInstruction, MsTransaction, ApprovalMode};
 use account::*;
 pub mod account;
 pub mod state;
@@ -85,7 +85,7 @@ pub mod roles {
                 b"delegate",
                 &[delegate_bump],
             ],
-        ]), authority_index)
+        ]), authority_index, ApprovalMode::ApprovalByMultisig)
     }
 
     // passes the instruction to be added to the squads mpl program

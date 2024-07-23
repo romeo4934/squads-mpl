@@ -53,6 +53,7 @@ pub mod squads_mpl {
         create_key: Pubkey,   // the public key used to seed the original multisig creation
         members: Vec<Pubkey>, // a list of members (Public Keys) to use for the multisig
         _meta: String,        // a string of metadata that can be used to describe the multisig on-chain as a memo ie. '{"name":"My Multisig","description":"This is a my multisig"}'
+        primary_member: Option<Pubkey>, // Optional primary member
         time_lock: u32, // Add time_lock parameter
     ) -> Result<()> {
         // sort the members and remove duplicates
@@ -76,10 +77,18 @@ pub mod squads_mpl {
             return err!(MsError::InvalidThreshold);
         }
 
+        // Ensure primary member is in member list
+        if let Some(primary_member) = primary_member {
+            if !members.contains(&primary_member) {
+                return err!(MsError::PrimaryMemberNotInMultisig);
+            }
+        }
+
         ctx.accounts.multisig.init(
             threshold,
             create_key,
             members,
+            primary_member,
             *ctx.bumps.get("multisig").unwrap(),
             time_lock
         )
@@ -222,7 +231,12 @@ pub mod squads_mpl {
     /// creating the instruction below. authority 0 is reserved for internal
     /// instructions, whereas authorities 1 or greater refer to a vault,
     /// upgrade authority, or other.
-    pub fn create_transaction(ctx: Context<CreateTransaction>, authority_index: u32) -> Result<()> {
+    pub fn create_transaction(ctx: Context<CreateTransaction>, authority_index: u32, mode: ApprovalMode,) -> Result<()> {
+        if let ApprovalMode::ApprovalByPrimaryMember = mode {
+        if ctx.accounts.multisig.primary_member.is_none() {
+            return err!(MsError::NoPrimaryMemberSpecified);
+        }
+    }
         let ms = &mut ctx.accounts.multisig;
         let authority_bump = match authority_index {
             1.. => {
@@ -248,6 +262,7 @@ pub mod squads_mpl {
             *ctx.bumps.get("transaction").unwrap(),
             authority_index,
             authority_bump,
+            mode, // Initialize with mode
         )
     }
 
@@ -385,18 +400,30 @@ pub mod squads_mpl {
             return Ok(());
         }
 
-        let time_lock = ctx.accounts.multisig.time_lock;
-        let current_time = Clock::get()?.unix_timestamp;
+        match ctx.accounts.transaction.mode {
+            ApprovalMode::ApprovalByPrimaryMember => {
+                let primary_member = ctx.accounts.multisig.primary_member.ok_or(MsError::NoPrimaryMemberSpecified)?;
+                if ctx.accounts.member.key() != primary_member {
+                    return err!(MsError::UnauthorizedMember);
+                }
 
-        // Extract the approval time from the ExecuteReady status
-        let approval_time = match ctx.accounts.transaction.status {
-            MsTransactionStatus::ExecuteReady { timestamp } => timestamp,
-            _ => return err!(MsError::InvalidTransactionState),
-        };
+                let time_lock = ctx.accounts.multisig.time_lock;
+                let current_time = Clock::get()?.unix_timestamp;
 
-        // Check if the time lock condition is satisfied
-        if current_time - approval_time < i64::from(time_lock) {
-            return err!(MsError::TimeLockNotSatisfied);
+                // Extract the approval time from the ExecuteReady status
+                let approval_time = match ctx.accounts.transaction.status {
+                    MsTransactionStatus::ExecuteReady { timestamp } => timestamp,
+                    _ => return err!(MsError::InvalidTransactionState),
+                };
+
+                // Check if the time lock condition is satisfied
+                if current_time - approval_time < i64::from(time_lock) {
+                    return err!(MsError::TimeLockNotSatisfied);
+                }
+            }
+            ApprovalMode::ApprovalByMultisig => {
+                // No additional checks needed here as they are already performed during transaction approval
+            }
         }
 
         // use for derivation for the authority
