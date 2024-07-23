@@ -26,4 +26,7 @@ pub enum MsError {
     PrimaryMemberNotInMultisig, // Error for primary member not being in the multisig
     UnauthorizedMember, // Error for member unauthorized to execute transaction
     TimeLockExceedsMaximum, // Error for time lock exceeding the maximum allowable duration
+    GuardianAlreadyExists,
+    GuardianNotFound,
+    MaxGuardiansReached, // Error when the maximum number of guardians is reached
 }

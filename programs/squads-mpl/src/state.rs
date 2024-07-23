@@ -89,6 +89,22 @@ impl Ms {
         Ok(())
     }
 
+    pub fn add_guardian(&mut self, guardian: Pubkey) -> Result<()> {
+        if matches!(self.is_guardian(guardian), None) {
+            self.guardians.push(guardian);
+            self.guardians.sort();
+        }
+        Ok(())
+    }
+
+    /// Removes a guardian from the multisig. Is a no-op if the guardian is not in the multisig.
+    pub fn remove_guardian(&mut self, guardian: Pubkey) -> Result<()> {
+        if let Some(ind) = self.is_guardian(guardian) {
+            self.guardians.remove(ind);
+        }
+        Ok(())
+    }
+
     /// Updates the change index, deprecating any active/draft transactions
     /// that have an index lower than the change index
     pub fn set_change_index(&mut self, index: u32) -> Result<()>{

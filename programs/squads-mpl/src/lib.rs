@@ -46,6 +46,7 @@ pub mod squads_mpl {
     use super::*;
 
     pub const MAX_TIME_LOCK: u32 = 3 * 30 * 24 * 60 * 60; // 3 months
+    pub const MAX_GUARDIANS: usize = 10; // Set maximum number of guardians to 10
 
     /// Creates a new multisig account
     // instruction to create a multisig
@@ -147,6 +148,36 @@ pub mod squads_mpl {
         ctx.accounts.multisig.set_change_index(new_index)?;
 
         Ok(())
+    }
+
+    /// The instruction to add a new guardian to the multisig.
+    pub fn add_guardian(ctx: Context<MsAuth>, new_guardian: Pubkey) -> Result<()> {
+        // Check if the guardian already exists
+        if ctx.accounts.multisig.is_guardian(new_guardian).is_some() {
+            return err!(MsError::GuardianAlreadyExists);
+        }
+
+        // Check if the maximum number of guardians is reached
+        if ctx.accounts.multisig.guardians.len() >= MAX_GUARDIANS {
+            return err!(MsError::MaxGuardiansReached);
+        }
+
+        // Add the guardian
+        ctx.accounts.multisig.add_guardian(new_guardian)?;
+        let new_index = ctx.accounts.multisig.transaction_index;
+        ctx.accounts.multisig.set_change_index(new_index)
+    }
+
+    /// The instruction to remove a guardian from the multisig.
+    pub fn remove_guardian(ctx: Context<MsAuth>, old_guardian: Pubkey) -> Result<()> {
+        // Check if the guardian exists
+        if ctx.accounts.multisig.is_guardian(old_guardian).is_none() {
+            return err!(MsError::GuardianNotFound);
+        }
+
+        ctx.accounts.multisig.remove_guardian(old_guardian)?;
+        let new_index = ctx.accounts.multisig.transaction_index;
+        ctx.accounts.multisig.set_change_index(new_index)
     }
 
     /// The instruction to add a new member to the multisig.
