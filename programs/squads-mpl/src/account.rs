@@ -110,7 +110,7 @@ pub struct AddInstruction<'info> {
             b"transaction"
         ], bump = transaction.bump,
         constraint = transaction.creator == creator.key(),
-        constraint = transaction.status == MsTransactionStatus::Draft @MsError::InvalidTransactionState,
+        constraint = matches!(transaction.status, MsTransactionStatus::Draft { .. }) @MsError::InvalidTransactionState,
         constraint = transaction.ms == multisig.key() @MsError::InvalidInstructionAccount,
     )]
     pub transaction: Account<'info, MsTransaction>,
@@ -166,7 +166,7 @@ pub struct ActivateTransaction<'info> {
             b"transaction"
         ], bump = transaction.bump,
         constraint = transaction.creator == creator.key(),
-        constraint = transaction.status == MsTransactionStatus::Draft @MsError::InvalidTransactionState,
+        constraint = matches!(transaction.status, MsTransactionStatus::Draft { .. }) @MsError::InvalidTransactionState,
         constraint = transaction.transaction_index > multisig.ms_change_index @MsError::DeprecatedTransaction,
         constraint = transaction.ms == multisig.key() @MsError::InvalidInstructionAccount,
     )]
@@ -208,7 +208,7 @@ pub struct VoteTransaction<'info> {
             &transaction.transaction_index.to_le_bytes(),
             b"transaction"
         ], bump = transaction.bump,
-        constraint = transaction.status == MsTransactionStatus::Active @MsError::InvalidTransactionState,
+        constraint = matches!(transaction.status, MsTransactionStatus::Active { .. }) @MsError::InvalidTransactionState ,
         constraint = transaction.transaction_index > multisig.ms_change_index @MsError::DeprecatedTransaction,
         constraint = transaction.ms == multisig.key() @MsError::InvalidInstructionAccount,
     )]
@@ -251,7 +251,7 @@ pub struct CancelTransaction<'info> {
             &transaction.transaction_index.to_le_bytes(),
             b"transaction"
         ], bump = transaction.bump,
-        constraint = transaction.status == MsTransactionStatus::ExecuteReady @MsError::InvalidTransactionState,
+        constraint = matches!(transaction.status, MsTransactionStatus::ExecuteReady { .. }) @MsError::InvalidTransactionState,
         constraint = transaction.ms == multisig.key() @MsError::InvalidInstructionAccount,
     )]
     pub transaction: Account<'info, MsTransaction>,
@@ -293,7 +293,7 @@ pub struct ExecuteTransaction<'info> {
             &transaction.transaction_index.to_le_bytes(),
             b"transaction"
         ], bump = transaction.bump,
-        constraint = transaction.status == MsTransactionStatus::ExecuteReady @MsError::InvalidTransactionState,
+        constraint = matches!(transaction.status, MsTransactionStatus::ExecuteReady { .. }) @MsError::InvalidTransactionState,
         constraint = transaction.ms == multisig.key() @MsError::InvalidInstructionAccount,
         // if they've already started sequential execution, they must continue
         constraint = transaction.executed_index < 1 @MsError::PartialExecution,
@@ -336,7 +336,7 @@ pub struct ExecuteInstruction<'info> {
             &transaction.transaction_index.to_le_bytes(),
             b"transaction"
         ], bump = transaction.bump,
-        constraint = transaction.status == MsTransactionStatus::ExecuteReady @MsError::InvalidTransactionState,
+        constraint = matches!(transaction.status, MsTransactionStatus::ExecuteReady { .. }) @MsError::InvalidTransactionState,
         constraint = transaction.ms == multisig.key() @MsError::InvalidInstructionAccount,
     )]
     pub transaction: Account<'info, MsTransaction>,

@@ -113,12 +113,12 @@ impl Ms {
 /// MsTransactionStatus enum of the current status of the Multisig Transaction.
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]
 pub enum MsTransactionStatus {
-    Draft,          // Transaction default state
-    Active,         // Transaction is live and ready
-    ExecuteReady,   // Transaction has been approved and is pending execution
-    Executed,       // Transaction has been executed
-    Rejected,       // Transaction has been rejected
-    Cancelled,      // Transaction has been cancelled
+    Draft { timestamp: i64 },          // Transaction default state
+    Active { timestamp: i64 },         // Transaction is live and ready
+    ExecuteReady { timestamp: i64 },   // Transaction has been approved and is pending execution
+    Executed { timestamp: i64 },       // Transaction has been executed
+    Rejected { timestamp: i64 },       // Transaction has been rejected
+    Cancelled { timestamp: i64 },      // Transaction has been cancelled
 }
 
 /// The MsTransaction is the state account for a multisig transaction
@@ -135,8 +135,7 @@ pub struct MsTransaction {
     pub approved: Vec<Pubkey>,          // keys that have approved/signed
     pub rejected: Vec<Pubkey>,          // keys that have rejected
     pub cancelled: Vec<Pubkey>,         // keys that have cancelled (ExecuteReady only)
-    pub executed_index: u8,              // if Tx is executed sequentially, tracks which ix has been executed so far.
-    pub approval_time: Option<i64>,      // Timestamp when the transaction was approved                                   
+    pub executed_index: u8,              // if Tx is executed sequentially, tracks which ix has been executed so far.                             
                                     
 }
 
@@ -147,11 +146,10 @@ impl MsTransaction {
         4 +                                 // the transaction index
         4 +                                 // the authority index (for this proposal)
         1 +                                 // the authority bump
-        (1 + 12) +                          // the enum size
+        (8 * 6) +                          // the timestamp for each status variant
         1 +                                 // the number of instructions (attached)
         1 +                                 // space for tx bump
-        1 +                                 // track index if executed sequentially
-        9;                                  // track approval time
+        1;                                // track index if executed sequentially
 
     pub fn initial_size_with_members(members_len: usize) -> usize {
         MsTransaction::MINIMUM_SIZE + (3 * (4 + (members_len * 32) ) )
@@ -164,44 +162,43 @@ impl MsTransaction {
         self.transaction_index = transaction_index;
         self.authority_index = authority_index;
         self.authority_bump = authority_bump;
-        self.status = MsTransactionStatus::Draft;
+        self.status = MsTransactionStatus::Draft { timestamp: Clock::get()?.unix_timestamp };
         self.instruction_index = 0;
         self.approved = Vec::new();
         self.rejected = Vec::new();
         self.cancelled = Vec::new();
         self.bump = bump;
         self.executed_index = 0;
-        self.approval_time = None; // Initialize with None
         Ok(())
     }
 
     /// change status to Active
     pub fn activate(&mut self)-> Result<()>{
-        self.status = MsTransactionStatus::Active;
+        self.status = MsTransactionStatus::Active { timestamp: Clock::get()?.unix_timestamp };
         Ok(())
     }
 
     /// change status to ExecuteReady
     pub fn ready_to_execute(&mut self)-> Result<()>{
-        self.status = MsTransactionStatus::ExecuteReady;
+        self.status = MsTransactionStatus::ExecuteReady { timestamp: Clock::get()?.unix_timestamp };
         Ok(())
     }
 
     /// set status to Rejected
     pub fn set_rejected(&mut self) -> Result<()>{
-        self.status = MsTransactionStatus::Rejected;
+        self.status = MsTransactionStatus::Rejected { timestamp: Clock::get()?.unix_timestamp };
         Ok(())
     }
 
     /// set status to Cancelled
     pub fn set_cancelled(&mut self) -> Result<()>{
-        self.status = MsTransactionStatus::Cancelled;
+        self.status = MsTransactionStatus::Cancelled { timestamp: Clock::get()?.unix_timestamp };
         Ok(())
     }
 
     /// set status to executed
     pub fn set_executed(&mut self) -> Result<()>{
-        self.status = MsTransactionStatus::Executed;
+        self.status = MsTransactionStatus::Executed { timestamp: Clock::get()?.unix_timestamp };
         Ok(())
     }
 

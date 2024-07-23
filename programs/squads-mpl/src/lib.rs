@@ -303,7 +303,6 @@ pub mod squads_mpl {
         // if current number of signers reaches threshold, mark the transaction as execute ready
         if ctx.accounts.transaction.approved.len() >= usize::from(ctx.accounts.multisig.threshold) {
             ctx.accounts.transaction.ready_to_execute()?;
-            ctx.accounts.transaction.approval_time = Some(Clock::get()?.unix_timestamp);
         }
         Ok(())
     }
@@ -388,7 +387,14 @@ pub mod squads_mpl {
 
         let time_lock = ctx.accounts.multisig.time_lock;
         let current_time = Clock::get()?.unix_timestamp;
-        let approval_time = ctx.accounts.transaction.approval_time.ok_or(MsError::InvalidTransactionState)?;
+
+        // Extract the approval time from the ExecuteReady status
+        let approval_time = match ctx.accounts.transaction.status {
+            MsTransactionStatus::ExecuteReady { timestamp } => timestamp,
+            _ => return err!(MsError::InvalidTransactionState),
+        };
+
+        // Check if the time lock condition is satisfied
         if current_time - approval_time < i64::from(time_lock) {
             return err!(MsError::TimeLockNotSatisfied);
         }
