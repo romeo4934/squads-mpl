@@ -5,6 +5,7 @@ import { Program } from "@coral-xyz/anchor";
 import { SquadsMpl } from "../idl/squads_mpl";
 import { ProgramManager } from "../idl/program_manager";
 import { Roles } from "../idl/roles";
+import { setTimeout } from "timers/promises";
 
 import {
   createBlankTransaction,
@@ -582,7 +583,7 @@ describe("Programs", function(){
         );
         emptyTx.add(...txInstructions);
         await provider.sendAndConfirm(emptyTx);
-
+        await setTimeout(2000);
         // get the ix
         let ixState = await squads.getInstruction(
           getIxPDA(txPDA, new BN(1, 10), squads.multisigProgramId)[0]
@@ -591,6 +592,7 @@ describe("Programs", function(){
 
         // activate the tx
         let txState = await squads.activateTransaction(txPDA);
+        await setTimeout(2000);
         expect(txState.status).to.have.property("active");
 
         // approve the tx
