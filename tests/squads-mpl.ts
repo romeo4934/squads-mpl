@@ -112,6 +112,7 @@ describe("Programs", function(){
 
     let threshold = 1;
     let timeLock = 0; // Set the time lock to 0 for no delay
+    const initialGuardians = Array.from({ length: 10 }).map(() => anchor.web3.Keypair.generate().publicKey);
 
     // test suite
     describe("SMPL Basic functionality", function(){
@@ -151,7 +152,7 @@ describe("Programs", function(){
             "https://example.com/image.png",
             creator.publicKey, // primary member
             0,              // time lock (1 hour)
-            []                 // no guardians
+            initialGuardians               // 10 guardians
           );
         }catch(e){
           console.log("Error in createMultisig tx");
@@ -413,8 +414,9 @@ describe("Programs", function(){
         const currDataSize = msAccount.value.data.length;
         // get the current number of keys
         const currNumKeys = msStateCheck.keys.length;
+        const currNumGuardians = msStateCheck.guardians.length;
         // get the number of spots left
-        const SIZE_WITHOUT_MEMBERS = 8 + // Anchor disriminator
+        const SIZE_WITHOUT_MEMBERS = 8 + // Anchor discriminator
         2 +         // threshold value
         2 +         // authority index
         4 +         // transaction index
@@ -422,9 +424,13 @@ describe("Programs", function(){
         1 +         // PDA bump
         32 +        // creator
         1 +         // allow external execute
-        4;          // for vec length
+        4 +         // for vec length
+        33 +        // primary member (one byte for option + 32 for Pubkey)
+        4 +         // time lock
+        4 +         // for guardians vec length
+        32;         // padding alignment - base guardians length
 
-        const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 32) - currNumKeys;
+        const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 32) - currNumKeys - currNumGuardians;
 
         // if there is less than 1 spot left, calculate rent needed for realloc of 10 more keys
         if(spotsLeft < 1){
