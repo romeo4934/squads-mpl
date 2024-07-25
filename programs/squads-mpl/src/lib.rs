@@ -243,15 +243,14 @@ pub mod squads_mpl {
     /// upgrade authority, or other.
     pub fn create_transaction(ctx: Context<CreateTransaction>, authority_index: u32, mode: ApprovalMode,) -> Result<()> {
         match mode {
-            ApprovalMode::ApprovalByPrimaryMember | ApprovalMode::ApprovalByMultisig => {}
-            _ => return err!(MsError::InvalidApprovalMode),
-        }
-
-        if let ApprovalMode::ApprovalByPrimaryMember = mode {
-            if ctx.accounts.multisig.primary_member.is_none() {
-                return err!(MsError::NoPrimaryMemberSpecified);
+            ApprovalMode::ApprovalByPrimaryMember => {
+                if ctx.accounts.multisig.primary_member.is_none() {
+                    return err!(MsError::NoPrimaryMemberSpecified);
+                }
             }
+            ApprovalMode::ApprovalByMultisig => {}
         }
+        
         let ms = &mut ctx.accounts.multisig;
         let authority_bump = match authority_index {
             1.. => {
