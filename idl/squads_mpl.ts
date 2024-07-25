@@ -573,9 +573,9 @@ export type SquadsMpl = {
   ],
   "accounts": [
     {
-      "name": "Ms",
+      "name": "ms",
       "docs": [
-        "Ms is the basic state account for a multisig."
+        "ms is the basic state account for a multisig."
       ],
       "type": {
         "kind": "struct",
@@ -634,9 +634,9 @@ export type SquadsMpl = {
       }
     },
     {
-      "name": "MsTransaction",
+      "name": "msTransaction",
       "docs": [
-        "The MsTransaction is the state account for a multisig transaction"
+        "The msTransaction is the state account for a multisig transaction"
       ],
       "type": {
         "kind": "struct",
