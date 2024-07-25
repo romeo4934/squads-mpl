@@ -707,7 +707,7 @@ export type SquadsMpl = {
       }
     },
     {
-      "name": "MsInstruction",
+      "name": "msInstruction",
       "docs": [
         "The state account for an instruction that is attached to a transaction.",
         "Almost analagous to the native Instruction struct for solana, but with an extra",

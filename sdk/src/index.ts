@@ -321,6 +321,9 @@ class Squads {
       createKey: PublicKey,
       initialMembers: PublicKey[],
       metadata: string,
+      primaryMember: PublicKey | null, // Add primaryMember
+      timeLock: number, // Add timeLock
+      guardians: PublicKey[] // Add guardians
   ): [SquadsMethods, PublicKey] {
     if (
         !initialMembers.find((member) => member.equals(this.wallet.publicKey))
@@ -330,7 +333,7 @@ class Squads {
     const [multisigPDA] = getMsPDA(createKey, this.multisigProgramId);
     return [
       this.multisig.methods
-          .create(threshold, createKey, initialMembers, metadata, 0)
+          .create(threshold, createKey, initialMembers, metadata, primaryMember, timeLock, guardians)
           .accounts({multisig: multisigPDA, creator: this.wallet.publicKey}),
       multisigPDA,
     ];
@@ -342,13 +345,19 @@ class Squads {
       initialMembers: PublicKey[],
       name = "",
       description = "",
-      image = ""
+      image = "",
+      primaryMember: PublicKey | null = null,
+      timeLock = 0,
+      guardians: PublicKey[] = []
   ): Promise<MultisigAccount> {
     const [methods, multisigPDA] = this._createMultisig(
         threshold,
         createKey,
         initialMembers,
-        JSON.stringify({name, description, image})
+        JSON.stringify({name, description, image}),
+        primaryMember,
+        timeLock,
+        guardians
     );
     await methods.rpc();
     return await this.getMultisig(multisigPDA);
@@ -360,13 +369,19 @@ class Squads {
       initialMembers: PublicKey[],
       name = "",
       description = "",
-      image = ""
+      image = "",
+      primaryMember: PublicKey | null = null,
+      timeLock = 0,
+      guardians: PublicKey[] = []
   ): Promise<TransactionInstruction> {
     const [methods] = this._createMultisig(
         threshold,
         createKey,
         initialMembers,
-        JSON.stringify({name, description, image})
+        JSON.stringify({name, description, image}),
+        primaryMember,
+        timeLock,
+        guardians
     );
     return await methods.instruction();
   }
@@ -374,7 +389,8 @@ class Squads {
   private async _createTransaction(
       multisigPDA: PublicKey,
       authorityIndex: number,
-      transactionIndex: number
+      transactionIndex: number,
+      approvalMode: number
   ): Promise<[SquadsMethods, PublicKey]> {
     const [transactionPDA] = getTxPDA(
         multisigPDA,
@@ -382,7 +398,7 @@ class Squads {
         this.multisigProgramId
     );
     return [
-      this.multisig.methods.createTransaction(authorityIndex).accounts({
+      this.multisig.methods.createTransaction(authorityIndex, approvalMode).accounts({
         multisig: multisigPDA,
         transaction: transactionPDA,
         creator: this.wallet.publicKey,
@@ -393,7 +409,8 @@ class Squads {
 
   async createTransaction(
       multisigPDA: PublicKey,
-      authorityIndex: number
+      authorityIndex: number,
+      approvalMode: number
   ): Promise<TransactionAccount> {
     const nextTransactionIndex = await this.getNextTransactionIndex(
         multisigPDA
@@ -401,7 +418,8 @@ class Squads {
     const [methods, transactionPDA] = await this._createTransaction(
         multisigPDA,
         authorityIndex,
-        nextTransactionIndex
+        nextTransactionIndex,
+        approvalMode
     );
     await methods.rpc();
     return await this.getTransaction(transactionPDA);
@@ -410,12 +428,14 @@ class Squads {
   async buildCreateTransaction(
       multisigPDA: PublicKey,
       authorityIndex: number,
-      transactionIndex: number
+      transactionIndex: number,
+      approvalMode: number
   ): Promise<TransactionInstruction> {
     const [methods] = await this._createTransaction(
         multisigPDA,
         authorityIndex,
-        transactionIndex
+        transactionIndex,
+        approvalMode
     );
     return await methods.instruction();
   }
