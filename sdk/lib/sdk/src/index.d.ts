@@ -1,6 +1,6 @@
 import { Connection, PublicKey, Commitment, ConnectionConfig, TransactionInstruction, Signer } from "@solana/web3.js";
 import { Wallet } from "@coral-xyz/anchor";
-import { InstructionAccount, ManagedProgramAccount, MultisigAccount, ProgramManagerAccount, ProgramUpgradeAccount, TransactionAccount } from "./types";
+import { InstructionAccount, ManagedProgramAccount, MultisigAccount, ProgramManagerAccount, ProgramUpgradeAccount, TransactionAccount, ApprovalMode } from "./types";
 import { TransactionBuilder } from "./tx_builder";
 declare class Squads {
     readonly connection: Connection;
@@ -56,11 +56,11 @@ declare class Squads {
     getNextUpgradeIndex(managedProgramPDA: PublicKey): Promise<number>;
     getAuthorityPDA(multisigPDA: PublicKey, authorityIndex: number): PublicKey;
     private _createMultisig;
-    createMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string): Promise<MultisigAccount>;
-    buildCreateMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string): Promise<TransactionInstruction>;
+    createMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, guardians?: PublicKey[]): Promise<MultisigAccount>;
+    buildCreateMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, guardians?: PublicKey[]): Promise<TransactionInstruction>;
     private _createTransaction;
-    createTransaction(multisigPDA: PublicKey, authorityIndex: number): Promise<TransactionAccount>;
-    buildCreateTransaction(multisigPDA: PublicKey, authorityIndex: number, transactionIndex: number): Promise<TransactionInstruction>;
+    createTransaction(multisigPDA: PublicKey, authorityIndex: number, approvalMode: ApprovalMode): Promise<TransactionAccount>;
+    buildCreateTransaction(multisigPDA: PublicKey, authorityIndex: number, transactionIndex: number, approvalMode: ApprovalMode): Promise<TransactionInstruction>;
     private _addInstruction;
     addInstruction(transactionPDA: PublicKey, instruction: TransactionInstruction): Promise<InstructionAccount>;
     buildAddInstruction(multisigPDA: PublicKey, transactionPDA: PublicKey, instruction: TransactionInstruction, instructionIndex: number): Promise<TransactionInstruction>;

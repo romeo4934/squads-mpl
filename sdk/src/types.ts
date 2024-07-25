@@ -47,3 +47,5 @@ export type ProgramManagerMethodsNamespace = MethodsNamespace<
   ProgramManager,
   AllInstructions<ProgramManager>
 >;
+
+export type ApprovalMode = IdlTypes<SquadsMpl>["ApprovalMode"];

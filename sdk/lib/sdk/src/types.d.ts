@@ -22,4 +22,5 @@ export declare type ProgramUpgradeAccount = AccountDefDictionary<ProgramManager>
 export declare type SquadsMethods = MethodsBuilder<SquadsMpl, AllInstructions<SquadsMpl>>;
 export declare type SquadsMethodsNamespace = MethodsNamespace<SquadsMpl, AllInstructions<SquadsMpl>>;
 export declare type ProgramManagerMethodsNamespace = MethodsNamespace<ProgramManager, AllInstructions<ProgramManager>>;
+export declare type ApprovalMode = IdlTypes<SquadsMpl>["ApprovalMode"];
 export {};

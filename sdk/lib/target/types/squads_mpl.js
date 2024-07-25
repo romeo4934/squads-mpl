@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.IDL = void 0;
 exports.IDL = {
-    "version": "1.3.0",
+    "version": "1.3.1",
     "name": "squads_mpl",
     "instructions": [
         {
@@ -45,6 +45,22 @@ exports.IDL = {
                 {
                     "name": "meta",
                     "type": "string"
+                },
+                {
+                    "name": "primaryMember",
+                    "type": {
+                        "option": "publicKey"
+                    }
+                },
+                {
+                    "name": "timeLock",
+                    "type": "u32"
+                },
+                {
+                    "name": "guardians",
+                    "type": {
+                        "vec": "publicKey"
+                    }
                 }
             ]
         },
@@ -227,6 +243,12 @@ exports.IDL = {
                 {
                     "name": "authorityIndex",
                     "type": "u32"
+                },
+                {
+                    "name": "mode",
+                    "type": {
+                        "defined": "ApprovalMode"
+                    }
                 }
             ]
         },
@@ -456,6 +478,100 @@ exports.IDL = {
                 }
             ],
             "args": []
+        },
+        {
+            "name": "updatePrimaryMember",
+            "docs": [
+                "The instruction to update the primary member of the multisig."
+            ],
+            "accounts": [
+                {
+                    "name": "multisig",
+                    "isMut": true,
+                    "isSigner": true
+                }
+            ],
+            "args": [
+                {
+                    "name": "newPrimaryMember",
+                    "type": {
+                        "option": "publicKey"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "removePrimaryMember",
+            "accounts": [
+                {
+                    "name": "multisig",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "guardian",
+                    "isMut": false,
+                    "isSigner": true
+                }
+            ],
+            "args": []
+        },
+        {
+            "name": "updateTimeLock",
+            "docs": [
+                "The instruction to update the time lock duration of the multisig."
+            ],
+            "accounts": [
+                {
+                    "name": "multisig",
+                    "isMut": true,
+                    "isSigner": true
+                }
+            ],
+            "args": [
+                {
+                    "name": "newTimeLock",
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "addGuardian",
+            "docs": [
+                "The instruction to add a new guardian to the multisig."
+            ],
+            "accounts": [
+                {
+                    "name": "multisig",
+                    "isMut": true,
+                    "isSigner": true
+                }
+            ],
+            "args": [
+                {
+                    "name": "newGuardian",
+                    "type": "publicKey"
+                }
+            ]
+        },
+        {
+            "name": "removeGuardian",
+            "docs": [
+                "The instruction to remove a guardian from the multisig."
+            ],
+            "accounts": [
+                {
+                    "name": "multisig",
+                    "isMut": true,
+                    "isSigner": true
+                }
+            ],
+            "args": [
+                {
+                    "name": "oldGuardian",
+                    "type": "publicKey"
+                }
+            ]
         }
     ],
     "accounts": [
@@ -497,6 +613,22 @@ exports.IDL = {
                     },
                     {
                         "name": "keys",
+                        "type": {
+                            "vec": "publicKey"
+                        }
+                    },
+                    {
+                        "name": "primaryMember",
+                        "type": {
+                            "option": "publicKey"
+                        }
+                    },
+                    {
+                        "name": "timeLock",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "guardians",
                         "type": {
                             "vec": "publicKey"
                         }
@@ -567,6 +699,12 @@ exports.IDL = {
                     {
                         "name": "executedIndex",
                         "type": "u8"
+                    },
+                    {
+                        "name": "mode",
+                        "type": {
+                            "defined": "ApprovalMode"
+                        }
                     }
                 ]
             }
@@ -677,22 +815,72 @@ exports.IDL = {
                 "kind": "enum",
                 "variants": [
                     {
-                        "name": "Draft"
+                        "name": "Draft",
+                        "fields": [
+                            {
+                                "name": "timestamp",
+                                "type": "i64"
+                            }
+                        ]
                     },
                     {
-                        "name": "Active"
+                        "name": "Active",
+                        "fields": [
+                            {
+                                "name": "timestamp",
+                                "type": "i64"
+                            }
+                        ]
                     },
                     {
-                        "name": "ExecuteReady"
+                        "name": "ExecuteReady",
+                        "fields": [
+                            {
+                                "name": "timestamp",
+                                "type": "i64"
+                            }
+                        ]
                     },
                     {
-                        "name": "Executed"
+                        "name": "Executed",
+                        "fields": [
+                            {
+                                "name": "timestamp",
+                                "type": "i64"
+                            }
+                        ]
                     },
                     {
-                        "name": "Rejected"
+                        "name": "Rejected",
+                        "fields": [
+                            {
+                                "name": "timestamp",
+                                "type": "i64"
+                            }
+                        ]
                     },
                     {
-                        "name": "Cancelled"
+                        "name": "Cancelled",
+                        "fields": [
+                            {
+                                "name": "timestamp",
+                                "type": "i64"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "name": "ApprovalMode",
+            "type": {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "ApprovalByPrimaryMember"
+                    },
+                    {
+                        "name": "ApprovalByMultisig"
                     }
                 ]
             }
@@ -754,6 +942,38 @@ exports.IDL = {
         {
             "code": 6013,
             "name": "NotEnoughLamports"
+        },
+        {
+            "code": 6014,
+            "name": "TimeLockNotSatisfied"
+        },
+        {
+            "code": 6015,
+            "name": "NoPrimaryMemberSpecified"
+        },
+        {
+            "code": 6016,
+            "name": "PrimaryMemberNotInMultisig"
+        },
+        {
+            "code": 6017,
+            "name": "UnauthorizedMember"
+        },
+        {
+            "code": 6018,
+            "name": "TimeLockExceedsMaximum"
+        },
+        {
+            "code": 6019,
+            "name": "GuardianAlreadyExists"
+        },
+        {
+            "code": 6020,
+            "name": "GuardianNotFound"
+        },
+        {
+            "code": 6021,
+            "name": "MaxGuardiansReached"
         }
     ]
 };

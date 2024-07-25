@@ -24,6 +24,7 @@ import {
   ProgramUpgradeAccount,
   SquadsMethods,
   TransactionAccount,
+  ApprovalMode
 } from "./types";
 import {
   getAuthorityPDA,
@@ -390,7 +391,7 @@ class Squads {
       multisigPDA: PublicKey,
       authorityIndex: number,
       transactionIndex: number,
-      approvalMode: number
+      approvalMode: ApprovalMode
   ): Promise<[SquadsMethods, PublicKey]> {
     const [transactionPDA] = getTxPDA(
         multisigPDA,
@@ -410,7 +411,7 @@ class Squads {
   async createTransaction(
       multisigPDA: PublicKey,
       authorityIndex: number,
-      approvalMode: number
+      approvalMode: ApprovalMode
   ): Promise<TransactionAccount> {
     const nextTransactionIndex = await this.getNextTransactionIndex(
         multisigPDA
@@ -429,7 +430,7 @@ class Squads {
       multisigPDA: PublicKey,
       authorityIndex: number,
       transactionIndex: number,
-      approvalMode: number
+      approvalMode: ApprovalMode
   ): Promise<TransactionInstruction> {
     const [methods] = await this._createTransaction(
         multisigPDA,

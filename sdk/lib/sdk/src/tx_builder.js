@@ -162,7 +162,7 @@ class TransactionBuilder {
             const transactionPDA = this.transactionPDA();
             const wrappedAddInstructions = yield Promise.all(this.instructions.map((rawInstruction, index) => this._buildAddInstruction(transactionPDA, rawInstruction, index + 1)));
             const createTxInstruction = yield this.methods
-                .createTransaction(this.authorityIndex)
+                .createTransaction(this.authorityIndex, { approvalByMultisig: {} })
                 .accounts({
                 multisig: this.multisig.publicKey,
                 transaction: transactionPDA,

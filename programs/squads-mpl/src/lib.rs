@@ -104,82 +104,6 @@ pub mod squads_mpl {
         )
     }
 
-    /// The instruction to update the primary member of the multisig.
-    pub fn update_primary_member(ctx: Context<MsAuth>, new_primary_member: Option<Pubkey>) -> Result<()> {
-        // If a new primary member is provided, ensure it is in the member list
-        if let Some(ref primary_member) = new_primary_member {
-            if !ctx.accounts.multisig.keys.contains(primary_member) {
-                return err!(MsError::PrimaryMemberNotInMultisig);
-            }
-        }
-        
-        // Update the primary member
-        ctx.accounts.multisig.primary_member = new_primary_member;
-
-        // Mark the change by updating the change index to deprecate any active transactions
-        let new_index = ctx.accounts.multisig.transaction_index;
-        // set the change index, which will deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)?;
-
-        Ok(())
-    }
-
-    pub fn remove_primary_member(ctx: Context<MsAuthGuardian>) -> Result<()> {
-        // Mark the change by updating the change index to deprecate any active transactions
-        let new_index = ctx.accounts.multisig.transaction_index;
-        // set the change index, which will deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)?;
-        ctx.accounts.multisig.remove_primary_member()
-    }
-
-    /// The instruction to update the time lock duration of the multisig.
-    pub fn update_time_lock(ctx: Context<MsAuth>, new_time_lock: u32) -> Result<()> {
-        // Ensure the new time lock is within the maximum allowable duration
-        if new_time_lock > MAX_TIME_LOCK {
-            return err!(MsError::TimeLockExceedsMaximum);
-        }
-
-        // Update the time lock duration
-        ctx.accounts.multisig.time_lock = new_time_lock;
-
-        // Mark the change by updating the change index to deprecate any active transactions
-        let new_index = ctx.accounts.multisig.transaction_index;
-        // set the change index, which will deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)?;
-
-        Ok(())
-    }
-
-    /// The instruction to add a new guardian to the multisig.
-    pub fn add_guardian(ctx: Context<MsAuth>, new_guardian: Pubkey) -> Result<()> {
-        // Check if the guardian already exists
-        if ctx.accounts.multisig.is_guardian(new_guardian).is_some() {
-            return err!(MsError::GuardianAlreadyExists);
-        }
-
-        // Check if the maximum number of guardians is reached
-        if ctx.accounts.multisig.guardians.len() >= MAX_GUARDIANS {
-            return err!(MsError::MaxGuardiansReached);
-        }
-
-        // Add the guardian
-        ctx.accounts.multisig.add_guardian(new_guardian)?;
-        let new_index = ctx.accounts.multisig.transaction_index;
-        ctx.accounts.multisig.set_change_index(new_index)
-    }
-
-    /// The instruction to remove a guardian from the multisig.
-    pub fn remove_guardian(ctx: Context<MsAuth>, old_guardian: Pubkey) -> Result<()> {
-        // Check if the guardian exists
-        if ctx.accounts.multisig.is_guardian(old_guardian).is_none() {
-            return err!(MsError::GuardianNotFound);
-        }
-
-        ctx.accounts.multisig.remove_guardian(old_guardian)?;
-        let new_index = ctx.accounts.multisig.transaction_index;
-        ctx.accounts.multisig.set_change_index(new_index)
-    }
-
     /// The instruction to add a new member to the multisig.
     /// Adds member/key to the multisig and reallocates space if neccessary
     /// If the multisig needs to be reallocated, it must be prefunded with
@@ -711,5 +635,81 @@ pub mod squads_mpl {
             ctx.accounts.transaction.set_executed()?;
         }
         Ok(())
+    }
+
+       /// The instruction to update the primary member of the multisig.
+    pub fn update_primary_member(ctx: Context<MsAuth>, new_primary_member: Option<Pubkey>) -> Result<()> {
+        // If a new primary member is provided, ensure it is in the member list
+        if let Some(ref primary_member) = new_primary_member {
+            if !ctx.accounts.multisig.keys.contains(primary_member) {
+                return err!(MsError::PrimaryMemberNotInMultisig);
+            }
+        }
+        
+        // Update the primary member
+        ctx.accounts.multisig.primary_member = new_primary_member;
+
+        // Mark the change by updating the change index to deprecate any active transactions
+        let new_index = ctx.accounts.multisig.transaction_index;
+        // set the change index, which will deprecate any active transactions
+        ctx.accounts.multisig.set_change_index(new_index)?;
+
+        Ok(())
+    }
+
+    pub fn remove_primary_member(ctx: Context<MsAuthGuardian>) -> Result<()> {
+        // Mark the change by updating the change index to deprecate any active transactions
+        let new_index = ctx.accounts.multisig.transaction_index;
+        // set the change index, which will deprecate any active transactions
+        ctx.accounts.multisig.set_change_index(new_index)?;
+        ctx.accounts.multisig.remove_primary_member()
+    }
+
+    /// The instruction to update the time lock duration of the multisig.
+    pub fn update_time_lock(ctx: Context<MsAuth>, new_time_lock: u32) -> Result<()> {
+        // Ensure the new time lock is within the maximum allowable duration
+        if new_time_lock > MAX_TIME_LOCK {
+            return err!(MsError::TimeLockExceedsMaximum);
+        }
+
+        // Update the time lock duration
+        ctx.accounts.multisig.time_lock = new_time_lock;
+
+        // Mark the change by updating the change index to deprecate any active transactions
+        let new_index = ctx.accounts.multisig.transaction_index;
+        // set the change index, which will deprecate any active transactions
+        ctx.accounts.multisig.set_change_index(new_index)?;
+
+        Ok(())
+    }
+
+    /// The instruction to add a new guardian to the multisig.
+    pub fn add_guardian(ctx: Context<MsAuth>, new_guardian: Pubkey) -> Result<()> {
+        // Check if the guardian already exists
+        if ctx.accounts.multisig.is_guardian(new_guardian).is_some() {
+            return err!(MsError::GuardianAlreadyExists);
+        }
+
+        // Check if the maximum number of guardians is reached
+        if ctx.accounts.multisig.guardians.len() >= MAX_GUARDIANS {
+            return err!(MsError::MaxGuardiansReached);
+        }
+
+        // Add the guardian
+        ctx.accounts.multisig.add_guardian(new_guardian)?;
+        let new_index = ctx.accounts.multisig.transaction_index;
+        ctx.accounts.multisig.set_change_index(new_index)
+    }
+
+    /// The instruction to remove a guardian from the multisig.
+    pub fn remove_guardian(ctx: Context<MsAuth>, old_guardian: Pubkey) -> Result<()> {
+        // Check if the guardian exists
+        if ctx.accounts.multisig.is_guardian(old_guardian).is_none() {
+            return err!(MsError::GuardianNotFound);
+        }
+
+        ctx.accounts.multisig.remove_guardian(old_guardian)?;
+        let new_index = ctx.accounts.multisig.transaction_index;
+        ctx.accounts.multisig.set_change_index(new_index)
     }
 }

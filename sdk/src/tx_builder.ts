@@ -181,7 +181,7 @@ export class TransactionBuilder {
       )
     );
     const createTxInstruction = await this.methods
-      .createTransaction(this.authorityIndex)
+      .createTransaction(this.authorityIndex,  {approvalByMultisig: {}})
       .accounts({
         multisig: this.multisig.publicKey,
         transaction: transactionPDA,

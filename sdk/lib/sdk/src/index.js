@@ -182,36 +182,39 @@ class Squads {
     getAuthorityPDA(multisigPDA, authorityIndex) {
         return (0, address_1.getAuthorityPDA)(multisigPDA, new bn_js_1.default(authorityIndex, 10), this.multisigProgramId)[0];
     }
-    _createMultisig(threshold, createKey, initialMembers, metadata) {
+    _createMultisig(threshold, createKey, initialMembers, metadata, primaryMember, // Add primaryMember
+    timeLock, // Add timeLock
+    guardians // Add guardians
+    ) {
         if (!initialMembers.find((member) => member.equals(this.wallet.publicKey))) {
             initialMembers.push(this.wallet.publicKey);
         }
         const [multisigPDA] = (0, address_1.getMsPDA)(createKey, this.multisigProgramId);
         return [
             this.multisig.methods
-                .create(threshold, createKey, initialMembers, metadata)
+                .create(threshold, createKey, initialMembers, metadata, primaryMember, timeLock, guardians)
                 .accounts({ multisig: multisigPDA, creator: this.wallet.publicKey }),
             multisigPDA,
         ];
     }
-    createMultisig(threshold, createKey, initialMembers, name = "", description = "", image = "") {
+    createMultisig(threshold, createKey, initialMembers, name = "", description = "", image = "", primaryMember = null, timeLock = 0, guardians = []) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [methods, multisigPDA] = this._createMultisig(threshold, createKey, initialMembers, JSON.stringify({ name, description, image }));
+            const [methods, multisigPDA] = this._createMultisig(threshold, createKey, initialMembers, JSON.stringify({ name, description, image }), primaryMember, timeLock, guardians);
             yield methods.rpc();
             return yield this.getMultisig(multisigPDA);
         });
     }
-    buildCreateMultisig(threshold, createKey, initialMembers, name = "", description = "", image = "") {
+    buildCreateMultisig(threshold, createKey, initialMembers, name = "", description = "", image = "", primaryMember = null, timeLock = 0, guardians = []) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [methods] = this._createMultisig(threshold, createKey, initialMembers, JSON.stringify({ name, description, image }));
+            const [methods] = this._createMultisig(threshold, createKey, initialMembers, JSON.stringify({ name, description, image }), primaryMember, timeLock, guardians);
             return yield methods.instruction();
         });
     }
-    _createTransaction(multisigPDA, authorityIndex, transactionIndex) {
+    _createTransaction(multisigPDA, authorityIndex, transactionIndex, approvalMode) {
         return __awaiter(this, void 0, void 0, function* () {
             const [transactionPDA] = (0, address_1.getTxPDA)(multisigPDA, new bn_js_1.default(transactionIndex, 10), this.multisigProgramId);
             return [
-                this.multisig.methods.createTransaction(authorityIndex).accounts({
+                this.multisig.methods.createTransaction(authorityIndex, approvalMode).accounts({
                     multisig: multisigPDA,
                     transaction: transactionPDA,
                     creator: this.wallet.publicKey,
@@ -220,17 +223,17 @@ class Squads {
             ];
         });
     }
-    createTransaction(multisigPDA, authorityIndex) {
+    createTransaction(multisigPDA, authorityIndex, approvalMode) {
         return __awaiter(this, void 0, void 0, function* () {
             const nextTransactionIndex = yield this.getNextTransactionIndex(multisigPDA);
-            const [methods, transactionPDA] = yield this._createTransaction(multisigPDA, authorityIndex, nextTransactionIndex);
+            const [methods, transactionPDA] = yield this._createTransaction(multisigPDA, authorityIndex, nextTransactionIndex, approvalMode);
             yield methods.rpc();
             return yield this.getTransaction(transactionPDA);
         });
     }
-    buildCreateTransaction(multisigPDA, authorityIndex, transactionIndex) {
+    buildCreateTransaction(multisigPDA, authorityIndex, transactionIndex, approvalMode) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [methods] = yield this._createTransaction(multisigPDA, authorityIndex, transactionIndex);
+            const [methods] = yield this._createTransaction(multisigPDA, authorityIndex, transactionIndex, approvalMode);
             return yield methods.instruction();
         });
     }
