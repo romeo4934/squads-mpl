@@ -145,7 +145,13 @@ describe("Programs", function(){
           await squads.createMultisig(
             threshold,
             randomCreateKey,
-            memberList.map((m) => m.publicKey)
+            memberList.map((m) => m.publicKey),
+            "Test Multisig",
+            "Description for testing",
+            "https://example.com/image.png",
+            creator.publicKey, // primary member
+            0,              // time lock (1 hour)
+            []                 // no guardians
           );
         }catch(e){
           console.log("Error in createMultisig tx");
@@ -184,7 +190,7 @@ describe("Programs", function(){
 
       it(`Create Tx draft`,  async function(){
         // create a transaction draft
-        const txState = await squads.createTransaction(msPDA, 1);
+        const txState = await squads.createTransaction(msPDA, 1, {approvalByMultisig: {}});
         expect(txState.instructionIndex).to.equal(0);
         expect(txState.creator.toBase58()).to.equal(creator.publicKey.toBase58());
 
@@ -195,7 +201,7 @@ describe("Programs", function(){
 
       it(`Add Ix to Tx`,  async function(){
         // create a transaction draft
-        let txState = await squads.createTransaction(msPDA, 1);
+        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
         // check the transaction indexes match
         expect(txState.instructionIndex).to.equal(0);
         expect(txState.status).to.have.property("draft");
@@ -212,7 +218,7 @@ describe("Programs", function(){
 
       it(`Tx Activate`,  async function(){
         // create a transaction draft
-        let txState = await squads.createTransaction(msPDA, 1);
+        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
         const testIx = await createTestTransferTransaction(
           msPDA,
           creator.publicKey
@@ -230,7 +236,7 @@ describe("Programs", function(){
 
       it(`Tx Sign`,  async function(){
         // create a transaction draft
-        let txState = await squads.createTransaction(msPDA, 1);
+        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
         const testIx = await createTestTransferTransaction(
           msPDA,
           creator.publicKey
@@ -255,11 +261,10 @@ describe("Programs", function(){
           testPayee.publicKey
         );
 
-        let txState = await squads.createTransaction(msPDA, 1);
+        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
         await squads.addInstruction(txState.publicKey, testIx);
         await squads.activateTransaction(txState.publicKey);
         await squads.approveTransaction(txState.publicKey);
-
         txState = await squads.getTransaction(txState.publicKey);
         expect(txState.status).to.have.property("executeReady");
 
@@ -305,7 +310,7 @@ describe("Programs", function(){
           testPayee.publicKey
         );
 
-        let txState = await squads.createTransaction(msPDA, 1);
+        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
         await squads.addInstruction(txState.publicKey, testIx);
         await squads.addInstruction(txState.publicKey, testIx2x);
         await squads.activateTransaction(txState.publicKey);
@@ -341,7 +346,7 @@ describe("Programs", function(){
         // create authority to use (Vault, index 1)
         const authorityPDA = squads.getAuthorityPDA(msPDA, 1);
 
-        let txState = await squads.createTransaction(msPDA, 1);
+        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
 
         // person/entity who gets paid
         const testPayee = anchor.web3.Keypair.generate();
@@ -534,7 +539,7 @@ describe("Programs", function(){
       it(`Transaction instruction failure`, async function(){
         // create authority to use (Vault, index 1)
         const authorityPDA = squads.getAuthorityPDA(msPDA, 1);
-        let txState = await squads.createTransaction(msPDA, 1);
+        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
 
         // the test transfer instruction
         const testPayee = anchor.web3.Keypair.generate();
