@@ -84,6 +84,9 @@ const getIxAuthority = async (txPda: anchor.web3.PublicKey, index: anchor.BN, pr
   );
 };
 
+const MAX_GUARDIANS = 10;
+const ONE_MINUTE = 60 * 1; 
+
 let provider;
 
 describe("Programs", function(){
@@ -764,6 +767,83 @@ describe("Programs", function(){
         expect((msState.keys as any[]).length).to.equal(startKeys + 1);
         expect(msState.threshold).to.equal(1);
       });
+
+
+
+      it(`Create Tx with ApprovalByPrimaryMember and enforce time lock delay`, async function() {
+        // Create the multisig with primary member and time lock of 1 minute
+        // Create a unique seed for each test run
+        const uniqueSeed = anchor.web3.Keypair.generate().publicKey;
+        const timeLock = ONE_MINUTE;
+        const initialGuardians = Array.from({ length: MAX_GUARDIANS }).map(() => anchor.web3.Keypair.generate().publicKey);
+        await squads.createMultisig(
+            1,  // threshold
+            uniqueSeed,
+            memberList.map((m) => m.publicKey),
+            "Test Multisig with Time Lock",
+            "Testing time lock",
+            "https://example.com/image.png",
+            creator.publicKey,  // primary member
+            timeLock,  // time lock
+            initialGuardians  // guardians
+        );
+
+        // Derive PDAs based on the new unique seed
+        const [msPDA] = getMsPDA(uniqueSeed, squads.multisigProgramId);
+
+        // create authority to use (Vault, index 1)
+        const authorityPDA = squads.getAuthorityPDA(msPDA, 1);
+
+        // the test transfer instruction
+        const testPayee = anchor.web3.Keypair.generate();
+        const testIx = await createTestTransferTransaction(
+          authorityPDA,
+          testPayee.publicKey
+        );
+
+        let txState = await squads.createTransaction(msPDA, 1,  {approvalByPrimaryMember: {}});
+        await squads.addInstruction(txState.publicKey, testIx);
+        await squads.activateTransaction(txState.publicKey);
+        await squads.approveTransaction(txState.publicKey);
+        txState = await squads.getTransaction(txState.publicKey);
+        expect(txState.status).to.have.property("executeReady");
+
+        // move funds to auth/vault
+        const moveFundsToMsPDATx = await createBlankTransaction(
+          squads.connection,
+          creator.publicKey
+        );
+        const moveFundsToMsPDAIx = await createTestTransferTransaction(
+          creator.publicKey,
+          authorityPDA,
+          2000000
+        );
+        moveFundsToMsPDATx.add(moveFundsToMsPDAIx);
+        await provider.sendAndConfirm(moveFundsToMsPDATx);
+        const authorityPDAFunded = await squads.connection.getAccountInfo(
+          authorityPDA
+        );
+        expect(authorityPDAFunded.lamports).to.equal(2000000);        
+
+        // Try to execute the transaction immediately (should fail)
+        try {
+            await squads.executeTransaction(txState.publicKey);
+            throw new Error("Transaction succeeded before time lock delay, which should not happen.");
+        } catch (e) {
+            expect(e.message).to.include("TimeLockNotSatisfied");
+        }
+        console.log("Sending money to the vault...");
+
+        console.log("Waiting for time lock duration...");
+        // Wait for the time lock duration
+        await setTimeout((timeLock + 5) * 1000);  // Adding extra buffer to account for any delay in execution
+        console.log("Time lock duration passed, executing transaction...");
+        // Execute the transaction after the time lock delay
+        await squads.executeTransaction(txState.publicKey);
+        const executedTxState = await squads.getTransaction(txState.publicKey);
+        expect(executedTxState.status).to.have.property("executed");
+      });
+
     });
 
   });
