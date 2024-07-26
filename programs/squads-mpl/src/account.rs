@@ -34,24 +34,6 @@ pub struct Create<'info> {
     pub system_program: Program<'info, System>,
 }
 
-// In account.rs
-#[derive(Accounts)]
-pub struct MsAuthGuardian<'info> {
-    #[account(
-        mut,
-        seeds = [
-            b"squad",
-            multisig.create_key.as_ref(),
-            b"multisig"
-        ], bump = multisig.bump,
-        signer,
-        constraint = multisig.is_member(guardian.key()).is_some() || multisig.is_guardian(guardian.key()).is_some() @MsError::UnauthorizedMember,
-       // Member must be part of multisig or guardians list
-    )]
-    pub multisig: Box<Account<'info, Ms>>,
-    pub guardian: Signer<'info>,
-}
-
 /// The account context for creating a new multisig transaction
 /// Upon fresh creation the transaction will be in a Draft state
 /// 
@@ -397,6 +379,26 @@ pub struct MsAuth<'info> {
         signer
     )]
     pub multisig: Box<Account<'info, Ms>>,
+}
+
+#[derive(Accounts)]
+pub struct RemovePrimaryMember<'info> {
+    #[account(
+        mut,
+        seeds = [
+            b"squad",
+            multisig.create_key.as_ref(),
+            b"multisig"
+        ],
+        bump = multisig.bump,
+    )]
+    pub multisig: Account<'info, Ms>,
+
+    #[account(
+        mut,
+        constraint = multisig.is_member(member.key()).is_some() || multisig.is_guardian(member.key()).is_some() @MsError::UnauthorizedMember,
+    )]
+    pub member: Signer<'info>,
 }
 
 /// The account context for reallocating the multisig account (for add member, where the size may need to be adjusted)

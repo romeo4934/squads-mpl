@@ -661,11 +661,12 @@ pub mod squads_mpl {
         Ok(())
     }
 
-    pub fn remove_primary_member(ctx: Context<MsAuthGuardian>) -> Result<()> {
+    pub fn remove_primary_member(ctx: Context<RemovePrimaryMember>) -> Result<()> {
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
         // set the change index, which will deprecate any active transactions
         ctx.accounts.multisig.set_change_index(new_index)?;
+        // Remove the primary member
         ctx.accounts.multisig.remove_primary_member()
     }
 
