@@ -503,11 +503,11 @@ export type SquadsMpl = {
         {
           "name": "multisig",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
-          "name": "guardian",
-          "isMut": false,
+          "name": "member",
+          "isMut": true,
           "isSigner": true
         }
       ],
@@ -1480,11 +1480,11 @@ export const IDL: SquadsMpl = {
         {
           "name": "multisig",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
-          "name": "guardian",
-          "isMut": false,
+          "name": "member",
+          "isMut": true,
           "isSigner": true
         }
       ],

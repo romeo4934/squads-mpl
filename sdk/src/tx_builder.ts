@@ -187,17 +187,7 @@ export class TransactionBuilder {
       .instruction();
     return this.withInstruction(instruction);
   }
-
-  async withRemovePrimaryMember(): Promise<TransactionBuilder> {
-    const instruction = await this.methods
-      .removePrimaryMember()
-      .accounts({
-        multisig: this.multisig.publicKey,
-      })
-      .instruction();
-    return this.withInstruction(instruction);
-  }
-
+  
   // async withAddAuthority(): Promise<TransactionBuilder> {}
   // async withSetExternalExecute(): Promise<TransactionBuilder> {}
   async withSetAsExecuted(

@@ -776,6 +776,30 @@ class Squads {
     return await methods.instruction();
   }
 
+  private async _removePrimaryMember(
+    multisigPDA: PublicKey
+  ): Promise<SquadsMethods> {
+    return this.multisig.methods.removePrimaryMember().accounts({
+      multisig: multisigPDA,
+      member: this.wallet.publicKey,
+    });
+  }
+
+  async removePrimaryMember(
+    multisigPDA: PublicKey
+  ): Promise<MultisigAccount> {
+    const methods = await this._removePrimaryMember(multisigPDA);
+    await methods.rpc();
+    return await this.getMultisig(multisigPDA);
+  }
+
+  async buildRemovePrimaryMember(
+    multisigPDA: PublicKey,
+  ): Promise<TransactionInstruction> {
+    const methods = await this._removePrimaryMember(multisigPDA);
+    return await methods.instruction();
+  }
+
   async createProgramManager(
       multisigPDA: PublicKey
   ): Promise<ProgramManagerAccount> {

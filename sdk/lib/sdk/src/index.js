@@ -468,6 +468,27 @@ class Squads {
             return yield methods.instruction();
         });
     }
+    _removePrimaryMember(multisigPDA) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.multisig.methods.removePrimaryMember().accounts({
+                multisig: multisigPDA,
+                member: this.wallet.publicKey,
+            });
+        });
+    }
+    removePrimaryMember(multisigPDA) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const methods = yield this._removePrimaryMember(multisigPDA);
+            yield methods.rpc();
+            return yield this.getMultisig(multisigPDA);
+        });
+    }
+    buildRemovePrimaryMember(multisigPDA) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const methods = yield this._removePrimaryMember(multisigPDA);
+            return yield methods.instruction();
+        });
+    }
     createProgramManager(multisigPDA) {
         return __awaiter(this, void 0, void 0, function* () {
             const [programManagerPDA] = (0, address_1.getProgramManagerPDA)(multisigPDA, this.programManagerProgramId);
