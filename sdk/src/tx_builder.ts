@@ -144,6 +144,17 @@ export class TransactionBuilder {
       .instruction();
     return this.withInstruction(instruction);
   }
+
+  async withUpdateTimeLock(timeLock: number): Promise<TransactionBuilder> {
+    const instruction = await this.methods
+        .updateTimeLock(timeLock)
+        .accounts({
+            multisig: this.multisig.publicKey,
+        })
+        .instruction();
+    return this.withInstruction(instruction);
+}
+
   // async withAddAuthority(): Promise<TransactionBuilder> {}
   // async withSetExternalExecute(): Promise<TransactionBuilder> {}
   async withSetAsExecuted(

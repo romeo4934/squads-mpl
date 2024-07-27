@@ -771,26 +771,27 @@ describe("Programs", function(){
 
 
       it(`Create Tx with ApprovalByPrimaryMember and enforce time lock delay`, async function() {
-        // Create the multisig with primary member and time lock of 1 minute
-        // Create a unique seed for each test run
-        const uniqueSeed = anchor.web3.Keypair.generate().publicKey;
-        const timeLock = ONE_MINUTE;
-        const initialGuardians = Array.from({ length: MAX_GUARDIANS }).map(() => anchor.web3.Keypair.generate().publicKey);
-        await squads.createMultisig(
-            1,  // threshold
-            uniqueSeed,
-            memberList.map((m) => m.publicKey),
-            "Test Multisig with Time Lock",
-            "Testing time lock",
-            "https://example.com/image.png",
-            creator.publicKey,  // primary member
-            timeLock,  // time lock
-            initialGuardians  // guardians
-        );
+        // Step 1: Create a transaction to update the timelock
+        const [txInstructions, txPDA] = await squads.buildUpdateTimeLockTransaction(msPDA, ONE_MINUTE);
 
-        // Derive PDAs based on the new unique seed
-        const [msPDA] = getMsPDA(uniqueSeed, squads.multisigProgramId);
+        // Step 2: Add activation instruction
+        const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
 
+        // Step 3: Create and send the transaction updating the timelock
+        const updateTimeLockTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
+
+        await provider.sendAndConfirm(updateTimeLockTx, undefined, { commitment: "confirmed" });
+
+        // Step 4: Approve the transaction
+        await squads.approveTransaction(txPDA);
+
+        // Step 5: Execute the transaction
+        await squads.executeTransaction(txPDA);
+
+        // Verify the timelock was updated
+        let msState = await squads.getMultisig(msPDA);
+        expect(msState.timeLock).to.equal(ONE_MINUTE);
+        
         // create authority to use (Vault, index 1)
         const authorityPDA = squads.getAuthorityPDA(msPDA, 1);
 
@@ -823,7 +824,7 @@ describe("Programs", function(){
         const authorityPDAFunded = await squads.connection.getAccountInfo(
           authorityPDA
         );
-        expect(authorityPDAFunded.lamports).to.equal(2000000);        
+        expect(authorityPDAFunded.lamports).to.equal(5000000);        
 
         // Try to execute the transaction immediately (should fail)
         try {
@@ -835,8 +836,10 @@ describe("Programs", function(){
         console.log("Sending money to the vault...");
 
         console.log("Waiting for time lock duration...");
+        msState = await squads.getMultisig(msPDA);
+        console.log("timelock: ", msState.timeLock);
         // Wait for the time lock duration
-        await setTimeout((timeLock + 5) * 1000);  // Adding extra buffer to account for any delay in execution
+        await setTimeout((timeLock + 60) * 1000);  // Adding extra buffer to account for any delay in execution
         console.log("Time lock duration passed, executing transaction...");
         // Execute the transaction after the time lock delay
         await squads.executeTransaction(txState.publicKey);

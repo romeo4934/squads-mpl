@@ -137,6 +137,17 @@ class TransactionBuilder {
             return this.withInstruction(instruction);
         });
     }
+    withUpdateTimeLock(timeLock) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const instruction = yield this.methods
+                .updateTimeLock(timeLock)
+                .accounts({
+                multisig: this.multisig.publicKey,
+            })
+                .instruction();
+            return this.withInstruction(instruction);
+        });
+    }
     // async withAddAuthority(): Promise<TransactionBuilder> {}
     // async withSetExternalExecute(): Promise<TransactionBuilder> {}
     withSetAsExecuted(programManagerPDA, managedProgramPDA, programUpgradePDA, transactionPDA, instructionPDA, authorityIndex) {

@@ -357,6 +357,12 @@ class Squads {
             return yield methods.instruction();
         });
     }
+    buildUpdateTimeLockTransaction(multisigPDA, newTimeLock) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const txBuilder = yield this.getTransactionBuilder(multisigPDA, 0);
+            return yield (yield txBuilder.withUpdateTimeLock(newTimeLock)).getInstructions();
+        });
+    }
     _executeTransaction(transactionPDA, feePayer) {
         return __awaiter(this, void 0, void 0, function* () {
             const transaction = yield this.getTransaction(transactionPDA);

@@ -620,6 +620,13 @@ class Squads {
     return await methods.instruction();
   }
 
+  async buildUpdateTimeLockTransaction(multisigPDA: PublicKey, newTimeLock: number): Promise<[TransactionInstruction[], PublicKey]> {
+      const txBuilder = await this.getTransactionBuilder(multisigPDA, 0);
+      return await (
+          await txBuilder.withUpdateTimeLock(newTimeLock)
+      ).getInstructions();
+  }
+
   private async _executeTransaction(
       transactionPDA: PublicKey,
       feePayer: PublicKey
