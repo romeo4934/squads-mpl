@@ -76,7 +76,6 @@ declare class Squads {
     private _cancelTransaction;
     cancelTransaction(transactionPDA: PublicKey): Promise<TransactionAccount>;
     buildCancelTransaction(multisigPDA: PublicKey, transactionPDA: PublicKey): Promise<TransactionInstruction>;
-    buildUpdateTimeLockTransaction(multisigPDA: PublicKey, newTimeLock: number): Promise<[TransactionInstruction[], PublicKey]>;
     private _executeTransaction;
     executeTransaction(transactionPDA: PublicKey, feePayer?: PublicKey, signers?: Signer[]): Promise<TransactionAccount>;
     buildExecuteTransaction(transactionPDA: PublicKey, feePayer?: PublicKey): Promise<TransactionInstruction>;

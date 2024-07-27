@@ -770,22 +770,27 @@ describe("Programs", function(){
 
 
 
-      it(`Create Tx with ApprovalByPrimaryMember and enforce time lock delay`, async function() {
-        // Step 1: Create a transaction to update the timelock
-        const [txInstructions, txPDA] = await squads.buildUpdateTimeLockTransaction(msPDA, ONE_MINUTE);
+      it(`Create Tx with ApprovalByPrimaryMember and enforce time lock delay`, async function() {     
+        // Step 1: Get the transaction builder
+        const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
+        
+        // Step 2: Add instruction to update the timelock
+        const [txInstructions, txPDA] = await ( await txBuilder
+            .withUpdateTimeLock(ONE_MINUTE)
+            ).getInstructions({ approvalByMultisig: {} });
 
-        // Step 2: Add activation instruction
+        // Step 3: Add activation instruction
         const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
 
-        // Step 3: Create and send the transaction updating the timelock
+        // Step 4: Create and send the transaction updating the timelock
         const updateTimeLockTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
 
         await provider.sendAndConfirm(updateTimeLockTx, undefined, { commitment: "confirmed" });
 
-        // Step 4: Approve the transaction
+        // Step 5: Approve the transaction
         await squads.approveTransaction(txPDA);
 
-        // Step 5: Execute the transaction
+        // Step 6: Execute the transaction
         await squads.executeTransaction(txPDA);
 
         // Verify the timelock was updated
