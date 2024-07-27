@@ -1,4 +1,4 @@
-import { MultisigAccount, ProgramManagerMethodsNamespace, SquadsMethodsNamespace } from "./types";
+import { MultisigAccount, ProgramManagerMethodsNamespace, SquadsMethodsNamespace, ApprovalMode } from "./types";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { AnchorProvider } from "@coral-xyz/anchor";
 export declare class TransactionBuilder {
@@ -22,6 +22,6 @@ export declare class TransactionBuilder {
     withChangeThreshold(threshold: number): Promise<TransactionBuilder>;
     withUpdateTimeLock(timeLock: number): Promise<TransactionBuilder>;
     withSetAsExecuted(programManagerPDA: PublicKey, managedProgramPDA: PublicKey, programUpgradePDA: PublicKey, transactionPDA: PublicKey, instructionPDA: PublicKey, authorityIndex: number): Promise<TransactionBuilder>;
-    getInstructions(): Promise<[TransactionInstruction[], PublicKey]>;
-    executeInstructions(): Promise<[TransactionInstruction[], PublicKey]>;
+    getInstructions(approvalMode: ApprovalMode): Promise<[TransactionInstruction[], PublicKey]>;
+    executeInstructions(approvalMode: ApprovalMode): Promise<[TransactionInstruction[], PublicKey]>;
 }

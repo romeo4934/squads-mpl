@@ -168,12 +168,12 @@ class TransactionBuilder {
             return this.withInstruction(instruction);
         });
     }
-    getInstructions() {
+    getInstructions(approvalMode) {
         return __awaiter(this, void 0, void 0, function* () {
             const transactionPDA = this.transactionPDA();
             const wrappedAddInstructions = yield Promise.all(this.instructions.map((rawInstruction, index) => this._buildAddInstruction(transactionPDA, rawInstruction, index + 1)));
             const createTxInstruction = yield this.methods
-                .createTransaction(this.authorityIndex, { approvalByMultisig: {} })
+                .createTransaction(this.authorityIndex, approvalMode)
                 .accounts({
                 multisig: this.multisig.publicKey,
                 transaction: transactionPDA,
@@ -185,9 +185,9 @@ class TransactionBuilder {
             return [instructions, transactionPDA];
         });
     }
-    executeInstructions() {
+    executeInstructions(approvalMode) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [instructions, transactionPDA] = yield this.getInstructions();
+            const [instructions, transactionPDA] = yield this.getInstructions(approvalMode);
             const { blockhash } = yield this.provider.connection.getLatestBlockhash();
             const lastValidBlockHeight = yield this.provider.connection.getBlockHeight();
             const transaction = new anchor.web3.Transaction({

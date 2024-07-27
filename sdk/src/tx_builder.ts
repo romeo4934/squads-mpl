@@ -2,6 +2,7 @@ import {
   MultisigAccount,
   ProgramManagerMethodsNamespace,
   SquadsMethodsNamespace,
+  ApprovalMode
 } from "./types";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { getAuthorityPDA, getIxPDA, getTxPDA } from "./address";
@@ -184,7 +185,7 @@ export class TransactionBuilder {
       .instruction();
     return this.withInstruction(instruction);
   }
-  async getInstructions(): Promise<[TransactionInstruction[], PublicKey]> {
+  async getInstructions(approvalMode: ApprovalMode): Promise<[TransactionInstruction[], PublicKey]> {
     const transactionPDA = this.transactionPDA();
     const wrappedAddInstructions = await Promise.all(
       this.instructions.map((rawInstruction, index) =>
@@ -192,7 +193,7 @@ export class TransactionBuilder {
       )
     );
     const createTxInstruction = await this.methods
-      .createTransaction(this.authorityIndex,  {approvalByMultisig: {}})
+      .createTransaction(this.authorityIndex, approvalMode)
       .accounts({
         multisig: this.multisig.publicKey,
         transaction: transactionPDA,
@@ -203,8 +204,8 @@ export class TransactionBuilder {
     this.instructions = [];
     return [instructions, transactionPDA];
   }
-  async executeInstructions(): Promise<[TransactionInstruction[], PublicKey]> {
-    const [instructions, transactionPDA] = await this.getInstructions();
+  async executeInstructions(approvalMode: ApprovalMode): Promise<[TransactionInstruction[], PublicKey]> {
+    const [instructions, transactionPDA] = await this.getInstructions(approvalMode);
     const { blockhash } = await this.provider.connection.getLatestBlockhash();
     const lastValidBlockHeight =
       await this.provider.connection.getBlockHeight();

@@ -624,7 +624,7 @@ class Squads {
       const txBuilder = await this.getTransactionBuilder(multisigPDA, 0);
       return await (
           await txBuilder.withUpdateTimeLock(newTimeLock)
-      ).getInstructions();
+      ).getInstructions( {approvalByMultisig: {}});
   }
 
   private async _executeTransaction(

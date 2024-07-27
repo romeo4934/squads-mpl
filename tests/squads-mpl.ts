@@ -461,7 +461,7 @@ describe("Programs", function(){
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         const [txInstructions, txPDA] = await (
           await txBuilder.withAddMember(member2.publicKey)
-        ).getInstructions();
+        ).getInstructions({approvalByMultisig: {}});
         const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
 
         let addMemberTx = await createBlankTransaction(
@@ -513,7 +513,7 @@ describe("Programs", function(){
         const startKeys = msState.keys.length;
         const [txInstructions, txPDA] = await (
           await txBuilder.withAddMember(newMember)
-        ).getInstructions();
+        ).getInstructions({approvalByMultisig: {}});
         const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
 
         let addMemberTx = await createBlankTransaction(
@@ -579,7 +579,7 @@ describe("Programs", function(){
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         const [txInstructions, txPDA] = await (
           await txBuilder.withChangeThreshold(2)
-        ).getInstructions();
+        ).getInstructions({approvalByMultisig: {}});
         const emptyTx = await createBlankTransaction(
           squads.connection,
           creator.publicKey
@@ -618,7 +618,7 @@ describe("Programs", function(){
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         const [txInstructions, txPDA] = await (
           await txBuilder.withChangeThreshold(2)
-        ).executeInstructions();
+        ).executeInstructions({approvalByMultisig: {}});
 
         // get the ix
         let ixState = await squads.getInstruction(
@@ -645,7 +645,7 @@ describe("Programs", function(){
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         const [txInstructions, txPDA] = await (
           await txBuilder.withChangeThreshold(2)
-        ).executeInstructions();
+        ).executeInstructions({approvalByMultisig: {}});
 
         // get the ix
         let ixState = await squads.getInstruction(
@@ -691,7 +691,7 @@ describe("Programs", function(){
         const startTxIndex = msState.transactionIndex;
         const [txInstructions, txPDA] = await (
           await txBuilder.withAddMemberAndChangeThreshold(newMember, 1)
-        ).getInstructions();
+        ).getInstructions({approvalByMultisig: {}});
         const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
 
         let addMemberTx = await createBlankTransaction(

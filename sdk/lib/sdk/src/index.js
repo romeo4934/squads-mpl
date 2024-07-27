@@ -360,7 +360,7 @@ class Squads {
     buildUpdateTimeLockTransaction(multisigPDA, newTimeLock) {
         return __awaiter(this, void 0, void 0, function* () {
             const txBuilder = yield this.getTransactionBuilder(multisigPDA, 0);
-            return yield (yield txBuilder.withUpdateTimeLock(newTimeLock)).getInstructions();
+            return yield (yield txBuilder.withUpdateTimeLock(newTimeLock)).getInstructions({ approvalByMultisig: {} });
         });
     }
     _executeTransaction(transactionPDA, feePayer) {
