@@ -340,6 +340,7 @@ pub struct ExecuteInstruction<'info> {
         ], bump = transaction.bump,
         constraint = matches!(transaction.status, MsTransactionStatus::ExecuteReady { .. }) @MsError::InvalidTransactionState,
         constraint = transaction.ms == multisig.key() @MsError::InvalidInstructionAccount,
+        constraint = transaction.transaction_index > multisig.ms_change_index @MsError::DeprecatedTransaction,
     )]
     pub transaction: Account<'info, MsTransaction>,
 
