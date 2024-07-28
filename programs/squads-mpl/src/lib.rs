@@ -435,8 +435,10 @@ pub mod squads_mpl {
                     _ => return err!(MsError::InvalidTransactionState),
                 };
 
+                let elapsed_time = current_time.checked_sub(approval_time).ok_or(MsError::TimeError)?;
+
                 // Check if the time lock condition is satisfied
-                if current_time - approval_time < i64::from(time_lock) {
+                if elapsed_time < i64::from(time_lock) {
                     return err!(MsError::TimeLockNotSatisfied);
                 }
             }

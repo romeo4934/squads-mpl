@@ -29,4 +29,5 @@ pub enum MsError {
     GuardianAlreadyExists,
     GuardianNotFound,
     MaxGuardiansReached, // Error when the maximum number of guardians is reached
+    InvalidApprovalModeForExecution, // Error for approval mode not matching the transaction mode
 }
