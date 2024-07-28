@@ -397,9 +397,9 @@ pub struct RemovePrimaryMember<'info> {
 
     #[account(
         mut,
-        constraint = multisig.is_member(member.key()).is_some() || multisig.is_guardian(member.key()).is_some() @MsError::UnauthorizedMember,
+        constraint = multisig.is_guardian(remover.key()).is_some() @MsError::UnauthorizedMember,
     )]
-    pub member: Signer<'info>,
+    pub remover: Signer<'info>,
 }
 
 /// The account context for reallocating the multisig account (for add member, where the size may need to be adjusted)

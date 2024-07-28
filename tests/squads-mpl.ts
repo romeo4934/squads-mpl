@@ -116,7 +116,8 @@ describe("Programs", function(){
 
     let threshold = 1;
     let timeLock = 0; // Set the time lock to 0 for no delay
-    const initialGuardians = Array.from({ length: 10 }).map(() => anchor.web3.Keypair.generate().publicKey);
+    const initialGuardiansKeys = Array.from({ length: 10 }).map(() => anchor.web3.Keypair.generate());
+    const initialGuardians = initialGuardiansKeys.map((guardian) => guardian.publicKey);
 
     // test suite
     describe("SMPL Basic functionality", function(){
@@ -838,11 +839,9 @@ describe("Programs", function(){
         } catch (e) {
             expect(e.message).to.include("TimeLockNotSatisfied");
         }
-        console.log("Sending money to the vault...");
+        console.log("            Sending money to the vault...");
 
-        console.log("Waiting for time lock duration...");
-        msState = await squads.getMultisig(msPDA);
-        console.log("timelock: ", msState.timeLock);
+        console.log("            Waiting for time lock duration...");
         // Wait for the time lock duration
         await setTimeout((timeLock + 60) * 1000);  // Adding extra buffer to account for any delay in execution
         console.log("Time lock duration passed, executing transaction...");
@@ -850,6 +849,56 @@ describe("Programs", function(){
         await squads.executeTransaction(txState.publicKey);
         const executedTxState = await squads.getTransaction(txState.publicKey);
         expect(executedTxState.status).to.have.property("executed");
+      });
+
+      it(`Guardian removes primary member, and verify that the primary member cannot execute the previously approved transaction`, async function() {
+        // Step 2: Primary member drafts and approves a transaction
+        const authorityPDA = squads.getAuthorityPDA(msPDA, 1);
+
+        const testPayee = anchor.web3.Keypair.generate();
+        const testIx = await createTestTransferTransaction(
+          authorityPDA,
+          testPayee.publicKey
+        );
+
+        let txState = await squads.createTransaction(msPDA, 1, { approvalByPrimaryMember: {} });
+        await squads.addInstruction(txState.publicKey, testIx);
+        await squads.activateTransaction(txState.publicKey);
+        await squads.approveTransaction(txState.publicKey);
+        txState = await squads.getTransaction(txState.publicKey);
+        expect(txState.status).to.have.property("executeReady");
+
+        // Step 3: Guardian drafts and approves a transaction to remove the primary member
+        
+        await provider.connection.requestAirdrop(
+          initialGuardiansKeys[0].publicKey,
+          anchor.web3.LAMPORTS_PER_SOL
+        );
+        const removePrimaryMemberTx = await program.methods
+          .removePrimaryMember()
+          .accounts({
+            multisig: msPDA,
+            remover: initialGuardiansKeys[0].publicKey,
+          })
+          .signers([initialGuardiansKeys[0]])
+          .transaction();
+        try {
+          await provider.sendAndConfirm(removePrimaryMemberTx, [initialGuardiansKeys[0]], undefined, {commitment: "confirmed"});
+        } catch (e) {
+          console.log(initialGuardiansKeys[0].publicKey.toBase58(), " signing error");
+        }
+          
+        // Verify the state has no primary member
+        const msState = await squads.getMultisig(msPDA);
+        expect(msState.primaryMember).to.be.null;
+
+        // Step 4: Verify the primary member cannot execute the previously approved transaction
+        try {
+          await squads.executeTransaction(txState.publicKey);
+          throw new Error("Transaction was incorrectly executed by primary member.");
+        } catch (e) {
+          expect(e.message).to.include("DeprecatedTransaction");
+        }        
       });
 
     });

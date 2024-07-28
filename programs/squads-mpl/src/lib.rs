@@ -65,6 +65,11 @@ pub mod squads_mpl {
         members.sort();
         members.dedup();
 
+        // sort the guardians and remove duplicates
+        let mut guardians = guardians;
+        guardians.sort();
+        guardians.dedup();
+
         // check we don't exceed u16
         let total_members = members.len();
         if total_members < 1 {
@@ -656,18 +661,17 @@ pub mod squads_mpl {
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
         // set the change index, which will deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)?;
-
-        Ok(())
+        ctx.accounts.multisig.set_change_index(new_index)
     }
 
     pub fn remove_primary_member(ctx: Context<RemovePrimaryMember>) -> Result<()> {
+        // Remove the primary member
+        ctx.accounts.multisig.primary_member = None;
+
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
         // set the change index, which will deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)?;
-        // Remove the primary member
-        ctx.accounts.multisig.remove_primary_member()
+        ctx.accounts.multisig.set_change_index(new_index)
     }
 
     /// The instruction to update the time lock duration of the multisig.
@@ -683,9 +687,7 @@ pub mod squads_mpl {
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
         // set the change index, which will deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)?;
-
-        Ok(())
+        ctx.accounts.multisig.set_change_index(new_index)
     }
 
     /// The instruction to add a new guardian to the multisig.
@@ -702,7 +704,9 @@ pub mod squads_mpl {
 
         // Add the guardian
         ctx.accounts.multisig.add_guardian(new_guardian)?;
+        // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
+        // set the change index, which will deprecate any active transactions
         ctx.accounts.multisig.set_change_index(new_index)
     }
 
@@ -714,7 +718,9 @@ pub mod squads_mpl {
         }
 
         ctx.accounts.multisig.remove_guardian(old_guardian)?;
+        // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
+        // set the change index, which will deprecate any active transactions
         ctx.accounts.multisig.set_change_index(new_index)
     }
 }

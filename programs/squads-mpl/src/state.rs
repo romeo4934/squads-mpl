@@ -52,7 +52,7 @@ impl Ms {
 
 
     /// Initializes the new multisig account
-    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, primary_member: Option<Pubkey>, bump: u8, time_lock: u32,guardians: Vec<Pubkey>) -> Result<()> {
+    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, primary_member: Option<Pubkey>, bump: u8, time_lock: u32, guardians: Vec<Pubkey>) -> Result<()> {
         self.threshold = threshold;
         self.keys = members;
         self.authority_index = 1;   // default vault is the first authority
@@ -83,11 +83,6 @@ impl Ms {
         }
     }
 
-    /// remove the primary member
-    pub fn remove_primary_member(&mut self) -> Result<()> {
-        self.primary_member = None;
-        Ok(())
-    }
 
     pub fn add_guardian(&mut self, guardian: Pubkey) -> Result<()> {
         if matches!(self.is_guardian(guardian), None) {
