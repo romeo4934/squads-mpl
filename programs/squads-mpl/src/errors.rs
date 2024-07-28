@@ -30,4 +30,5 @@ pub enum MsError {
     GuardianNotFound,
     MaxGuardiansReached, // Error when the maximum number of guardians is reached
     InvalidApprovalModeForExecution, // Error for approval mode not matching the transaction mode
+    TimeError, // Error for time related errors
 }
