@@ -777,26 +777,31 @@ class Squads {
   }
 
   private async _removePrimaryMember(
-    multisigPDA: PublicKey
+    multisigPDA: PublicKey,
+    removerSigner: anchor.web3.Keypair
   ): Promise<SquadsMethods> {
     return this.multisig.methods.removePrimaryMember().accounts({
       multisig: multisigPDA,
-      member: this.wallet.publicKey,
-    });
+      remover: removerSigner.publicKey,
+    })
+    .signers([removerSigner]);
+    ;
   }
 
   async removePrimaryMember(
-    multisigPDA: PublicKey
+    multisigPDA: PublicKey,
+    removerSigner: anchor.web3.Keypair
   ): Promise<MultisigAccount> {
-    const methods = await this._removePrimaryMember(multisigPDA);
+    const methods = await this._removePrimaryMember(multisigPDA,removerSigner);
     await methods.rpc();
     return await this.getMultisig(multisigPDA);
   }
 
   async buildRemovePrimaryMember(
     multisigPDA: PublicKey,
+    removerSigner: anchor.web3.Keypair
   ): Promise<TransactionInstruction> {
-    const methods = await this._removePrimaryMember(multisigPDA);
+    const methods = await this._removePrimaryMember(multisigPDA,removerSigner);
     return await methods.instruction();
   }
 

@@ -506,7 +506,7 @@ export declare type SquadsMpl = {
                     "isSigner": false;
                 },
                 {
-                    "name": "member";
+                    "name": "remover";
                     "isMut": true;
                     "isSigner": true;
                 }

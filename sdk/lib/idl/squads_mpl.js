@@ -509,7 +509,7 @@ exports.IDL = {
                     "isSigner": false
                 },
                 {
-                    "name": "member",
+                    "name": "remover",
                     "isMut": true,
                     "isSigner": true
                 }

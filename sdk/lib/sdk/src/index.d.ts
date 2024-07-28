@@ -1,6 +1,7 @@
 import { Connection, PublicKey, Commitment, ConnectionConfig, TransactionInstruction, Signer } from "@solana/web3.js";
 import { Wallet } from "@coral-xyz/anchor";
 import { InstructionAccount, ManagedProgramAccount, MultisigAccount, ProgramManagerAccount, ProgramUpgradeAccount, TransactionAccount, ApprovalMode } from "./types";
+import * as anchor from "@coral-xyz/anchor";
 import { TransactionBuilder } from "./tx_builder";
 declare class Squads {
     readonly connection: Connection;
@@ -83,8 +84,8 @@ declare class Squads {
     executeInstruction(transactionPDA: PublicKey, instructionPDA: PublicKey): Promise<InstructionAccount>;
     buildExecuteInstruction(transactionPDA: PublicKey, instructionPDA: PublicKey): Promise<TransactionInstruction>;
     private _removePrimaryMember;
-    removePrimaryMember(multisigPDA: PublicKey): Promise<MultisigAccount>;
-    buildRemovePrimaryMember(multisigPDA: PublicKey): Promise<TransactionInstruction>;
+    removePrimaryMember(multisigPDA: PublicKey, removerSigner: anchor.web3.Keypair): Promise<MultisigAccount>;
+    buildRemovePrimaryMember(multisigPDA: PublicKey, removerSigner: anchor.web3.Keypair): Promise<TransactionInstruction>;
     createProgramManager(multisigPDA: PublicKey): Promise<ProgramManagerAccount>;
     createManagedProgram(multisigPDA: PublicKey, programAddress: PublicKey, name: string): Promise<ManagedProgramAccount>;
     createProgramUpgrade(multisigPDA: PublicKey, managedProgramPDA: PublicKey, bufferAddress: PublicKey, spillAddress: PublicKey, authorityAddress: PublicKey, upgradeName: string): Promise<ProgramUpgradeAccount>;
