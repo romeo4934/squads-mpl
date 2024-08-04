@@ -11,6 +11,8 @@ use anchor_lang::{
     }
 };
 
+use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
+
 use hex::FromHex;
 
 use state::*;
@@ -739,4 +741,99 @@ pub mod squads_mpl {
         let new_index = ctx.accounts.multisig.transaction_index;
         ctx.accounts.multisig.set_change_index(new_index)
     }
+
+pub fn spending_limit_use(
+    ctx: Context<SpendingLimitUse>,
+    amount: u64,
+    mint: Pubkey,
+    decimals: u8,
+    ) -> Result<()> {
+        let now = Clock::get()?.unix_timestamp;
+
+        // Get a mutable reference to `ms` and extract spending limit
+        let ms = &mut ctx.accounts.multisig;
+        
+        // Find and modify the spending limit
+        let spending_limit = {
+            let spending_limit = ms.spendings.iter_mut().find(|spending| spending.mint == mint)
+                .ok_or(MsError::SpendingLimitNotFound)?;
+
+            // Reset `spending_limit.remaining_amount` if the period has passed
+            if let Some(reset_period) = spending_limit.period.to_seconds() {
+                let passed_since_last_reset = now.checked_sub(spending_limit.last_reset).unwrap();
+                if passed_since_last_reset > reset_period {
+                    spending_limit.remaining_amount = spending_limit.amount;
+                    let periods_passed = passed_since_last_reset.checked_div(reset_period).unwrap();
+                    spending_limit.last_reset = spending_limit.last_reset.checked_add(periods_passed.checked_mul(reset_period).unwrap()).unwrap();
+                }
+            }
+
+            // Update `spending_limit.remaining_amount`
+            spending_limit.remaining_amount = spending_limit.remaining_amount.checked_sub(amount)
+                .ok_or(MsError::SpendingLimitExceeded)?;
+
+            // Return a copy of `spending_limit` to use after immutable borrow
+            spending_limit.clone()
+        }; // Drop mutable borrow here
+
+        // Derive the PDA and bump for the vault
+        let (vault_address, vault_bump) = Pubkey::find_program_address(
+            &[
+                b"squad",
+                ms.key().as_ref(),
+                &0_u8.to_le_bytes(), // Fixed index 0
+                b"authority",
+            ],
+            ctx.program_id,
+        );
+
+        // Ensure the derived PDA matches the expected one
+        require_keys_eq!(vault_address, *ctx.accounts.vault.key, MsError::InvalidInstructionAccount);
+
+        // Transfer tokens
+        if spending_limit.mint == Pubkey::default() {
+            // Transfer SOL
+            let system_program = ctx.accounts.system_program.as_ref().ok_or(MsError::MissingAccount)?;
+            anchor_lang::system_program::transfer(CpiContext::new_with_signer(
+                system_program.to_account_info(),
+                anchor_lang::system_program::Transfer {
+                    from: ctx.accounts.vault.to_account_info(), // PDA representing the vault
+                    to: ctx.accounts.destination.to_account_info(),
+                },
+                &[&[
+                    b"squad",
+                    ms.key().as_ref(),
+                    &0_u8.to_le_bytes(),
+                    b"authority",
+                    &[vault_bump],
+                ]],
+            ), amount)?;
+        } else {
+            // Transfer SPL token
+            let token_program = ctx.accounts.token_program.as_ref().ok_or(MsError::MissingAccount)?;
+            let vault_token_account = ctx.accounts.vault_token_account.as_ref().ok_or(MsError::MissingAccount)?;
+            let destination_token_account = ctx.accounts.destination_token_account.as_ref().ok_or(MsError::MissingAccount)?;
+            let mint = ctx.accounts.mint.as_ref().ok_or(MsError::MissingAccount)?;
+
+            let cpi_accounts = Transfer {
+                from: vault_token_account.to_account_info(), // PDA representing the SPL token vault
+                to: destination_token_account.to_account_info(),
+                authority: ctx.accounts.vault.to_account_info(),
+            };
+
+            token::transfer(
+                CpiContext::new_with_signer(token_program.to_account_info(), cpi_accounts, &[&[
+                    b"squad",
+                    ms.key().as_ref(),
+                    &0_u8.to_le_bytes(),
+                    b"authority",
+                    &[vault_bump],
+                ]]),
+                amount,
+            )?;
+        }
+
+        Ok(())
+    }
+
 }

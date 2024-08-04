@@ -4,6 +4,7 @@
 */
 
 use anchor_lang::prelude::*;
+use anchor_spl::token::{ Mint, Token, TokenAccount};
 use crate::state::*;
 use crate::errors::*;
 
@@ -426,4 +427,27 @@ pub struct MsAuthRealloc<'info> {
 
     pub rent: Sysvar<'info, Rent>,
     pub system_program: Program<'info, System>,
+}
+
+
+#[derive(Accounts)]
+pub struct SpendingLimitUse<'info> {
+    #[account(mut)]
+    pub multisig: Account<'info, Ms>,
+  
+    /// CHECK: Manually checking this derivation in the method
+    #[account(mut)]
+    pub vault: AccountInfo<'info>, // PDA representing the vault, address derived in the function
+
+    /// CHECK: Manually checking this derivation in the method
+    #[account(mut)]
+    pub destination: AccountInfo<'info>, // Destination account for transfer
+
+    pub mint: Option<Account<'info, Mint>>, // Optional mint account for SPL tokens
+    #[account(mut)]
+    pub vault_token_account: Option<Account<'info, TokenAccount>>, // Optional vault token account
+    #[account(mut)]
+    pub destination_token_account: Option<Account<'info, TokenAccount>>, // Optional destination token account
+    pub token_program: Option<Program<'info, Token>>, // Optional SPL token program
+    pub system_program: Option<Program<'info, System>>, // Optional system program for SOL transfers
 }

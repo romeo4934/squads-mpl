@@ -31,4 +31,7 @@ pub enum MsError {
     MaxGuardiansReached, // Error when the maximum number of guardians is reached
     InvalidApprovalModeForExecution, // Error for approval mode not matching the transaction mode
     TimeError, // Error for time related errors
+    MissingAccount, // Error for missing account
+    SpendingLimitNotFound, // Error for missing spending limit
+    SpendingLimitExceeded, // Error for exceeding spending limit
 }

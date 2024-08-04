@@ -434,3 +434,13 @@ pub enum Period {
     Weekly,
     Monthly,
 }
+
+impl Period {
+    pub fn to_seconds(&self) -> Option<i64> {
+        match self {
+            Period::Daily => Some(24 * 60 * 60),     // 1 day in seconds
+            Period::Weekly => Some(7 * 24 * 60 * 60), // 1 week in seconds
+            Period::Monthly => Some(30 * 24 * 60 * 60), // 1 month (assuming 30 days) in seconds
+        }
+    }
+}
