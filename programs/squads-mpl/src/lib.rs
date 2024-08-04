@@ -725,4 +725,18 @@ pub mod squads_mpl {
         // set the change index, which will deprecate any active transactions
         ctx.accounts.multisig.set_change_index(new_index)
     }
+
+    pub fn add_spending_limit(ctx: Context<MsAuth>, mint: Pubkey, amount: u64, period: Period) -> Result<()> {
+        // DO VALIDATION HERE Ensure no duplicates  and MaxSpendingLimitsReached
+        ctx.accounts.multisig.add_spending_limit(mint, amount, period)?;
+        let new_index = ctx.accounts.multisig.transaction_index;
+        ctx.accounts.multisig.set_change_index(new_index)
+    }
+
+    /// Method to remove a spending limit
+    pub fn remove_spending_limit(ctx: Context<MsAuth>, mint: Pubkey) -> Result<()> {
+        ctx.accounts.multisig.remove_spending_limit(mint)?;
+        let new_index = ctx.accounts.multisig.transaction_index;
+        ctx.accounts.multisig.set_change_index(new_index)
+    }
 }

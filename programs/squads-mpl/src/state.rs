@@ -33,6 +33,7 @@ pub struct Ms {
     pub primary_member: Option<Pubkey>, // Optional primary member
     pub time_lock: u32,                 // Time lock in seconds, 0 for no delay
     pub guardians: Vec<Pubkey>,          // List of guardians
+    pub spendings: Vec<SpendingLimit>,  // Spending limits only apply to the initial vault index 0, we can have only a maximum of 10 spending limits
 }
 
 impl Ms {
@@ -48,7 +49,15 @@ impl Ms {
     33 +        // primary member (one byte for option + 32 for Pubkey)
     4 +        // time lock
     4 +         // for guardians vec length
-    32;         // padding alignment - base guardians length
+    (10* 32) + // each guardian is a public key (32 bytes)
+    4 +         // for spending vec length
+    (10 * (
+        32 +    // mint (Pubkey)
+        8 +     // amount (u64)
+        1 +     // period (1 byte for enum)
+        8 +     // remaining amount (u64)
+        8       // last reset timestamp (i64)
+    ));       // 10 spendings
 
 
     /// Initializes the new multisig account
@@ -64,6 +73,7 @@ impl Ms {
         self.time_lock = time_lock; // Initialize with the time_lock
         self.primary_member = primary_member;
         self.guardians = guardians;
+        self.spendings = Vec::new(); 
         Ok(())
     }
 
@@ -138,6 +148,29 @@ impl Ms {
     /// sets the threshold for the multisig.
     pub fn change_threshold(&mut self, threshold: u16) -> Result<()>{
         self.threshold = threshold;
+        Ok(())
+    }
+
+    // Method to add a new spending limit
+    pub fn add_spending_limit(&mut self, mint: Pubkey, amount: u64, period: Period) -> Result<()> {
+        let new_spending = SpendingLimit {
+            mint,
+            amount,
+            period,
+            remaining_amount: amount,
+            last_reset: Clock::get()?.unix_timestamp,
+        };
+
+        self.spendings.push(new_spending);
+        self.spendings.sort_by(|a, b| a.mint.cmp(&b.mint));
+        Ok(())
+    }
+
+    // Method to remove a spending limit
+    pub fn remove_spending_limit(&mut self, mint: Pubkey) -> Result<()> {
+        if let Some(index) = self.spendings.iter().position(|spending| spending.mint == mint) {
+            self.spendings.remove(index);
+        }
         Ok(())
     }
 
@@ -382,4 +415,22 @@ impl IncomingInstruction {
         // will used when saved
         get_instance_packed_len(&self).unwrap_or_default().checked_add(3).unwrap_or_default()
     }
+}
+
+/// Spending Limit struct
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct SpendingLimit {
+    pub mint: Pubkey,            // Token mint or SOL Pubkey::default() means SOL.
+    pub amount: u64,             // Total amount
+    pub period: Period,          // Period enum
+    pub remaining_amount: u64,   // Remaining amount
+    pub last_reset: i64,         // Last reset timestamp
+}
+
+/// Period enum
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub enum Period {
+    Daily,
+    Weekly,
+    Monthly,
 }

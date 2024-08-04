@@ -24,7 +24,7 @@ pub struct Create<'info> {
     #[account(
         init,
         payer = creator,
-        space = Ms::SIZE_WITHOUT_MEMBERS + (members.len() * 32)+ (10* 32),  // Preallocate space for up to 10 guardians
+        space = Ms::SIZE_WITHOUT_MEMBERS + (members.len() * 32),  // Preallocate space for the members
         seeds = [b"squad", create_key.as_ref(), b"multisig"], bump
     )]
     pub multisig: Account<'info, Ms>,
