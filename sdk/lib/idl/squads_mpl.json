@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
+  "version": "1.3.1",
   "name": "squads_mpl",
   "instructions": [
     {
@@ -42,6 +42,22 @@
         {
           "name": "meta",
           "type": "string"
+        },
+        {
+          "name": "primaryMember",
+          "type": {
+            "option": "publicKey"
+          }
+        },
+        {
+          "name": "timeLock",
+          "type": "u32"
+        },
+        {
+          "name": "guardians",
+          "type": {
+            "vec": "publicKey"
+          }
         }
       ]
     },
@@ -224,6 +240,12 @@
         {
           "name": "authorityIndex",
           "type": "u32"
+        },
+        {
+          "name": "mode",
+          "type": {
+            "defined": "ApprovalMode"
+          }
         }
       ]
     },
@@ -453,6 +475,164 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "updatePrimaryMember",
+      "docs": [
+        "The instruction to update the primary member of the multisig."
+      ],
+      "accounts": [
+        {
+          "name": "multisig",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newPrimaryMember",
+          "type": {
+            "option": "publicKey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "removePrimaryMember",
+      "accounts": [
+        {
+          "name": "multisig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "remover",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "updateTimeLock",
+      "docs": [
+        "The instruction to update the time lock duration of the multisig."
+      ],
+      "accounts": [
+        {
+          "name": "multisig",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newTimeLock",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "addGuardian",
+      "docs": [
+        "The instruction to add a new guardian to the multisig."
+      ],
+      "accounts": [
+        {
+          "name": "multisig",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newGuardian",
+          "type": "publicKey"
+        }
+      ]
+    },
+    {
+      "name": "removeGuardian",
+      "docs": [
+        "The instruction to remove a guardian from the multisig."
+      ],
+      "accounts": [
+        {
+          "name": "multisig",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "oldGuardian",
+          "type": "publicKey"
+        }
+      ]
+    },
+    {
+      "name": "addSpendingLimit",
+      "accounts": [
+        {
+          "name": "spendingLimit",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "multisig",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "mint",
+          "type": "publicKey"
+        },
+        {
+          "name": "vaultIndex",
+          "type": "u8"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "period",
+          "type": {
+            "defined": "Period"
+          }
+        }
+      ]
+    },
+    {
+      "name": "removeSpendingLimit",
+      "docs": [
+        "Method to remove a spending limit"
+      ],
+      "accounts": [
+        {
+          "name": "spendingLimit",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "multisig",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -494,6 +674,22 @@
           },
           {
             "name": "keys",
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "primaryMember",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "timeLock",
+            "type": "u32"
+          },
+          {
+            "name": "guardians",
             "type": {
               "vec": "publicKey"
             }
@@ -564,6 +760,12 @@
           {
             "name": "executedIndex",
             "type": "u8"
+          },
+          {
+            "name": "mode",
+            "type": {
+              "defined": "ApprovalMode"
+            }
           }
         ]
       }
@@ -605,6 +807,81 @@
           {
             "name": "executed",
             "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SpendingLimit",
+      "docs": [
+        "Spending Limit struct"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "multisig",
+            "docs": [
+              "The multisig this belongs to."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "vaultIndex",
+            "docs": [
+              "The index of the vault that the spending limit is for."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "mint",
+            "docs": [
+              "The token mint the spending limit is for.",
+              "Pubkey::default() means SOL.",
+              "use NATIVE_MINT for Wrapped SOL."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "amount",
+            "docs": [
+              "The amount of tokens that can be spent in a period.",
+              "This amount is in decimals of the mint,",
+              "so 1 SOL would be `1_000_000_000` and 1 USDC would be `1_000_000`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "period",
+            "docs": [
+              "The reset period of the spending limit.",
+              "When it passes, the remaining amount is reset, unless it's `Period::OneTime`."
+            ],
+            "type": {
+              "defined": "Period"
+            }
+          },
+          {
+            "name": "remainingAmount",
+            "docs": [
+              "The remaining amount of tokens that can be spent in the current period.",
+              "When reaches 0, the spending limit cannot be used anymore until the period reset."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "lastReset",
+            "docs": [
+              "Unix timestamp marking the last time the spending limit was reset (or created)."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump."
+            ],
+            "type": "u8"
           }
         ]
       }
@@ -674,22 +951,92 @@
         "kind": "enum",
         "variants": [
           {
-            "name": "Draft"
+            "name": "Draft",
+            "fields": [
+              {
+                "name": "timestamp",
+                "type": "i64"
+              }
+            ]
           },
           {
-            "name": "Active"
+            "name": "Active",
+            "fields": [
+              {
+                "name": "timestamp",
+                "type": "i64"
+              }
+            ]
           },
           {
-            "name": "ExecuteReady"
+            "name": "ExecuteReady",
+            "fields": [
+              {
+                "name": "timestamp",
+                "type": "i64"
+              }
+            ]
           },
           {
-            "name": "Executed"
+            "name": "Executed",
+            "fields": [
+              {
+                "name": "timestamp",
+                "type": "i64"
+              }
+            ]
           },
           {
-            "name": "Rejected"
+            "name": "Rejected",
+            "fields": [
+              {
+                "name": "timestamp",
+                "type": "i64"
+              }
+            ]
           },
           {
-            "name": "Cancelled"
+            "name": "Cancelled",
+            "fields": [
+              {
+                "name": "timestamp",
+                "type": "i64"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "ApprovalMode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "ApprovalByPrimaryMember"
+          },
+          {
+            "name": "ApprovalByMultisig"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Period",
+      "docs": [
+        "Period enum"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Daily"
+          },
+          {
+            "name": "Weekly"
+          },
+          {
+            "name": "Monthly"
           }
         ]
       }
@@ -751,6 +1098,58 @@
     {
       "code": 6013,
       "name": "NotEnoughLamports"
+    },
+    {
+      "code": 6014,
+      "name": "TimeLockNotSatisfied"
+    },
+    {
+      "code": 6015,
+      "name": "NoPrimaryMemberSpecified"
+    },
+    {
+      "code": 6016,
+      "name": "PrimaryMemberNotInMultisig"
+    },
+    {
+      "code": 6017,
+      "name": "UnauthorizedMember"
+    },
+    {
+      "code": 6018,
+      "name": "TimeLockExceedsMaximum"
+    },
+    {
+      "code": 6019,
+      "name": "GuardianAlreadyExists"
+    },
+    {
+      "code": 6020,
+      "name": "GuardianNotFound"
+    },
+    {
+      "code": 6021,
+      "name": "MaxGuardiansReached"
+    },
+    {
+      "code": 6022,
+      "name": "InvalidApprovalModeForExecution"
+    },
+    {
+      "code": 6023,
+      "name": "TimeError"
+    },
+    {
+      "code": 6024,
+      "name": "MissingAccount"
+    },
+    {
+      "code": 6025,
+      "name": "SpendingLimitNotFound"
+    },
+    {
+      "code": 6026,
+      "name": "SpendingLimitExceeded"
     }
   ]
 }

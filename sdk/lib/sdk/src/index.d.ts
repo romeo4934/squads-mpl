@@ -56,6 +56,7 @@ declare class Squads {
     getNextProgramIndex(programManagerPDA: PublicKey): Promise<number>;
     getNextUpgradeIndex(managedProgramPDA: PublicKey): Promise<number>;
     getAuthorityPDA(multisigPDA: PublicKey, authorityIndex: number): PublicKey;
+    getSpendingLimitPDA(multisigPDA: PublicKey, mint: PublicKey, vaultIndex: number): PublicKey;
     private _createMultisig;
     createMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, guardians?: PublicKey[]): Promise<MultisigAccount>;
     buildCreateMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, guardians?: PublicKey[]): Promise<TransactionInstruction>;

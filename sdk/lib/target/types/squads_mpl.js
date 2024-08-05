@@ -572,6 +572,78 @@ exports.IDL = {
                     "type": "publicKey"
                 }
             ]
+        },
+        {
+            "name": "addSpendingLimit",
+            "accounts": [
+                {
+                    "name": "spendingLimit",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "multisig",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "rentPayer",
+                    "isMut": true,
+                    "isSigner": true,
+                    "docs": [
+                        "This is usually the same as `config_authority`, but can be a different account if needed."
+                    ]
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "mint",
+                    "type": "publicKey"
+                },
+                {
+                    "name": "vaultIndex",
+                    "type": "u8"
+                },
+                {
+                    "name": "amount",
+                    "type": "u64"
+                },
+                {
+                    "name": "period",
+                    "type": {
+                        "defined": "Period"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "removeSpendingLimit",
+            "docs": [
+                "Method to remove a spending limit"
+            ],
+            "accounts": [
+                {
+                    "name": "spendingLimit",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "multisig",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": []
         }
     ],
     "accounts": [
@@ -749,6 +821,81 @@ exports.IDL = {
                     }
                 ]
             }
+        },
+        {
+            "name": "spendingLimit",
+            "docs": [
+                "Spending Limit struct"
+            ],
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "multisig",
+                        "docs": [
+                            "The multisig this belongs to."
+                        ],
+                        "type": "publicKey"
+                    },
+                    {
+                        "name": "vaultIndex",
+                        "docs": [
+                            "The index of the vault that the spending limit is for."
+                        ],
+                        "type": "u8"
+                    },
+                    {
+                        "name": "mint",
+                        "docs": [
+                            "The token mint the spending limit is for.",
+                            "Pubkey::default() means SOL.",
+                            "use NATIVE_MINT for Wrapped SOL."
+                        ],
+                        "type": "publicKey"
+                    },
+                    {
+                        "name": "amount",
+                        "docs": [
+                            "The amount of tokens that can be spent in a period.",
+                            "This amount is in decimals of the mint,",
+                            "so 1 SOL would be `1_000_000_000` and 1 USDC would be `1_000_000`."
+                        ],
+                        "type": "u64"
+                    },
+                    {
+                        "name": "period",
+                        "docs": [
+                            "The reset period of the spending limit.",
+                            "When it passes, the remaining amount is reset, unless it's `Period::OneTime`."
+                        ],
+                        "type": {
+                            "defined": "Period"
+                        }
+                    },
+                    {
+                        "name": "remainingAmount",
+                        "docs": [
+                            "The remaining amount of tokens that can be spent in the current period.",
+                            "When reaches 0, the spending limit cannot be used anymore until the period reset."
+                        ],
+                        "type": "u64"
+                    },
+                    {
+                        "name": "lastReset",
+                        "docs": [
+                            "Unix timestamp marking the last time the spending limit was reset (or created)."
+                        ],
+                        "type": "i64"
+                    },
+                    {
+                        "name": "bump",
+                        "docs": [
+                            "PDA bump."
+                        ],
+                        "type": "u8"
+                    }
+                ]
+            }
         }
     ],
     "types": [
@@ -884,6 +1031,26 @@ exports.IDL = {
                     }
                 ]
             }
+        },
+        {
+            "name": "Period",
+            "docs": [
+                "Period enum"
+            ],
+            "type": {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "Daily"
+                    },
+                    {
+                        "name": "Weekly"
+                    },
+                    {
+                        "name": "Monthly"
+                    }
+                ]
+            }
         }
     ],
     "errors": [
@@ -974,6 +1141,26 @@ exports.IDL = {
         {
             "code": 6021,
             "name": "MaxGuardiansReached"
+        },
+        {
+            "code": 6022,
+            "name": "InvalidApprovalModeForExecution"
+        },
+        {
+            "code": 6023,
+            "name": "TimeError"
+        },
+        {
+            "code": 6024,
+            "name": "MissingAccount"
+        },
+        {
+            "code": 6025,
+            "name": "SpendingLimitNotFound"
+        },
+        {
+            "code": 6026,
+            "name": "SpendingLimitExceeded"
         }
     ]
 };

@@ -2,10 +2,11 @@ import {
   MultisigAccount,
   ProgramManagerMethodsNamespace,
   SquadsMethodsNamespace,
-  ApprovalMode
+  ApprovalMode,
+  Period
 } from "./types";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { getAuthorityPDA, getIxPDA, getTxPDA } from "./address";
+import { getAuthorityPDA, getIxPDA, getTxPDA, getSpendingLimitPDA } from "./address";
 import BN from "bn.js";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
@@ -183,6 +184,29 @@ export class TransactionBuilder {
       .updatePrimaryMember(newPrimaryMember)
       .accounts({
         multisig: this.multisig.publicKey,
+      })
+      .instruction();
+    return this.withInstruction(instruction);
+  }
+
+  // Add this after other methods inside the TransactionBuilder class
+  async withAddSpendingLimit(
+    mint: PublicKey,
+    vaultIndex: number,
+    amount: number,
+    period: Period
+  ): Promise<TransactionBuilder> {
+    const [spendingLimitPDA] = await getSpendingLimitPDA(this.multisig.publicKey, mint, vaultIndex, this.programId);
+
+    console.log("Spending Limit PDA inside builder:", spendingLimitPDA.toString());
+
+    const instruction = await this.methods
+      .addSpendingLimit(mint, vaultIndex, new BN(amount), period)
+      .accounts({
+        multisig: this.multisig.publicKey,
+        spendingLimit: spendingLimitPDA,
+        rentPayer: this.provider.wallet.publicKey, // Ensure the correct signer
+        systemProgram: anchor.web3.SystemProgram.programId,
       })
       .instruction();
     return this.withInstruction(instruction);

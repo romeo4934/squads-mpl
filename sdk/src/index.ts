@@ -34,6 +34,7 @@ import {
   getProgramManagerPDA,
   getProgramUpgradePDA,
   getTxPDA,
+  getSpendingLimitPDA
 } from "./address";
 import BN from "bn.js";
 import * as anchor from "@coral-xyz/anchor";
@@ -313,6 +314,15 @@ class Squads {
     return getAuthorityPDA(
         multisigPDA,
         new BN(authorityIndex, 10),
+        this.multisigProgramId
+    )[0];
+  }
+
+  getSpendingLimitPDA(multisigPDA: PublicKey, mint: PublicKey, vaultIndex: number): PublicKey {
+    return getSpendingLimitPDA(
+        multisigPDA,
+        mint,
+        vaultIndex,
         this.multisigProgramId
     )[0];
   }

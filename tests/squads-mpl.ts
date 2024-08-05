@@ -6,6 +6,8 @@ import { SquadsMpl } from "../idl/squads_mpl";
 import { ProgramManager } from "../idl/program_manager";
 import { Roles } from "../idl/roles";
 import { setTimeout } from "timers/promises";
+import { Token } from "@solana/spl-token"; 
+import { Period } from "../sdk/src/types"; // Adjust according to your project structure
 
 import {
   createBlankTransaction,
@@ -19,6 +21,7 @@ import Squads, {
   getProgramManagerPDA,
   getAuthorityPDA,
   getTxPDA,
+  getSpendingLimitPDA,
 } from "../sdk/src/index";
 import BN from "bn.js";
 import { getExecuteProxyInstruction, getUserRolePDA, getUserDelegatePDA, getRolesManager } from "../helpers/roles";
@@ -898,6 +901,62 @@ describe("Programs", function(){
         } catch (e) {
           expect(e.message).to.include("DeprecatedTransaction");
         }        
+      });
+
+      // Add this inside the describe block named "SMPL Basic functionality"
+      it(`Add a spending limit`, async function() {
+        // Step 1: Get the transaction builder
+        const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
+
+        // Define the mint for the spending limit (use SOL for simplicity in this test case)
+        const mint = anchor.web3.PublicKey.default;
+
+        // Define the vault index, amount, and period for the spending limit
+        const vaultIndex = 1;
+        const amount = 1 * LAMPORTS_PER_SOL; // 1 SOL
+        const period = { daily: {} }; // Daily reset period
+
+        // Derive the spending limit PDA
+        const [spendingLimitPDA] = await anchor.web3.PublicKey.findProgramAddress(
+          [
+            Buffer.from("squad"),
+            msPDA.toBuffer(),
+            Buffer.from("spending_limit"),
+            mint.toBuffer(),
+            Buffer.from([vaultIndex]),
+          ],
+          squads.multisigProgramId
+        );
+
+        console.log("Spending Limit PDA:", spendingLimitPDA.toString());
+
+        // Step 2: Add instruction to add the spending limit
+        const [txInstructions, txPDA] = await (
+          await txBuilder.withAddSpendingLimit(mint, vaultIndex, amount, period)
+        ).getInstructions({ approvalByMultisig: {} });
+
+        // Step 3: Add activation instruction
+        const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
+
+        // Step 4: Create and send the transaction adding the spending limit
+        const addSpendingLimitTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
+        await provider.sendAndConfirm(addSpendingLimitTx, undefined, { commitment: "confirmed" });
+
+        // Step 5: Approve the transaction
+        await squads.approveTransaction(txPDA);
+
+        // Step 6: Execute the transaction
+        await squads.executeTransaction(txPDA);
+
+        // Verify the spending limit was added
+        const msState = await squads.getMultisig(msPDA);
+
+        // Assuming there's a method in your SDK like `getSpendingLimit`
+        const spendingLimit = await squads.getSpendingLimitPDA(msPDA, mint, vaultIndex);
+        console.log("Spending Limit PDA:", spendingLimit);
+        console.log("Spending Limit PDA:", spendingLimit.toString());
+        expect(spendingLimit.amount.toString()).to.equal(amount.toString());
+        expect(spendingLimit.period).to.equal(period.daily);
       });
 
     });

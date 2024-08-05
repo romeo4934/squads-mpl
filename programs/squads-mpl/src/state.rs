@@ -418,7 +418,7 @@ pub struct SpendingLimit {
 }
 
 impl SpendingLimit {
-    pub const LEN: usize = 32 + 1 + 32 + 8 + 1 + 8 + 8 + 1;
+    pub const LEN: usize = 8 + 32 + 1 + 32 + 8 + 1 + 8 + 8 + 1;
 
     pub fn init(
         &mut self,
@@ -427,7 +427,6 @@ impl SpendingLimit {
         mint: Pubkey,
         amount: u64,
         period: Period,
-        bump: u8,
     ) -> Result<()> {
         self.multisig = multisig;
         self.vault_index = vault_index;
@@ -436,7 +435,6 @@ impl SpendingLimit {
         self.period = period;
         self.remaining_amount = amount;
         self.last_reset = Clock::get()?.unix_timestamp;
-        self.bump = bump;
         Ok(())
     }
 }

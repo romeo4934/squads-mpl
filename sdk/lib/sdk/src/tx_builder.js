@@ -181,6 +181,23 @@ class TransactionBuilder {
             return this.withInstruction(instruction);
         });
     }
+    // Add this after other methods inside the TransactionBuilder class
+    withAddSpendingLimit(mint, vaultIndex, amount, period) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [spendingLimitPDA] = yield (0, address_1.getSpendingLimitPDA)(this.multisig.publicKey, mint, vaultIndex, this.programId);
+            console.log("Spending Limit PDA inside builder:", spendingLimitPDA.toString());
+            const instruction = yield this.methods
+                .addSpendingLimit(mint, vaultIndex, new bn_js_1.default(amount), period)
+                .accounts({
+                multisig: this.multisig.publicKey,
+                spendingLimit: spendingLimitPDA,
+                rentPayer: this.provider.wallet.publicKey,
+                systemProgram: anchor.web3.SystemProgram.programId,
+            })
+                .instruction();
+            return this.withInstruction(instruction);
+        });
+    }
     // async withAddAuthority(): Promise<TransactionBuilder> {}
     // async withSetExternalExecute(): Promise<TransactionBuilder> {}
     withSetAsExecuted(programManagerPDA, managedProgramPDA, programUpgradePDA, transactionPDA, instructionPDA, authorityIndex) {

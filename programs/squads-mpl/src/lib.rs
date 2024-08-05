@@ -727,22 +727,41 @@ pub mod squads_mpl {
         // set the change index, which will deprecate any active transactions
         ctx.accounts.multisig.set_change_index(new_index)
     }
-     /*
-    pub fn add_spending_limit(ctx: Context<MsAuth>, mint: Pubkey, amount: u64, period: Period) -> Result<()> {
-        // DO VALIDATION HERE Ensure no duplicates  and MaxSpendingLimitsReached
-        ctx.accounts.multisig.add_spending_limit(mint, amount, period)?;
+
+    pub fn add_spending_limit(ctx: Context<CreateSpendingLimit>, mint: Pubkey, vault_index: u8, amount: u64, period: Period) -> Result<()> {
+        msg!("add_spending_limit instruction called");
+        msg!("Mint: {}", mint);
+        msg!("Vault index: {}", vault_index);
+        msg!("Amount: {}", amount);
+
+        let spending_limit_key = ctx.accounts.spending_limit.key();
+         msg!("Spending Limit Key: {}", spending_limit_key);
+
+        let spending_limit = &mut ctx.accounts.spending_limit;
+        
+
+       
+
+        // Initialize the spending limit account
+        spending_limit.init(
+            ctx.accounts.multisig.key(),
+            vault_index,
+            mint,
+            amount,
+            period,
+        )?;
+
         let new_index = ctx.accounts.multisig.transaction_index;
         ctx.accounts.multisig.set_change_index(new_index)
     }
 
     /// Method to remove a spending limit
-    pub fn remove_spending_limit(ctx: Context<MsAuth>, mint: Pubkey) -> Result<()> {
-        ctx.accounts.multisig.remove_spending_limit(mint)?;
+    pub fn remove_spending_limit(ctx: Context<RemoveSpendingLimit>) -> Result<()> {
         let new_index = ctx.accounts.multisig.transaction_index;
         ctx.accounts.multisig.set_change_index(new_index)
     }
-
-   
+     /*
+   THIS METHOD IS NOT WORKING AND NEEDS TO BE REVISED
 pub fn spending_limit_use(
     ctx: Context<SpendingLimitUse>,
     amount: u64,

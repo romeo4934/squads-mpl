@@ -182,6 +182,9 @@ class Squads {
     getAuthorityPDA(multisigPDA, authorityIndex) {
         return (0, address_1.getAuthorityPDA)(multisigPDA, new bn_js_1.default(authorityIndex, 10), this.multisigProgramId)[0];
     }
+    getSpendingLimitPDA(multisigPDA, mint, vaultIndex) {
+        return (0, address_1.getSpendingLimitPDA)(multisigPDA, mint, vaultIndex, this.multisigProgramId)[0];
+    }
     _createMultisig(threshold, createKey, initialMembers, metadata, primaryMember, // Add primaryMember
     timeLock, // Add timeLock
     guardians // Add guardians

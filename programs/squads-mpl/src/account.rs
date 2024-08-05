@@ -434,7 +434,7 @@ pub struct MsAuthRealloc<'info> {
 pub struct CreateSpendingLimit<'info> {
     #[account(
         init,
-        payer = creator,
+        payer = rent_payer,
         space = SpendingLimit::LEN,
         seeds = [
             b"squad",
@@ -450,10 +450,12 @@ pub struct CreateSpendingLimit<'info> {
         mut,
         seeds = [b"squad", multisig.create_key.as_ref(), b"multisig"],
         bump = multisig.bump,
+        signer
     )]
     pub multisig: Account<'info, Ms>,
+    /// This is usually the same as `config_authority`, but can be a different account if needed.
     #[account(mut)]
-    pub creator: Signer<'info>,
+    pub rent_payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -469,21 +471,24 @@ pub struct RemoveSpendingLimit<'info> {
             mint.as_ref(),
             &vault_index.to_le_bytes(),
         ],
-        bump
+        bump,
+        close = multisig
     )]
     pub spending_limit: Account<'info, SpendingLimit>,
     #[account(
         mut,
         seeds = [b"squad", multisig.create_key.as_ref(), b"multisig"],
         bump = multisig.bump,
+        signer
     )]
     pub multisig: Account<'info, Ms>,
-    pub creator: Signer<'info>,
     #[account(address = solana_program::system_program::ID)]
     pub system_program: Program<'info, System>,
 }
 
 /*
+
+
 #[derive(Accounts)]
 pub struct SpendingLimitUse<'info> {
     #[account(mut)]
