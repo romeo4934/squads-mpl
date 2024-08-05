@@ -33,7 +33,6 @@ pub struct Ms {
     pub primary_member: Option<Pubkey>, // Optional primary member
     pub time_lock: u32,                 // Time lock in seconds, 0 for no delay
     pub guardians: Vec<Pubkey>,          // List of guardians
-    pub spendings: Vec<SpendingLimit>,  // Spending limits only apply to the initial vault index 0, we can have only a maximum of 10 spending limits
 }
 
 impl Ms {
@@ -49,15 +48,7 @@ impl Ms {
     33 +        // primary member (one byte for option + 32 for Pubkey)
     4 +        // time lock
     4 +         // for guardians vec length
-    (10* 32) + // each guardian is a public key (32 bytes)
-    4 +         // for spending vec length
-    (10 * (
-        32 +    // mint (Pubkey)
-        8 +     // amount (u64)
-        1 +     // period (1 byte for enum)
-        8 +     // remaining amount (u64)
-        8       // last reset timestamp (i64)
-    ));       // 10 spendings
+    (10* 32); // each guardian is a public key (32 bytes)
 
 
     /// Initializes the new multisig account
@@ -73,7 +64,6 @@ impl Ms {
         self.time_lock = time_lock; // Initialize with the time_lock
         self.primary_member = primary_member;
         self.guardians = guardians;
-        self.spendings = Vec::new(); 
         Ok(())
     }
 
@@ -151,29 +141,6 @@ impl Ms {
         Ok(())
     }
 
-    // Method to add a new spending limit
-    pub fn add_spending_limit(&mut self, mint: Pubkey, amount: u64, period: Period) -> Result<()> {
-        let new_spending = SpendingLimit {
-            mint,
-            amount,
-            period,
-            remaining_amount: amount,
-            last_reset: Clock::get()?.unix_timestamp,
-        };
-
-        self.spendings.push(new_spending);
-        self.spendings.sort_by(|a, b| a.mint.cmp(&b.mint));
-        Ok(())
-    }
-
-    // Method to remove a spending limit
-    pub fn remove_spending_limit(&mut self, mint: Pubkey) -> Result<()> {
-        if let Some(index) = self.spendings.iter().position(|spending| spending.mint == mint) {
-            self.spendings.remove(index);
-        }
-        Ok(())
-    }
-
 }
 
 /// MsTransactionStatus enum of the current status of the Multisig Transaction.
@@ -223,8 +190,7 @@ impl MsTransaction {
         1 +                                 // the number of instructions (attached)
         1 +                                 // space for tx bump
         1 +                                // track index if executed sequentially
-        4 +                                // ApprovalMode (4 bytes for enum on-chain)
-        32;                                // padding alignment
+        4;                               // ApprovalMode (4 bytes for enum on-chain)
 
     pub fn initial_size_with_members(members_len: usize) -> usize {
         MsTransaction::MINIMUM_SIZE + (3 * (4 + (members_len * 32) ) )
@@ -418,13 +384,61 @@ impl IncomingInstruction {
 }
 
 /// Spending Limit struct
-#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+#[account]
 pub struct SpendingLimit {
-    pub mint: Pubkey,            // Token mint or SOL Pubkey::default() means SOL.
-    pub amount: u64,             // Total amount
-    pub period: Period,          // Period enum
-    pub remaining_amount: u64,   // Remaining amount
-    pub last_reset: i64,         // Last reset timestamp
+    /// The multisig this belongs to.
+    pub multisig: Pubkey,
+
+    /// The index of the vault that the spending limit is for.
+    pub vault_index: u8,
+
+    /// The token mint the spending limit is for.
+    /// Pubkey::default() means SOL.
+    /// use NATIVE_MINT for Wrapped SOL.
+    pub mint: Pubkey,
+
+    /// The amount of tokens that can be spent in a period.
+    /// This amount is in decimals of the mint,
+    /// so 1 SOL would be `1_000_000_000` and 1 USDC would be `1_000_000`.
+    pub amount: u64,
+
+    /// The reset period of the spending limit.
+    /// When it passes, the remaining amount is reset, unless it's `Period::OneTime`.
+    pub period: Period,
+
+    /// The remaining amount of tokens that can be spent in the current period.
+    /// When reaches 0, the spending limit cannot be used anymore until the period reset.
+    pub remaining_amount: u64,
+
+    /// Unix timestamp marking the last time the spending limit was reset (or created).
+    pub last_reset: i64,
+
+    /// PDA bump.
+    pub bump: u8,
+}
+
+impl SpendingLimit {
+    pub const LEN: usize = 32 + 1 + 32 + 8 + 1 + 8 + 8 + 1;
+
+    pub fn init(
+        &mut self,
+        multisig: Pubkey,
+        vault_index: u8,
+        mint: Pubkey,
+        amount: u64,
+        period: Period,
+        bump: u8,
+    ) -> Result<()> {
+        self.multisig = multisig;
+        self.vault_index = vault_index;
+        self.mint = mint;
+        self.amount = amount;
+        self.period = period;
+        self.remaining_amount = amount;
+        self.last_reset = Clock::get()?.unix_timestamp;
+        self.bump = bump;
+        Ok(())
+    }
 }
 
 /// Period enum

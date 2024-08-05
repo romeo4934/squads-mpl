@@ -429,7 +429,61 @@ pub struct MsAuthRealloc<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+#[instruction(mint: Pubkey, vault_index: u8 )]
+pub struct CreateSpendingLimit<'info> {
+    #[account(
+        init,
+        payer = creator,
+        space = SpendingLimit::LEN,
+        seeds = [
+            b"squad",
+            multisig.key().as_ref(),
+            b"spending_limit",
+            mint.as_ref(),
+            &vault_index.to_le_bytes(),
+        ],
+        bump
+    )]
+    pub spending_limit: Account<'info, SpendingLimit>,
+    #[account(
+        mut,
+        seeds = [b"squad", multisig.create_key.as_ref(), b"multisig"],
+        bump = multisig.bump,
+    )]
+    pub multisig: Account<'info, Ms>,
+    #[account(mut)]
+    pub creator: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
 
+#[derive(Accounts)]
+#[instruction(mint: Pubkey, vault_index: u8 )]
+pub struct RemoveSpendingLimit<'info> {
+    #[account(
+        mut,
+        seeds = [
+            b"squad",
+            multisig.key().as_ref(),
+            b"spending_limit",
+            mint.as_ref(),
+            &vault_index.to_le_bytes(),
+        ],
+        bump
+    )]
+    pub spending_limit: Account<'info, SpendingLimit>,
+    #[account(
+        mut,
+        seeds = [b"squad", multisig.create_key.as_ref(), b"multisig"],
+        bump = multisig.bump,
+    )]
+    pub multisig: Account<'info, Ms>,
+    pub creator: Signer<'info>,
+    #[account(address = solana_program::system_program::ID)]
+    pub system_program: Program<'info, System>,
+}
+
+/*
 #[derive(Accounts)]
 pub struct SpendingLimitUse<'info> {
     #[account(mut)]
@@ -451,3 +505,4 @@ pub struct SpendingLimitUse<'info> {
     pub token_program: Option<Program<'info, Token>>, // Optional SPL token program
     pub system_program: Option<Program<'info, System>>, // Optional system program for SOL transfers
 }
+*/

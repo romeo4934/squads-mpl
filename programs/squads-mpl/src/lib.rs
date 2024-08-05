@@ -128,7 +128,7 @@ pub mod squads_mpl {
         }
         let curr_data_size = multisig_account_info.data.borrow().len();
         let spots_left =
-            ((curr_data_size - Ms::SIZE_WITHOUT_MEMBERS) / 32) - ctx.accounts.multisig.keys.len() - ctx.accounts.multisig.guardians.len(); // Include guardians space
+            ((curr_data_size - Ms::SIZE_WITHOUT_MEMBERS) / 32) - ctx.accounts.multisig.keys.len() ;
 
         // if not enough, add (10 * 32) to size - bump it up by 10 accounts
         if spots_left < 1 {
@@ -727,7 +727,7 @@ pub mod squads_mpl {
         // set the change index, which will deprecate any active transactions
         ctx.accounts.multisig.set_change_index(new_index)
     }
-
+     /*
     pub fn add_spending_limit(ctx: Context<MsAuth>, mint: Pubkey, amount: u64, period: Period) -> Result<()> {
         // DO VALIDATION HERE Ensure no duplicates  and MaxSpendingLimitsReached
         ctx.accounts.multisig.add_spending_limit(mint, amount, period)?;
@@ -742,6 +742,7 @@ pub mod squads_mpl {
         ctx.accounts.multisig.set_change_index(new_index)
     }
 
+   
 pub fn spending_limit_use(
     ctx: Context<SpendingLimitUse>,
     amount: u64,
@@ -835,5 +836,6 @@ pub fn spending_limit_use(
 
         Ok(())
     }
+    */
 
 }

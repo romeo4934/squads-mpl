@@ -433,18 +433,9 @@ describe("Programs", function(){
         33 +        // primary member (one byte for option + 32 for Pubkey)
         4 +         // time lock
         4 +         // for guardians vec length
-        (10* 32) +
-        4 +         // for spending lmit vec length
-        (10 * (        
-          32 +        // mint (Pubkey)
-          8 +         // amount (u64)
-          1 +         // period (1 byte for enum)
-          8 +         // remaining amount (u64)
-          8           // last reset timestamp (i64)
-        ));
-
-        const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 32) - currNumKeys - currNumGuardians;
-
+        (10* 32); // each guardian is a public key (32 bytes)
+        
+        const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 32) - currNumKeys;
         // if there is less than 1 spot left, calculate rent needed for realloc of 10 more keys
         if(spotsLeft < 1){
           console.log("            MS needs more space")
