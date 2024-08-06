@@ -1,6 +1,6 @@
 import { Connection, PublicKey, Commitment, ConnectionConfig, TransactionInstruction, Signer } from "@solana/web3.js";
 import { Wallet } from "@coral-xyz/anchor";
-import { InstructionAccount, ManagedProgramAccount, MultisigAccount, ProgramManagerAccount, ProgramUpgradeAccount, TransactionAccount, ApprovalMode } from "./types";
+import { InstructionAccount, ManagedProgramAccount, MultisigAccount, ProgramManagerAccount, ProgramUpgradeAccount, TransactionAccount, ApprovalMode, SpendingLimitAccount } from "./types";
 import * as anchor from "@coral-xyz/anchor";
 import { TransactionBuilder } from "./tx_builder";
 declare class Squads {
@@ -57,6 +57,7 @@ declare class Squads {
     getNextUpgradeIndex(managedProgramPDA: PublicKey): Promise<number>;
     getAuthorityPDA(multisigPDA: PublicKey, authorityIndex: number): PublicKey;
     getSpendingLimitPDA(multisigPDA: PublicKey, mint: PublicKey, vaultIndex: number): PublicKey;
+    getSpendingLimit(multisig: PublicKey, mint: PublicKey, vaultIndex: number, commitment?: Commitment): Promise<SpendingLimitAccount>;
     private _createMultisig;
     createMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, guardians?: PublicKey[]): Promise<MultisigAccount>;
     buildCreateMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, guardians?: PublicKey[]): Promise<TransactionInstruction>;

@@ -185,6 +185,19 @@ class Squads {
     getSpendingLimitPDA(multisigPDA, mint, vaultIndex) {
         return (0, address_1.getSpendingLimitPDA)(multisigPDA, mint, vaultIndex, this.multisigProgramId)[0];
     }
+    getSpendingLimit(multisig, mint, vaultIndex, commitment = "processed") {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [spendingLimitPDA] = yield web3_js_1.PublicKey.findProgramAddress([
+                Buffer.from("squad"),
+                multisig.toBuffer(),
+                Buffer.from("spending_limit"),
+                mint.toBuffer(),
+                Buffer.from([vaultIndex]),
+            ], this.multisig.programId);
+            const accountData = yield this.multisig.account.spendingLimit.fetch(spendingLimitPDA, commitment);
+            return Object.assign(Object.assign({}, accountData), { publicKey: spendingLimitPDA });
+        });
+    }
     _createMultisig(threshold, createKey, initialMembers, metadata, primaryMember, // Add primaryMember
     timeLock, // Add timeLock
     guardians // Add guardians

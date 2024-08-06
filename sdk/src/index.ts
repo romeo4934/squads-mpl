@@ -24,7 +24,8 @@ import {
   ProgramUpgradeAccount,
   SquadsMethods,
   TransactionAccount,
-  ApprovalMode
+  ApprovalMode,
+  SpendingLimitAccount
 } from "./types";
 import {
   getAuthorityPDA,
@@ -325,6 +326,27 @@ class Squads {
         vaultIndex,
         this.multisigProgramId
     )[0];
+  }
+
+  async getSpendingLimit(
+    multisig: PublicKey,
+    mint: PublicKey,
+    vaultIndex: number,
+    commitment: Commitment = "processed"
+  ): Promise<SpendingLimitAccount> {
+    const [spendingLimitPDA] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from("squad"),
+        multisig.toBuffer(),
+        Buffer.from("spending_limit"),
+        mint.toBuffer(),
+        Buffer.from([vaultIndex]),
+      ],
+      this.multisig.programId
+    );
+
+    const accountData = await this.multisig.account.spendingLimit.fetch(spendingLimitPDA, commitment);
+    return {...accountData, publicKey: spendingLimitPDA} as SpendingLimitAccount;
   }
 
   private _createMultisig(

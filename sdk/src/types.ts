@@ -51,3 +51,5 @@ export type ProgramManagerMethodsNamespace = MethodsNamespace<
 export type ApprovalMode = IdlTypes<SquadsMpl>["ApprovalMode"];
 
 export type Period = IdlTypes<SquadsMpl>["Period"];
+
+export type SpendingLimitAccount = AccountDefDictionary<SquadsMpl>["spendingLimit"];

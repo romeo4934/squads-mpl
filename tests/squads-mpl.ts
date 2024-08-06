@@ -916,20 +916,7 @@ describe("Programs", function(){
         const amount = 1 * LAMPORTS_PER_SOL; // 1 SOL
         const period = { daily: {} }; // Daily reset period
 
-        // Derive the spending limit PDA
-        const [spendingLimitPDA] = await anchor.web3.PublicKey.findProgramAddress(
-          [
-            Buffer.from("squad"),
-            msPDA.toBuffer(),
-            Buffer.from("spending_limit"),
-            mint.toBuffer(),
-            Buffer.from([vaultIndex]),
-          ],
-          squads.multisigProgramId
-        );
-
-        console.log("Spending Limit PDA:", spendingLimitPDA.toString());
-
+        
         // Step 2: Add instruction to add the spending limit
         const [txInstructions, txPDA] = await (
           await txBuilder.withAddSpendingLimit(mint, vaultIndex, amount, period)
@@ -952,11 +939,9 @@ describe("Programs", function(){
         const msState = await squads.getMultisig(msPDA);
 
         // Assuming there's a method in your SDK like `getSpendingLimit`
-        const spendingLimit = await squads.getSpendingLimitPDA(msPDA, mint, vaultIndex);
-        console.log("Spending Limit PDA:", spendingLimit);
-        console.log("Spending Limit PDA:", spendingLimit.toString());
+        const spendingLimit = await squads.getSpendingLimit(msPDA, mint, vaultIndex);
         expect(spendingLimit.amount.toString()).to.equal(amount.toString());
-        expect(spendingLimit.period).to.equal(period.daily);
+        expect(spendingLimit.period).to.deep.equal(period);
       });
 
     });

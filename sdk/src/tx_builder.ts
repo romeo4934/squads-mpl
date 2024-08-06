@@ -198,8 +198,6 @@ export class TransactionBuilder {
   ): Promise<TransactionBuilder> {
     const [spendingLimitPDA] = await getSpendingLimitPDA(this.multisig.publicKey, mint, vaultIndex, this.programId);
 
-    console.log("Spending Limit PDA inside builder:", spendingLimitPDA.toString());
-
     const instruction = await this.methods
       .addSpendingLimit(mint, vaultIndex, new BN(amount), period)
       .accounts({

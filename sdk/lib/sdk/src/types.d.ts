@@ -24,4 +24,5 @@ export declare type SquadsMethodsNamespace = MethodsNamespace<SquadsMpl, AllInst
 export declare type ProgramManagerMethodsNamespace = MethodsNamespace<ProgramManager, AllInstructions<ProgramManager>>;
 export declare type ApprovalMode = IdlTypes<SquadsMpl>["ApprovalMode"];
 export declare type Period = IdlTypes<SquadsMpl>["Period"];
+export declare type SpendingLimitAccount = AccountDefDictionary<SquadsMpl>["spendingLimit"];
 export {};
