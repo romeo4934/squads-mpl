@@ -756,7 +756,7 @@ pub mod squads_mpl {
     }
 
     /// Method to remove a spending limit
-    pub fn remove_spending_limit(ctx: Context<RemoveSpendingLimit>) -> Result<()> {
+    pub fn remove_spending_limit(ctx: Context<RemoveSpendingLimit>, _mint: Pubkey, _vault_index: u8,) -> Result<()> {
         let new_index = ctx.accounts.multisig.transaction_index;
         ctx.accounts.multisig.set_change_index(new_index)
     }

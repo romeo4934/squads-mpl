@@ -197,6 +197,20 @@ class TransactionBuilder {
             return this.withInstruction(instruction);
         });
     }
+    withRemoveSpendingLimit(mint, vaultIndex) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [spendingLimitPDA] = yield (0, address_1.getSpendingLimitPDA)(this.multisig.publicKey, mint, vaultIndex, this.programId);
+            const instruction = yield this.methods
+                .removeSpendingLimit(mint, vaultIndex)
+                .accounts({
+                multisig: this.multisig.publicKey,
+                spendingLimit: spendingLimitPDA,
+                systemProgram: anchor.web3.SystemProgram.programId,
+            })
+                .instruction();
+            return this.withInstruction(instruction);
+        });
+    }
     // async withAddAuthority(): Promise<TransactionBuilder> {}
     // async withSetExternalExecute(): Promise<TransactionBuilder> {}
     withSetAsExecuted(programManagerPDA, managedProgramPDA, programUpgradePDA, transactionPDA, instructionPDA, authorityIndex) {

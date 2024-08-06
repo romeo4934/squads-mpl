@@ -209,6 +209,23 @@ export class TransactionBuilder {
       .instruction();
     return this.withInstruction(instruction);
   }
+
+  async withRemoveSpendingLimit(
+    mint: PublicKey,
+    vaultIndex: number
+  ): Promise<TransactionBuilder> {
+    const [spendingLimitPDA] = await getSpendingLimitPDA(this.multisig.publicKey, mint, vaultIndex, this.programId);
+
+    const instruction = await this.methods
+      .removeSpendingLimit(mint, vaultIndex)
+      .accounts({
+        multisig: this.multisig.publicKey,
+        spendingLimit: spendingLimitPDA,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .instruction();
+    return this.withInstruction(instruction);
+  }
   
   // async withAddAuthority(): Promise<TransactionBuilder> {}
   // async withSetExternalExecute(): Promise<TransactionBuilder> {}

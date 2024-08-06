@@ -25,6 +25,7 @@ export declare class TransactionBuilder {
     withRemoveGuardian(guardian: PublicKey): Promise<TransactionBuilder>;
     withUpdatePrimaryMember(newPrimaryMember: PublicKey | null): Promise<TransactionBuilder>;
     withAddSpendingLimit(mint: PublicKey, vaultIndex: number, amount: number, period: Period): Promise<TransactionBuilder>;
+    withRemoveSpendingLimit(mint: PublicKey, vaultIndex: number): Promise<TransactionBuilder>;
     withSetAsExecuted(programManagerPDA: PublicKey, managedProgramPDA: PublicKey, programUpgradePDA: PublicKey, transactionPDA: PublicKey, instructionPDA: PublicKey, authorityIndex: number): Promise<TransactionBuilder>;
     getInstructions(approvalMode: ApprovalMode): Promise<[TransactionInstruction[], PublicKey]>;
     executeInstructions(approvalMode: ApprovalMode): Promise<[TransactionInstruction[], PublicKey]>;

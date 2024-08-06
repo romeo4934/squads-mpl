@@ -643,7 +643,16 @@ exports.IDL = {
                     "isSigner": false
                 }
             ],
-            "args": []
+            "args": [
+                {
+                    "name": "mint",
+                    "type": "publicKey"
+                },
+                {
+                    "name": "vaultIndex",
+                    "type": "u8"
+                }
+            ]
         }
     ],
     "accounts": [
