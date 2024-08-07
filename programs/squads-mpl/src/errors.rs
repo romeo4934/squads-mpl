@@ -34,4 +34,5 @@ pub enum MsError {
     MissingAccount, // Error for missing account
     SpendingLimitNotFound, // Error for missing spending limit
     SpendingLimitExceeded, // Error for exceeding spending limit
+    SpendingLimitMustBeForSol, // Error for spending limit not being for SOL
 }

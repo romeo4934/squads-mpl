@@ -603,7 +603,7 @@ export type SquadsMpl = {
           "type": "publicKey"
         },
         {
-          "name": "vaultIndex",
+          "name": "authorityIndex",
           "type": "u8"
         },
         {
@@ -648,6 +648,52 @@ export type SquadsMpl = {
         {
           "name": "vaultIndex",
           "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "spendingLimitSolUse",
+      "accounts": [
+        {
+          "name": "multisig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "spendingLimit",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destination",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "primaryMember",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
         }
       ]
     }
@@ -844,9 +890,16 @@ export type SquadsMpl = {
             "type": "publicKey"
           },
           {
-            "name": "vaultIndex",
+            "name": "authorityIndex",
             "docs": [
               "The index of the vault that the spending limit is for."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "authorityBump",
+            "docs": [
+              "Authority bump"
             ],
             "type": "u8"
           },
@@ -1167,6 +1220,10 @@ export type SquadsMpl = {
     {
       "code": 6026,
       "name": "SpendingLimitExceeded"
+    },
+    {
+      "code": 6027,
+      "name": "SpendingLimitMustBeForSol"
     }
   ]
 };
@@ -1776,7 +1833,7 @@ export const IDL: SquadsMpl = {
           "type": "publicKey"
         },
         {
-          "name": "vaultIndex",
+          "name": "authorityIndex",
           "type": "u8"
         },
         {
@@ -1821,6 +1878,52 @@ export const IDL: SquadsMpl = {
         {
           "name": "vaultIndex",
           "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "spendingLimitSolUse",
+      "accounts": [
+        {
+          "name": "multisig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "spendingLimit",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destination",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "primaryMember",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
         }
       ]
     }
@@ -2017,9 +2120,16 @@ export const IDL: SquadsMpl = {
             "type": "publicKey"
           },
           {
-            "name": "vaultIndex",
+            "name": "authorityIndex",
             "docs": [
               "The index of the vault that the spending limit is for."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "authorityBump",
+            "docs": [
+              "Authority bump"
             ],
             "type": "u8"
           },
@@ -2340,6 +2450,10 @@ export const IDL: SquadsMpl = {
     {
       "code": 6026,
       "name": "SpendingLimitExceeded"
+    },
+    {
+      "code": 6027,
+      "name": "SpendingLimitMustBeForSol"
     }
   ]
 };

@@ -390,7 +390,10 @@ pub struct SpendingLimit {
     pub multisig: Pubkey,
 
     /// The index of the vault that the spending limit is for.
-    pub vault_index: u8,
+    pub authority_index: u8,
+
+    /// Authority bump
+    pub authority_bump: u8,
 
     /// The token mint the spending limit is for.
     /// Pubkey::default() means SOL.
@@ -418,18 +421,20 @@ pub struct SpendingLimit {
 }
 
 impl SpendingLimit {
-    pub const LEN: usize = 8 + 32 + 1 + 32 + 8 + 1 + 8 + 8 + 1;
+    pub const LEN: usize = 8 + 32 + 1 + 1 + 32 + 8 + 1 + 8 + 8 + 1;
 
     pub fn init(
         &mut self,
         multisig: Pubkey,
-        vault_index: u8,
+        authority_index: u8,
+        authority_bump: u8,
         mint: Pubkey,
         amount: u64,
         period: Period,
     ) -> Result<()> {
         self.multisig = multisig;
-        self.vault_index = vault_index;
+        self.authority_index = authority_index;
+        self.authority_bump = authority_bump;
         self.mint = mint;
         self.amount = amount;
         self.period = period;

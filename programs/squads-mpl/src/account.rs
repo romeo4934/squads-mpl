@@ -486,28 +486,54 @@ pub struct RemoveSpendingLimit<'info> {
     pub system_program: Program<'info, System>,
 }
 
-/*
-
-
 #[derive(Accounts)]
-pub struct SpendingLimitUse<'info> {
-    #[account(mut)]
+#[instruction(amount: u64)]
+pub struct SpendingLimitSolUse<'info> {
+    #[account(
+        mut,
+        seeds = [b"squad", multisig.create_key.as_ref(), b"multisig"],
+        bump = multisig.bump,
+    )]
     pub multisig: Account<'info, Ms>,
-  
-    /// CHECK: Manually checking this derivation in the method
-    #[account(mut)]
-    pub vault: AccountInfo<'info>, // PDA representing the vault, address derived in the function
 
-    /// CHECK: Manually checking this derivation in the method
-    #[account(mut)]
-    pub destination: AccountInfo<'info>, // Destination account for transfer
+    #[account(
+        mut,
+        seeds = [
+            b"squad",
+            multisig.key().as_ref(),
+            &spending_limit.authority_index.to_le_bytes(),
+            b"spending_limit"
+        ],
+        bump = spending_limit.bump,
+        constraint = spending_limit.mint == Pubkey::default() @ MsError::SpendingLimitMustBeForSol,
+        has_one = multisig @ MsError::InvalidInstructionAccount,
+    )]
+    pub spending_limit: Account<'info, SpendingLimit>,
 
-    pub mint: Option<Account<'info, Mint>>, // Optional mint account for SPL tokens
+    /// CHECK: Could be any account
     #[account(mut)]
-    pub vault_token_account: Option<Account<'info, TokenAccount>>, // Optional vault token account
-    #[account(mut)]
-    pub destination_token_account: Option<Account<'info, TokenAccount>>, // Optional destination token account
-    pub token_program: Option<Program<'info, Token>>, // Optional SPL token program
-    pub system_program: Option<Program<'info, System>>, // Optional system program for SOL transfers
+    pub destination: AccountInfo<'info>,
+
+    /// CHECK: All the required checks are done by checking the seeds.
+    #[account(
+        mut,
+        seeds = [
+            b"squad",
+            multisig.key().as_ref(),
+            &spending_limit.authority_index.to_le_bytes(),
+            b"authority"
+        ],
+        bump,
+    )]
+    pub vault: AccountInfo<'info>, // Vault from which SOL is transferred
+
+    #[account(
+        mut,
+        constraint = multisig.primary_member.is_some() @ MsError::PrimaryMemberNotInMultisig,
+        constraint = multisig.primary_member.unwrap() == primary_member.key() @ MsError::UnauthorizedMember
+    )]
+    pub primary_member: Signer<'info>, // Primary member as signer
+
+    pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
 }
-*/

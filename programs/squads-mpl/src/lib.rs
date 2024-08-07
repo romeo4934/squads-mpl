@@ -728,24 +728,26 @@ pub mod squads_mpl {
         ctx.accounts.multisig.set_change_index(new_index)
     }
 
-    pub fn add_spending_limit(ctx: Context<CreateSpendingLimit>, mint: Pubkey, vault_index: u8, amount: u64, period: Period) -> Result<()> {
-        msg!("add_spending_limit instruction called");
-        msg!("Mint: {}", mint);
-        msg!("Vault index: {}", vault_index);
-        msg!("Amount: {}", amount);
-
-        let spending_limit_key = ctx.accounts.spending_limit.key();
-         msg!("Spending Limit Key: {}", spending_limit_key);
-
+    pub fn add_spending_limit(ctx: Context<CreateSpendingLimit>, mint: Pubkey, authority_index: u8, amount: u64, period: Period) -> Result<()> {
         let spending_limit = &mut ctx.accounts.spending_limit;
-        
+        let ms = &ctx.accounts.multisig;
 
-       
+        // Compute the authority_bump
+        let (_, authority_bump) = Pubkey::find_program_address(
+            &[
+                b"squad",
+                ms.key().as_ref(),
+                &authority_index.to_le_bytes(),
+                b"authority",
+            ],
+            ctx.program_id,
+        );
 
         // Initialize the spending limit account
         spending_limit.init(
             ctx.accounts.multisig.key(),
-            vault_index,
+            authority_index,
+            authority_bump,
             mint,
             amount,
             period,
@@ -760,76 +762,57 @@ pub mod squads_mpl {
         let new_index = ctx.accounts.multisig.transaction_index;
         ctx.accounts.multisig.set_change_index(new_index)
     }
-     /*
-   THIS METHOD IS NOT WORKING AND NEEDS TO BE REVISED
-pub fn spending_limit_use(
-    ctx: Context<SpendingLimitUse>,
-    amount: u64,
-    mint: Pubkey,
-    decimals: u8,
-    ) -> Result<()> {
+    
+
+    pub fn spending_limit_sol_use(ctx: Context<SpendingLimitSolUse>, amount: u64) -> Result<()> {
         let now = Clock::get()?.unix_timestamp;
 
-        // Get a mutable reference to `ms` and extract spending limit
-        let ms = &mut ctx.accounts.multisig;
-        
-        // Find and modify the spending limit
-        let spending_limit = {
-            let spending_limit = ms.spendings.iter_mut().find(|spending| spending.mint == mint)
-                .ok_or(MsError::SpendingLimitNotFound)?;
+        // Get a mutable reference to `spending_limit` account.
+        let spending_limit = &mut ctx.accounts.spending_limit;
 
-            // Reset `spending_limit.remaining_amount` if the period has passed
-            if let Some(reset_period) = spending_limit.period.to_seconds() {
-                let passed_since_last_reset = now.checked_sub(spending_limit.last_reset).unwrap();
-                if passed_since_last_reset > reset_period {
-                    spending_limit.remaining_amount = spending_limit.amount;
-                    let periods_passed = passed_since_last_reset.checked_div(reset_period).unwrap();
-                    spending_limit.last_reset = spending_limit.last_reset.checked_add(periods_passed.checked_mul(reset_period).unwrap()).unwrap();
-                }
-            }
+        // Calculate the reset period in seconds.
+        let reset_period = spending_limit.period.to_seconds().unwrap();
 
-            // Update `spending_limit.remaining_amount`
-            spending_limit.remaining_amount = spending_limit.remaining_amount.checked_sub(amount)
-                .ok_or(MsError::SpendingLimitExceeded)?;
+        // Calculate the timestamp difference between now and last reset.
+        let time_since_last_reset = now.checked_sub(spending_limit.last_reset).unwrap();
 
-            // Return a copy of `spending_limit` to use after immutable borrow
-            spending_limit.clone()
-        }; // Drop mutable borrow here
+        // Check if the reset period has passed.
+        if time_since_last_reset > reset_period {
+            // Reset remaining amount and update the last reset timestamp.
+            spending_limit.remaining_amount = spending_limit.amount;
+            let periods_passed = time_since_last_reset.checked_div(reset_period).unwrap();
+            spending_limit.last_reset += periods_passed * reset_period;
+        }
 
-        // Derive the PDA and bump for the vault
-        let (vault_address, vault_bump) = Pubkey::find_program_address(
-            &[
+        // Check if the amount exceeds the remaining limit.
+        if amount > spending_limit.remaining_amount {
+            return err!(MsError::SpendingLimitExceeded);
+        }
+
+        // Subtract the amount from the remaining limit.
+        spending_limit.remaining_amount = spending_limit.remaining_amount.checked_sub(amount).unwrap();
+
+        // Transfer SOL from the vault to the destination account.
+        anchor_lang::system_program::transfer(CpiContext::new_with_signer(
+            ctx.accounts.system_program.to_account_info(),
+            anchor_lang::system_program::Transfer {
+                from: ctx.accounts.vault.to_account_info(), // Vault associated with the authority seeds
+                to: ctx.accounts.destination.to_account_info(),
+            },
+            &[&[
                 b"squad",
-                ms.key().as_ref(),
-                &0_u8.to_le_bytes(), // Fixed index 0
+                ctx.accounts.spending_limit.multisig.as_ref(),
+                &ctx.accounts.spending_limit.authority_index.to_le_bytes(),
                 b"authority",
-            ],
-            ctx.program_id,
-        );
+                &[ctx.accounts.spending_limit.authority_bump],
+            ]],
+        ), amount)?;
 
-        // Ensure the derived PDA matches the expected one
-        require_keys_eq!(vault_address, *ctx.accounts.vault.key, MsError::InvalidInstructionAccount);
+        Ok(())
+    }
 
-        // Transfer tokens
-        if spending_limit.mint == Pubkey::default() {
-            // Transfer SOL
-            let system_program = ctx.accounts.system_program.as_ref().ok_or(MsError::MissingAccount)?;
-            anchor_lang::system_program::transfer(CpiContext::new_with_signer(
-                system_program.to_account_info(),
-                anchor_lang::system_program::Transfer {
-                    from: ctx.accounts.vault.to_account_info(), // PDA representing the vault
-                    to: ctx.accounts.destination.to_account_info(),
-                },
-                &[&[
-                    b"squad",
-                    ms.key().as_ref(),
-                    &0_u8.to_le_bytes(),
-                    b"authority",
-                    &[vault_bump],
-                ]],
-            ), amount)?;
-        } else {
-            // Transfer SPL token
+ /*
+     // Transfer SPL token
             let token_program = ctx.accounts.token_program.as_ref().ok_or(MsError::MissingAccount)?;
             let vault_token_account = ctx.accounts.vault_token_account.as_ref().ok_or(MsError::MissingAccount)?;
             let destination_token_account = ctx.accounts.destination_token_account.as_ref().ok_or(MsError::MissingAccount)?;
@@ -851,10 +834,6 @@ pub fn spending_limit_use(
                 ]]),
                 amount,
             )?;
-        }
-
-        Ok(())
-    }
     */
 
 }

@@ -606,7 +606,7 @@ exports.IDL = {
                     "type": "publicKey"
                 },
                 {
-                    "name": "vaultIndex",
+                    "name": "authorityIndex",
                     "type": "u8"
                 },
                 {
@@ -651,6 +651,52 @@ exports.IDL = {
                 {
                     "name": "vaultIndex",
                     "type": "u8"
+                }
+            ]
+        },
+        {
+            "name": "spendingLimitSolUse",
+            "accounts": [
+                {
+                    "name": "multisig",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "spendingLimit",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "destination",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "vault",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "primaryMember",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "amount",
+                    "type": "u64"
                 }
             ]
         }
@@ -847,9 +893,16 @@ exports.IDL = {
                         "type": "publicKey"
                     },
                     {
-                        "name": "vaultIndex",
+                        "name": "authorityIndex",
                         "docs": [
                             "The index of the vault that the spending limit is for."
+                        ],
+                        "type": "u8"
+                    },
+                    {
+                        "name": "authorityBump",
+                        "docs": [
+                            "Authority bump"
                         ],
                         "type": "u8"
                     },
@@ -1170,6 +1223,10 @@ exports.IDL = {
         {
             "code": 6026,
             "name": "SpendingLimitExceeded"
+        },
+        {
+            "code": 6027,
+            "name": "SpendingLimitMustBeForSol"
         }
     ]
 };
