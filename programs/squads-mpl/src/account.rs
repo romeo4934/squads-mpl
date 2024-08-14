@@ -538,3 +538,55 @@ pub struct SpendingLimitSolUse<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
+#[derive(Accounts)]
+pub struct SpendingLimitSplUse<'info> {
+    #[account(
+        mut,
+        seeds = [b"squad", multisig.create_key.as_ref(), b"multisig"],
+        bump = multisig.bump,
+    )]
+    pub multisig: Account<'info, Ms>,
+
+    #[account(
+        mut,
+        seeds = [
+            b"squad",
+            multisig.key().as_ref(),
+            &spending_limit.mint.as_ref(),
+            &spending_limit.authority_index.to_le_bytes(),
+            b"spending_limit",
+        ],
+        bump = spending_limit.bump,
+        constraint = spending_limit.multisig == multisig.key() @MsError::InvalidInstructionAccount,
+        has_one = multisig @ MsError::InvalidInstructionAccount,
+    )]
+    pub spending_limit: Account<'info, SpendingLimit>,
+
+    #[account(
+        mut,
+        constraint = multisig.primary_member.is_some() @ MsError::PrimaryMemberNotInMultisig,
+        constraint = multisig.primary_member.unwrap() == primary_member.key() @ MsError::UnauthorizedMember
+    )]
+    pub primary_member: Signer<'info>, // Primary member as signer
+
+    #[account(mut)]
+    pub destination_token_account: Account<'info, TokenAccount>,
+    
+    /// CHECK: All the required checks are done by checking the seeds and bump.
+    #[account(
+        mut,
+        seeds = [
+            b"squad",
+            multisig.key().as_ref(),
+            &spending_limit.authority_index.to_le_bytes(),
+            b"authority"
+        ],
+        bump = spending_limit.authority_bump,
+    )]
+    pub vault: AccountInfo<'info>, // Vault from which tokens are transferred
+
+    pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
+}
+
