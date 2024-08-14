@@ -430,7 +430,7 @@ pub struct MsAuthRealloc<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(mint: Pubkey, vault_index: u32 )]
+#[instruction(mint: Pubkey, authority_index: u32 )]
 pub struct CreateSpendingLimit<'info> {
     #[account(
         init,
@@ -440,10 +440,10 @@ pub struct CreateSpendingLimit<'info> {
             b"squad",
             multisig.key().as_ref(),
             mint.as_ref(),
-            &vault_index.to_le_bytes(),
+            &authority_index.to_le_bytes(),
             b"spending_limit",
         ],
-        bump
+        bump,
     )]
     pub spending_limit: Account<'info, SpendingLimit>,
     #[account(
@@ -460,18 +460,18 @@ pub struct CreateSpendingLimit<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(mint: Pubkey, authority_index: u32 )]
 pub struct RemoveSpendingLimit<'info> {
     #[account(
         mut,
         seeds = [
             b"squad",
             multisig.key().as_ref(),
-            mint.as_ref(),
-            &authority_index.to_le_bytes(),
+            &spending_limit.mint.as_ref(),
+            &spending_limit.authority_index.to_le_bytes(),
             b"spending_limit",
         ],
         bump,
+        constraint = spending_limit.multisig == multisig.key() @MsError::InvalidInstructionAccount,
         close = multisig
     )]
     pub spending_limit: Account<'info, SpendingLimit>,
@@ -487,7 +487,6 @@ pub struct RemoveSpendingLimit<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(authority_index: u32, amount: u64)]
 pub struct SpendingLimitSolUse<'info> {
     #[account(
         mut,
@@ -502,10 +501,11 @@ pub struct SpendingLimitSolUse<'info> {
             b"squad",
             multisig.key().as_ref(),
             Pubkey::default().as_ref(),
-            &authority_index.to_le_bytes(),
+            &spending_limit.authority_index.to_le_bytes(),
             b"spending_limit",
         ],
         bump = spending_limit.bump,
+        constraint = spending_limit.multisig == multisig.key() @MsError::InvalidInstructionAccount,
         has_one = multisig @ MsError::InvalidInstructionAccount,
     )]
     pub spending_limit: Account<'info, SpendingLimit>,
@@ -523,7 +523,7 @@ pub struct SpendingLimitSolUse<'info> {
             &spending_limit.authority_index.to_le_bytes(),
             b"authority"
         ],
-        bump,
+        bump = spending_limit.authority_bump,
     )]
     pub vault: AccountInfo<'info>, // Vault from which SOL is transferred
 
