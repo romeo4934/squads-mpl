@@ -97,19 +97,20 @@ export const getProgramUpgradePDA = (
     programId
   );
 
+
 export const getSpendingLimitPDA = (
   msPDA: PublicKey,
   mint: PublicKey,
-  vaultIndex: number,
+  authorityIndexBN: BN,
   programId: PublicKey
 ) =>
   PublicKey.findProgramAddressSync(
     [
       utils.bytes.utf8.encode("squad"),
       msPDA.toBuffer(),
-      utils.bytes.utf8.encode("spending_limit"),
       mint.toBuffer(),
-      Buffer.from([vaultIndex]),
+      authorityIndexBN.toArrayLike(Buffer, "le", 4), // note authority index is an u32 (4 byte)
+      utils.bytes.utf8.encode("spending_limit"),
     ],
     programId
   );

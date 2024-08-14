@@ -323,7 +323,7 @@ class Squads {
     return getSpendingLimitPDA(
         multisigPDA,
         mint,
-        vaultIndex,
+        new BN(vaultIndex,10),
         this.multisigProgramId
     )[0];
   }
@@ -334,16 +334,7 @@ class Squads {
     vaultIndex: number,
     commitment: Commitment = "processed"
   ): Promise<SpendingLimitAccount> {
-    const [spendingLimitPDA] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from("squad"),
-        multisig.toBuffer(),
-        Buffer.from("spending_limit"),
-        mint.toBuffer(),
-        Buffer.from([vaultIndex]),
-      ],
-      this.multisig.programId
-    );
+    const [spendingLimitPDA] = getSpendingLimitPDA(multisig, mint, new BN(vaultIndex,10), this.multisigProgramId);
 
     const accountData = await this.multisig.account.spendingLimit.fetch(spendingLimitPDA, commitment);
     return {...accountData, publicKey: spendingLimitPDA} as SpendingLimitAccount;
@@ -836,6 +827,56 @@ class Squads {
     const methods = await this._removePrimaryMember(multisigPDA,removerSigner);
     return await methods.instruction();
   }
+
+  private async _spendingLimitSolUse(
+      multisig: PublicKey,
+      mint: PublicKey,
+      vaultIndex: number,
+      amount: BN,
+      destination: PublicKey,
+      primaryMember: PublicKey
+    ): Promise<SquadsMethods> {
+    const authorityIndexBN = new BN(vaultIndex, 10);
+      const spendingLimitPDA = this.getSpendingLimitPDA(
+      multisig,
+      mint,
+      vaultIndex
+    );
+        
+    const [vaultPDA] = getAuthorityPDA(multisig, authorityIndexBN, this.multisigProgramId);
+
+    return this.multisig.methods.spendingLimitSolUse(vaultIndex, amount).accounts({
+      multisig,
+      spendingLimit: spendingLimitPDA,
+      destination,
+      vault: vaultPDA, // Use the computed vault PDA
+      primaryMember,
+      systemProgram: anchor.web3.SystemProgram.programId,
+      rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+    });
+  }
+
+  async spendingLimitSolUse(
+    multisig: PublicKey,
+    mint: PublicKey,
+    vaultIndex: number,
+    amount: BN,
+    destination: PublicKey,
+    primaryMember: PublicKey
+  ): Promise<void> {
+    const methods = await this._spendingLimitSolUse(
+      multisig,
+      mint,
+      vaultIndex,
+      amount,
+      destination,
+      primaryMember
+    );
+
+    await methods.rpc();
+  }
+
+
 
   async createProgramManager(
       multisigPDA: PublicKey

@@ -183,17 +183,11 @@ class Squads {
         return (0, address_1.getAuthorityPDA)(multisigPDA, new bn_js_1.default(authorityIndex, 10), this.multisigProgramId)[0];
     }
     getSpendingLimitPDA(multisigPDA, mint, vaultIndex) {
-        return (0, address_1.getSpendingLimitPDA)(multisigPDA, mint, vaultIndex, this.multisigProgramId)[0];
+        return (0, address_1.getSpendingLimitPDA)(multisigPDA, mint, new bn_js_1.default(vaultIndex, 10), this.multisigProgramId)[0];
     }
     getSpendingLimit(multisig, mint, vaultIndex, commitment = "processed") {
         return __awaiter(this, void 0, void 0, function* () {
-            const [spendingLimitPDA] = yield web3_js_1.PublicKey.findProgramAddress([
-                Buffer.from("squad"),
-                multisig.toBuffer(),
-                Buffer.from("spending_limit"),
-                mint.toBuffer(),
-                Buffer.from([vaultIndex]),
-            ], this.multisig.programId);
+            const [spendingLimitPDA] = (0, address_1.getSpendingLimitPDA)(multisig, mint, new bn_js_1.default(vaultIndex, 10), this.multisigProgramId);
             const accountData = yield this.multisig.account.spendingLimit.fetch(spendingLimitPDA, commitment);
             return Object.assign(Object.assign({}, accountData), { publicKey: spendingLimitPDA });
         });
@@ -505,6 +499,31 @@ class Squads {
         return __awaiter(this, void 0, void 0, function* () {
             const methods = yield this._removePrimaryMember(multisigPDA, removerSigner);
             return yield methods.instruction();
+        });
+    }
+    _spendingLimitSolUse(multisig, mint, vaultIndex, amount, destination, primaryMember) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const authorityIndexBN = new bn_js_1.default(vaultIndex, 10);
+            const spendingLimitPDA = this.getSpendingLimitPDA(multisig, mint, vaultIndex);
+            console.log("Spending Limit PDA", spendingLimitPDA.toBase58());
+            console.log("Multisig", multisig);
+            console.log("Multisig", multisig.toBase58());
+            const [vaultPDA] = (0, address_1.getAuthorityPDA)(multisig, authorityIndexBN, this.multisigProgramId);
+            return this.multisig.methods.spendingLimitSolUse(vaultIndex, amount).accounts({
+                multisig,
+                spendingLimit: spendingLimitPDA,
+                destination,
+                vault: vaultPDA,
+                primaryMember,
+                systemProgram: anchor.web3.SystemProgram.programId,
+                rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+            });
+        });
+    }
+    spendingLimitSolUse(multisig, mint, vaultIndex, amount, destination, primaryMember) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const methods = yield this._spendingLimitSolUse(multisig, mint, vaultIndex, amount, destination, primaryMember);
+            yield methods.rpc();
         });
     }
     createProgramManager(multisigPDA) {

@@ -390,7 +390,7 @@ pub struct SpendingLimit {
     pub multisig: Pubkey,
 
     /// The index of the vault that the spending limit is for.
-    pub authority_index: u8,
+    pub authority_index: u32,
 
     /// Authority bump
     pub authority_bump: u8,
@@ -421,16 +421,17 @@ pub struct SpendingLimit {
 }
 
 impl SpendingLimit {
-    pub const LEN: usize = 8 + 32 + 1 + 1 + 32 + 8 + 1 + 8 + 8 + 1;
+    pub const LEN: usize = 8 + 32 + 4 + 1 + 32 + 8 + 1 + 8 + 8 + 1;
 
     pub fn init(
         &mut self,
         multisig: Pubkey,
-        authority_index: u8,
+        authority_index: u32,
         authority_bump: u8,
         mint: Pubkey,
         amount: u64,
         period: Period,
+        bump: u8,
     ) -> Result<()> {
         self.multisig = multisig;
         self.authority_index = authority_index;
@@ -440,9 +441,12 @@ impl SpendingLimit {
         self.period = period;
         self.remaining_amount = amount;
         self.last_reset = Clock::get()?.unix_timestamp;
+        self.bump = bump;
         Ok(())
     }
+
 }
+
 
 /// Period enum
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]

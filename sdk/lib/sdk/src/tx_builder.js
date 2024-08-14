@@ -184,7 +184,7 @@ class TransactionBuilder {
     // Add this after other methods inside the TransactionBuilder class
     withAddSpendingLimit(mint, vaultIndex, amount, period) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [spendingLimitPDA] = yield (0, address_1.getSpendingLimitPDA)(this.multisig.publicKey, mint, vaultIndex, this.programId);
+            const [spendingLimitPDA] = yield (0, address_1.getSpendingLimitPDA)(this.multisig.publicKey, mint, new bn_js_1.default(vaultIndex, 10), this.programId);
             const instruction = yield this.methods
                 .addSpendingLimit(mint, vaultIndex, new bn_js_1.default(amount), period)
                 .accounts({
@@ -199,7 +199,7 @@ class TransactionBuilder {
     }
     withRemoveSpendingLimit(mint, vaultIndex) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [spendingLimitPDA] = yield (0, address_1.getSpendingLimitPDA)(this.multisig.publicKey, mint, vaultIndex, this.programId);
+            const [spendingLimitPDA] = yield (0, address_1.getSpendingLimitPDA)(this.multisig.publicKey, mint, new bn_js_1.default(vaultIndex, 10), this.programId);
             const instruction = yield this.methods
                 .removeSpendingLimit(mint, vaultIndex)
                 .accounts({

@@ -604,7 +604,7 @@ export type SquadsMpl = {
         },
         {
           "name": "authorityIndex",
-          "type": "u8"
+          "type": "u32"
         },
         {
           "name": "amount",
@@ -646,8 +646,8 @@ export type SquadsMpl = {
           "type": "publicKey"
         },
         {
-          "name": "vaultIndex",
-          "type": "u8"
+          "name": "authorityIndex",
+          "type": "u32"
         }
       ]
     },
@@ -691,6 +691,10 @@ export type SquadsMpl = {
         }
       ],
       "args": [
+        {
+          "name": "authorityIndex",
+          "type": "u32"
+        },
         {
           "name": "amount",
           "type": "u64"
@@ -894,7 +898,7 @@ export type SquadsMpl = {
             "docs": [
               "The index of the vault that the spending limit is for."
             ],
-            "type": "u8"
+            "type": "u32"
           },
           {
             "name": "authorityBump",
@@ -1834,7 +1838,7 @@ export const IDL: SquadsMpl = {
         },
         {
           "name": "authorityIndex",
-          "type": "u8"
+          "type": "u32"
         },
         {
           "name": "amount",
@@ -1876,8 +1880,8 @@ export const IDL: SquadsMpl = {
           "type": "publicKey"
         },
         {
-          "name": "vaultIndex",
-          "type": "u8"
+          "name": "authorityIndex",
+          "type": "u32"
         }
       ]
     },
@@ -1921,6 +1925,10 @@ export const IDL: SquadsMpl = {
         }
       ],
       "args": [
+        {
+          "name": "authorityIndex",
+          "type": "u32"
+        },
         {
           "name": "amount",
           "type": "u64"
@@ -2124,7 +2132,7 @@ export const IDL: SquadsMpl = {
             "docs": [
               "The index of the vault that the spending limit is for."
             ],
-            "type": "u8"
+            "type": "u32"
           },
           {
             "name": "authorityBump",

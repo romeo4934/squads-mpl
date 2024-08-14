@@ -825,14 +825,14 @@ describe("Programs", function(){
         const moveFundsToMsPDAIx = await createTestTransferTransaction(
           creator.publicKey,
           authorityPDA,
-          2000000
+          600000000
         );
         moveFundsToMsPDATx.add(moveFundsToMsPDAIx);
         await provider.sendAndConfirm(moveFundsToMsPDATx);
         const authorityPDAFunded = await squads.connection.getAccountInfo(
           authorityPDA
         );
-        expect(authorityPDAFunded.lamports).to.equal(5000000);        
+        expect(authorityPDAFunded.lamports).to.equal(603000000);        
 
         // Try to execute the transaction immediately (should fail)
         try {
@@ -853,6 +853,103 @@ describe("Programs", function(){
         expect(executedTxState.status).to.have.property("executed");
       });
 
+      // Add this inside the describe block named "SMPL Basic functionality"
+      it(`Add a spending limit`, async function() {
+        // Step 1: Get the transaction builder
+        let txBuilder = await squads.getTransactionBuilder(msPDA, 0);
+
+        // Define the mint for the spending limit (use SOL for simplicity in this test case)
+        const mint = anchor.web3.PublicKey.default;
+
+        // Define the vault index, amount, and period for the spending limit
+        const vaultIndex = 1;
+        const amount = 1 * LAMPORTS_PER_SOL; // 1 SOL
+        const period = { daily: {} }; // Daily reset period
+
+        
+        // Step 2: Add instruction to add the spending limit
+        let [txInstructions, txPDA] = await (
+          await txBuilder.withAddSpendingLimit(mint, vaultIndex, amount, period)
+        ).getInstructions({ approvalByMultisig: {} });
+
+        // Step 3: Add activation instruction
+        let activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
+
+        // Step 4: Create and send the transaction adding the spending limit
+        const addSpendingLimitTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
+        await provider.sendAndConfirm(addSpendingLimitTx, undefined, { commitment: "confirmed" });
+
+        // Step 5: Approve the transaction
+        await squads.approveTransaction(txPDA);
+        // Step 6: Execute the transaction
+        await squads.executeTransaction(txPDA);
+
+        // Verify the spending limit was added
+        const msState = await squads.getMultisig(msPDA);
+
+        // Assuming there's a method in your SDK like `getSpendingLimit`
+        let spendingLimit = await squads.getSpendingLimit(msPDA, mint, vaultIndex);
+        expect(spendingLimit.amount.toString()).to.equal(amount.toString());
+        expect(spendingLimit.period).to.deep.equal(period);
+
+        // Now test removing the spending limit
+        txBuilder = await squads.getTransactionBuilder(msPDA, 0);
+        [txInstructions, txPDA] = await (
+          await txBuilder.withRemoveSpendingLimit(mint, vaultIndex)
+        ).getInstructions({ approvalByMultisig: {} });
+
+        activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
+        const removeSpendingLimitTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
+        await provider.sendAndConfirm(removeSpendingLimitTx, undefined, { commitment: "confirmed" });
+        await squads.approveTransaction(txPDA);
+        await squads.executeTransaction(txPDA);
+        // Verify the spending limit was removed
+        try {
+          spendingLimit = await squads.getSpendingLimit(msPDA, mint, vaultIndex);
+          throw new Error("Spending limit was not removed correctly.");
+        } catch (e) {
+          expect(e.message).to.include("Account does not exist");
+        }
+      });
+
+      it(`Use spending limit to transfer SOL`, async function() {
+        // Step 1: Add a spending limit if not already added in previous tests
+        const mint = anchor.web3.PublicKey.default;
+        const vaultIndex = 1;
+        const amount = 1 * LAMPORTS_PER_SOL; // 1 SOL
+        const period = { daily: {} }; // Daily reset period
+
+        let txBuilder = await squads.getTransactionBuilder(msPDA, 0);
+        let [txInstructions, txPDA] = await (
+          await txBuilder.withAddSpendingLimit(mint, vaultIndex, amount, period)
+        ).getInstructions({ approvalByMultisig: {} });
+        
+        let activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
+        
+        const addSpendingLimitTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
+        await provider.sendAndConfirm(addSpendingLimitTx, undefined, { commitment: "confirmed" });
+        await squads.approveTransaction(txPDA);
+        await squads.executeTransaction(txPDA);
+
+        // Step 2: Use the spending limit to transfer SOL
+        const destination = anchor.web3.Keypair.generate().publicKey;
+        const transferAmount = 0.5 * LAMPORTS_PER_SOL; // Transfer 0.5 SOL
+
+       // use spendingLimitSolUse from the sdk
+       await squads.spendingLimitSolUse(msPDA, mint, vaultIndex, new BN(transferAmount), destination, creator.publicKey);
+      
+
+        // Verifications
+        const destinationAccount = await provider.connection.getAccountInfo(destination, "processed");
+        expect(destinationAccount.lamports).to.equal(transferAmount);
+
+        // Step 3: Verify remaining amount in spending limit
+        const spendingLimit = await squads.getSpendingLimit(msPDA, mint, vaultIndex);
+        const expectedRemaining = amount - transferAmount;
+        expect(spendingLimit.remainingAmount.toString()).to.equal(expectedRemaining.toString());
+      });
+
+      
       it(`Guardian removes primary member, and verify that the primary member cannot execute the previously approved transaction`, async function() {
         // Step 2: Primary member drafts and approves a transaction
         const authorityPDA = squads.getAuthorityPDA(msPDA, 1);
@@ -902,68 +999,7 @@ describe("Programs", function(){
           expect(e.message).to.include("DeprecatedTransaction");
         }        
       });
-
-      // Add this inside the describe block named "SMPL Basic functionality"
-      it(`Add a spending limit`, async function() {
-        // Step 1: Get the transaction builder
-        let txBuilder = await squads.getTransactionBuilder(msPDA, 0);
-
-        // Define the mint for the spending limit (use SOL for simplicity in this test case)
-        const mint = anchor.web3.PublicKey.default;
-
-        // Define the vault index, amount, and period for the spending limit
-        const vaultIndex = 1;
-        const amount = 1 * LAMPORTS_PER_SOL; // 1 SOL
-        const period = { daily: {} }; // Daily reset period
-
-        
-        // Step 2: Add instruction to add the spending limit
-        let [txInstructions, txPDA] = await (
-          await txBuilder.withAddSpendingLimit(mint, vaultIndex, amount, period)
-        ).getInstructions({ approvalByMultisig: {} });
-
-        // Step 3: Add activation instruction
-        let activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
-
-        // Step 4: Create and send the transaction adding the spending limit
-        const addSpendingLimitTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
-        await provider.sendAndConfirm(addSpendingLimitTx, undefined, { commitment: "confirmed" });
-
-        // Step 5: Approve the transaction
-        await squads.approveTransaction(txPDA);
-
-        // Step 6: Execute the transaction
-        await squads.executeTransaction(txPDA);
-
-        // Verify the spending limit was added
-        const msState = await squads.getMultisig(msPDA);
-
-        // Assuming there's a method in your SDK like `getSpendingLimit`
-        let spendingLimit = await squads.getSpendingLimit(msPDA, mint, vaultIndex);
-        expect(spendingLimit.amount.toString()).to.equal(amount.toString());
-        expect(spendingLimit.period).to.deep.equal(period);
-
-        // Now test removing the spending limit
-        txBuilder = await squads.getTransactionBuilder(msPDA, 0);
-        [txInstructions, txPDA] = await (
-          await txBuilder.withRemoveSpendingLimit(mint, vaultIndex)
-        ).getInstructions({ approvalByMultisig: {} });
-
-        activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
-        const removeSpendingLimitTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
-        await provider.sendAndConfirm(removeSpendingLimitTx, undefined, { commitment: "confirmed" });
-        await squads.approveTransaction(txPDA);
-        await squads.executeTransaction(txPDA);
-
-        // Verify the spending limit was removed
-        try {
-          spendingLimit = await squads.getSpendingLimit(msPDA, mint, vaultIndex);
-          throw new Error("Spending limit was not removed correctly.");
-        } catch (e) {
-          expect(e.message).to.include("Account does not exist");
-        }
-      });
-
+      
     });
 
   });

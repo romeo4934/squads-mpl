@@ -728,8 +728,8 @@ pub mod squads_mpl {
         ctx.accounts.multisig.set_change_index(new_index)
     }
 
-    pub fn add_spending_limit(ctx: Context<CreateSpendingLimit>, mint: Pubkey, authority_index: u8, amount: u64, period: Period) -> Result<()> {
-        let spending_limit = &mut ctx.accounts.spending_limit;
+    pub fn add_spending_limit(ctx: Context<CreateSpendingLimit>, mint: Pubkey, authority_index: u32, amount: u64, period: Period) -> Result<()> {
+        let spending_limit = &mut ctx.accounts.spending_limit;        
         let ms = &ctx.accounts.multisig;
 
         // Compute the authority_bump
@@ -751,6 +751,7 @@ pub mod squads_mpl {
             mint,
             amount,
             period,
+            *ctx.bumps.get("spending_limit").unwrap(),
         )?;
 
         let new_index = ctx.accounts.multisig.transaction_index;
@@ -758,13 +759,13 @@ pub mod squads_mpl {
     }
 
     /// Method to remove a spending limit
-    pub fn remove_spending_limit(ctx: Context<RemoveSpendingLimit>, _mint: Pubkey, _vault_index: u8,) -> Result<()> {
+    pub fn remove_spending_limit(ctx: Context<RemoveSpendingLimit>, _mint: Pubkey, _authority_index: u32,) -> Result<()> {
         let new_index = ctx.accounts.multisig.transaction_index;
         ctx.accounts.multisig.set_change_index(new_index)
     }
     
 
-    pub fn spending_limit_sol_use(ctx: Context<SpendingLimitSolUse>, amount: u64) -> Result<()> {
+    pub fn spending_limit_sol_use(ctx: Context<SpendingLimitSolUse>, _authority_index: u32, amount: u64) -> Result<()> {
         let now = Clock::get()?.unix_timestamp;
 
         // Get a mutable reference to `spending_limit` account.

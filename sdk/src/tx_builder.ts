@@ -196,7 +196,7 @@ export class TransactionBuilder {
     amount: number,
     period: Period
   ): Promise<TransactionBuilder> {
-    const [spendingLimitPDA] = await getSpendingLimitPDA(this.multisig.publicKey, mint, vaultIndex, this.programId);
+    const [spendingLimitPDA] = await getSpendingLimitPDA(this.multisig.publicKey, mint, new BN(vaultIndex,10), this.programId);
 
     const instruction = await this.methods
       .addSpendingLimit(mint, vaultIndex, new BN(amount), period)
@@ -214,7 +214,7 @@ export class TransactionBuilder {
     mint: PublicKey,
     vaultIndex: number
   ): Promise<TransactionBuilder> {
-    const [spendingLimitPDA] = await getSpendingLimitPDA(this.multisig.publicKey, mint, vaultIndex, this.programId);
+    const [spendingLimitPDA] = await getSpendingLimitPDA(this.multisig.publicKey, mint, new BN(vaultIndex,10), this.programId);
 
     const instruction = await this.methods
       .removeSpendingLimit(mint, vaultIndex)

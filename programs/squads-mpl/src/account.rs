@@ -430,7 +430,7 @@ pub struct MsAuthRealloc<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(mint: Pubkey, vault_index: u8 )]
+#[instruction(mint: Pubkey, vault_index: u32 )]
 pub struct CreateSpendingLimit<'info> {
     #[account(
         init,
@@ -439,9 +439,9 @@ pub struct CreateSpendingLimit<'info> {
         seeds = [
             b"squad",
             multisig.key().as_ref(),
-            b"spending_limit",
             mint.as_ref(),
             &vault_index.to_le_bytes(),
+            b"spending_limit",
         ],
         bump
     )]
@@ -460,16 +460,16 @@ pub struct CreateSpendingLimit<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(mint: Pubkey, vault_index: u8 )]
+#[instruction(mint: Pubkey, authority_index: u32 )]
 pub struct RemoveSpendingLimit<'info> {
     #[account(
         mut,
         seeds = [
             b"squad",
             multisig.key().as_ref(),
-            b"spending_limit",
             mint.as_ref(),
-            &vault_index.to_le_bytes(),
+            &authority_index.to_le_bytes(),
+            b"spending_limit",
         ],
         bump,
         close = multisig
@@ -487,7 +487,7 @@ pub struct RemoveSpendingLimit<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(amount: u64)]
+#[instruction(authority_index: u32, amount: u64)]
 pub struct SpendingLimitSolUse<'info> {
     #[account(
         mut,
@@ -501,11 +501,11 @@ pub struct SpendingLimitSolUse<'info> {
         seeds = [
             b"squad",
             multisig.key().as_ref(),
-            &spending_limit.authority_index.to_le_bytes(),
-            b"spending_limit"
+            Pubkey::default().as_ref(),
+            &authority_index.to_le_bytes(),
+            b"spending_limit",
         ],
         bump = spending_limit.bump,
-        constraint = spending_limit.mint == Pubkey::default() @ MsError::SpendingLimitMustBeForSol,
         has_one = multisig @ MsError::InvalidInstructionAccount,
     )]
     pub spending_limit: Account<'info, SpendingLimit>,
@@ -514,7 +514,7 @@ pub struct SpendingLimitSolUse<'info> {
     #[account(mut)]
     pub destination: AccountInfo<'info>,
 
-    /// CHECK: All the required checks are done by checking the seeds.
+    /// CHECK: All the required checks are done by checking the seeds and bump.
     #[account(
         mut,
         seeds = [
@@ -537,3 +537,4 @@ pub struct SpendingLimitSolUse<'info> {
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 }
+

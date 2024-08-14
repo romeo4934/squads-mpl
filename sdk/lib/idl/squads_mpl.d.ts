@@ -604,7 +604,7 @@ export declare type SquadsMpl = {
                 },
                 {
                     "name": "authorityIndex";
-                    "type": "u8";
+                    "type": "u32";
                 },
                 {
                     "name": "amount";
@@ -691,6 +691,10 @@ export declare type SquadsMpl = {
                 }
             ];
             "args": [
+                {
+                    "name": "authorityIndex";
+                    "type": "u32";
+                },
                 {
                     "name": "amount";
                     "type": "u64";
@@ -894,7 +898,7 @@ export declare type SquadsMpl = {
                         "docs": [
                             "The index of the vault that the spending limit is for."
                         ];
-                        "type": "u8";
+                        "type": "u32";
                     },
                     {
                         "name": "authorityBump";

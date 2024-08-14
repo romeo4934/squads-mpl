@@ -7,4 +7,4 @@ export declare const getAuthorityPDA: (msPDA: PublicKey, authorityIndexBN: BN, p
 export declare const getProgramManagerPDA: (msPDA: PublicKey, programId: PublicKey) => [PublicKey, number];
 export declare const getManagedProgramPDA: (programManagerPDA: PublicKey, managedProgramIndexBN: BN, programId: PublicKey) => [PublicKey, number];
 export declare const getProgramUpgradePDA: (managedProgramPDA: PublicKey, upgradeIndexBN: BN, programId: PublicKey) => [PublicKey, number];
-export declare const getSpendingLimitPDA: (msPDA: PublicKey, mint: PublicKey, vaultIndex: number, programId: PublicKey) => [PublicKey, number];
+export declare const getSpendingLimitPDA: (msPDA: PublicKey, mint: PublicKey, authorityIndexBN: BN, programId: PublicKey) => [PublicKey, number];

@@ -607,7 +607,7 @@ exports.IDL = {
                 },
                 {
                     "name": "authorityIndex",
-                    "type": "u8"
+                    "type": "u32"
                 },
                 {
                     "name": "amount",
@@ -694,6 +694,10 @@ exports.IDL = {
                 }
             ],
             "args": [
+                {
+                    "name": "authorityIndex",
+                    "type": "u32"
+                },
                 {
                     "name": "amount",
                     "type": "u64"
@@ -897,7 +901,7 @@ exports.IDL = {
                         "docs": [
                             "The index of the vault that the spending limit is for."
                         ],
-                        "type": "u8"
+                        "type": "u32"
                     },
                     {
                         "name": "authorityBump",
