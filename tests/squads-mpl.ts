@@ -947,6 +947,17 @@ describe("Programs", function(){
         const spendingLimit = await squads.getSpendingLimit(msPDA, mint, vaultIndex);
         const expectedRemaining = amount - transferAmount;
         expect(spendingLimit.remainingAmount.toString()).to.equal(expectedRemaining.toString());
+
+        // Step 3: Attempt to use the spending limit to transfer more than the remaining amount
+        const excessiveTransferAmount = expectedRemaining + 0.1 * LAMPORTS_PER_SOL; // Exceeds the remaining amount
+
+        try {
+            await squads.spendingLimitSolUse(msPDA, mint, vaultIndex, new BN(excessiveTransferAmount), destination, creator.publicKey);
+            throw new Error("Spending limit transaction succeeded when it should have failed due to exceeding limit.");
+        } catch (e) {
+            expect(e.message).to.include("SpendingLimitExceeded");
+        }
+
       });
 
       
