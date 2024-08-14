@@ -217,7 +217,7 @@ export class TransactionBuilder {
     const [spendingLimitPDA] = await getSpendingLimitPDA(this.multisig.publicKey, mint, new BN(vaultIndex,10), this.programId);
 
     const instruction = await this.methods
-      .removeSpendingLimit(mint, vaultIndex)
+      .removeSpendingLimit()
       .accounts({
         multisig: this.multisig.publicKey,
         spendingLimit: spendingLimitPDA,

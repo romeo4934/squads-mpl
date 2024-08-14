@@ -845,7 +845,7 @@ class Squads {
         
     const [vaultPDA] = getAuthorityPDA(multisig, authorityIndexBN, this.multisigProgramId);
 
-    return this.multisig.methods.spendingLimitSolUse(vaultIndex, amount).accounts({
+    return this.multisig.methods.spendingLimitSolUse(amount).accounts({
       multisig,
       spendingLimit: spendingLimitPDA,
       destination,

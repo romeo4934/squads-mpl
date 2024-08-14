@@ -640,16 +640,7 @@ export declare type SquadsMpl = {
                     "isSigner": false;
                 }
             ];
-            "args": [
-                {
-                    "name": "mint";
-                    "type": "publicKey";
-                },
-                {
-                    "name": "vaultIndex";
-                    "type": "u8";
-                }
-            ];
+            "args": [];
         },
         {
             "name": "spendingLimitSolUse";
@@ -691,10 +682,6 @@ export declare type SquadsMpl = {
                 }
             ];
             "args": [
-                {
-                    "name": "authorityIndex";
-                    "type": "u32";
-                },
                 {
                     "name": "amount";
                     "type": "u64";

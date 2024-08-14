@@ -759,13 +759,13 @@ pub mod squads_mpl {
     }
 
     /// Method to remove a spending limit
-    pub fn remove_spending_limit(ctx: Context<RemoveSpendingLimit>, _mint: Pubkey, _authority_index: u32,) -> Result<()> {
+    pub fn remove_spending_limit(ctx: Context<RemoveSpendingLimit>, ) -> Result<()> {
         let new_index = ctx.accounts.multisig.transaction_index;
         ctx.accounts.multisig.set_change_index(new_index)
     }
     
 
-    pub fn spending_limit_sol_use(ctx: Context<SpendingLimitSolUse>, _authority_index: u32, amount: u64) -> Result<()> {
+    pub fn spending_limit_sol_use(ctx: Context<SpendingLimitSolUse>,  amount: u64) -> Result<()> {
         let now = Clock::get()?.unix_timestamp;
 
         // Get a mutable reference to `spending_limit` account.

@@ -640,16 +640,7 @@ export type SquadsMpl = {
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "mint",
-          "type": "publicKey"
-        },
-        {
-          "name": "authorityIndex",
-          "type": "u32"
-        }
-      ]
+      "args": []
     },
     {
       "name": "spendingLimitSolUse",
@@ -691,10 +682,6 @@ export type SquadsMpl = {
         }
       ],
       "args": [
-        {
-          "name": "authorityIndex",
-          "type": "u32"
-        },
         {
           "name": "amount",
           "type": "u64"
@@ -1874,16 +1861,7 @@ export const IDL: SquadsMpl = {
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "mint",
-          "type": "publicKey"
-        },
-        {
-          "name": "authorityIndex",
-          "type": "u32"
-        }
-      ]
+      "args": []
     },
     {
       "name": "spendingLimitSolUse",
@@ -1925,10 +1903,6 @@ export const IDL: SquadsMpl = {
         }
       ],
       "args": [
-        {
-          "name": "authorityIndex",
-          "type": "u32"
-        },
         {
           "name": "amount",
           "type": "u64"

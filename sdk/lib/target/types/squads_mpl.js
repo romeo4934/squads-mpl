@@ -643,16 +643,7 @@ exports.IDL = {
                     "isSigner": false
                 }
             ],
-            "args": [
-                {
-                    "name": "mint",
-                    "type": "publicKey"
-                },
-                {
-                    "name": "vaultIndex",
-                    "type": "u8"
-                }
-            ]
+            "args": []
         },
         {
             "name": "spendingLimitSolUse",
@@ -694,10 +685,6 @@ exports.IDL = {
                 }
             ],
             "args": [
-                {
-                    "name": "authorityIndex",
-                    "type": "u32"
-                },
                 {
                     "name": "amount",
                     "type": "u64"

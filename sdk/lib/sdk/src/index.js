@@ -505,11 +505,8 @@ class Squads {
         return __awaiter(this, void 0, void 0, function* () {
             const authorityIndexBN = new bn_js_1.default(vaultIndex, 10);
             const spendingLimitPDA = this.getSpendingLimitPDA(multisig, mint, vaultIndex);
-            console.log("Spending Limit PDA", spendingLimitPDA.toBase58());
-            console.log("Multisig", multisig);
-            console.log("Multisig", multisig.toBase58());
             const [vaultPDA] = (0, address_1.getAuthorityPDA)(multisig, authorityIndexBN, this.multisigProgramId);
-            return this.multisig.methods.spendingLimitSolUse(vaultIndex, amount).accounts({
+            return this.multisig.methods.spendingLimitSolUse(amount).accounts({
                 multisig,
                 spendingLimit: spendingLimitPDA,
                 destination,

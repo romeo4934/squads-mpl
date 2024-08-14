@@ -201,7 +201,7 @@ class TransactionBuilder {
         return __awaiter(this, void 0, void 0, function* () {
             const [spendingLimitPDA] = yield (0, address_1.getSpendingLimitPDA)(this.multisig.publicKey, mint, new bn_js_1.default(vaultIndex, 10), this.programId);
             const instruction = yield this.methods
-                .removeSpendingLimit(mint, vaultIndex)
+                .removeSpendingLimit()
                 .accounts({
                 multisig: this.multisig.publicKey,
                 spendingLimit: spendingLimitPDA,
