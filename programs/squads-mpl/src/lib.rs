@@ -803,7 +803,7 @@ pub mod squads_mpl {
                 .ok_or(MsError::MissingAccount)?; // Ensure destination account is provided for SOL transfer
 
             anchor_lang::system_program::transfer(CpiContext::new_with_signer(
-                ctx.accounts.system_program.to_account_info(),
+                ctx.accounts.system_program.as_ref().ok_or(MsError::MissingAccount)?.to_account_info(),
                 anchor_lang::system_program::Transfer {
                     from: ctx.accounts.vault.to_account_info(), // Vault associated with the authority seeds
                     to: destination.clone(),

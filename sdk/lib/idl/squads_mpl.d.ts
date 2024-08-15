@@ -656,15 +656,14 @@ export declare type SquadsMpl = {
                     "isSigner": false;
                 },
                 {
+                    "name": "vault";
+                    "isMut": true;
+                    "isSigner": false;
+                },
+                {
                     "name": "primaryMember";
                     "isMut": true;
                     "isSigner": true;
-                },
-                {
-                    "name": "destinationTokenAccount";
-                    "isMut": true;
-                    "isSigner": false;
-                    "isOptional": true;
                 },
                 {
                     "name": "destination";
@@ -673,9 +672,16 @@ export declare type SquadsMpl = {
                     "isOptional": true;
                 },
                 {
-                    "name": "vault";
-                    "isMut": true;
+                    "name": "systemProgram";
+                    "isMut": false;
                     "isSigner": false;
+                    "isOptional": true;
+                },
+                {
+                    "name": "mint";
+                    "isMut": false;
+                    "isSigner": false;
+                    "isOptional": true;
                 },
                 {
                     "name": "vaultTokenAccount";
@@ -687,20 +693,19 @@ export declare type SquadsMpl = {
                     ];
                 },
                 {
-                    "name": "tokenProgram";
-                    "isMut": false;
+                    "name": "destinationTokenAccount";
+                    "isMut": true;
                     "isSigner": false;
                     "isOptional": true;
                 },
                 {
-                    "name": "systemProgram";
+                    "name": "tokenProgram";
                     "isMut": false;
                     "isSigner": false;
-                },
-                {
-                    "name": "rent";
-                    "isMut": false;
-                    "isSigner": false;
+                    "isOptional": true;
+                    "docs": [
+                        "In case `spending_limit.mint` is an SPL token."
+                    ];
                 }
             ];
             "args": [
@@ -1237,6 +1242,10 @@ export declare type SquadsMpl = {
         {
             "code": 6027;
             "name": "SpendingLimitMustBeForSol";
+        },
+        {
+            "code": 6028;
+            "name": "InvalidMint";
         }
     ];
 };

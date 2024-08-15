@@ -471,7 +471,6 @@ pub struct RemoveSpendingLimit<'info> {
             b"spending_limit",
         ],
         bump,
-        constraint = spending_limit.multisig == multisig.key() @MsError::InvalidInstructionAccount,
         close = multisig
     )]
     pub spending_limit: Account<'info, SpendingLimit>,
@@ -506,24 +505,8 @@ pub struct SpendingLimitUse<'info> {
             b"spending_limit",
         ],
         bump = spending_limit.bump,
-        constraint = spending_limit.multisig == multisig.key() @MsError::InvalidInstructionAccount,
-        has_one = multisig @ MsError::InvalidInstructionAccount,
     )]
     pub spending_limit: Account<'info, SpendingLimit>,
-
-    #[account(
-        mut,
-        constraint = multisig.primary_member.is_some() @ MsError::PrimaryMemberNotInMultisig,
-        constraint = multisig.primary_member.unwrap() == primary_member.key() @ MsError::UnauthorizedMember
-    )]
-    pub primary_member: Signer<'info>, // Primary member as signer
-
-    #[account(mut)]
-    pub destination_token_account: Option<Account<'info, TokenAccount>>, // SPL token destination account
-    
-    /// CHECK: Could be any account
-    #[account(mut)]
-    pub destination: Option<AccountInfo<'info>>, // SOL destination account
 
     /// CHECK: All the required checks are done by checking the seeds and bump.
     #[account(
@@ -538,16 +521,43 @@ pub struct SpendingLimitUse<'info> {
     )]
     pub vault: AccountInfo<'info>, // Vault from which the asset is transferred
 
+    #[account(
+        mut,
+        constraint = multisig.primary_member.is_some() @ MsError::PrimaryMemberNotInMultisig,
+        constraint = multisig.primary_member.unwrap() == primary_member.key() @ MsError::UnauthorizedMember
+    )]
+    pub primary_member: Signer<'info>, // Primary member as signer
+
+    /// CHECK: Could be any account
+    #[account(mut)]
+    pub destination: Option<AccountInfo<'info>>, // SOL destination account
+    
+    pub system_program: Option<Program<'info, System>>,
+
+    #[account(
+        address = spending_limit.mint @ MsError::InvalidMint
+    )]
+    pub mint: Option<Account<'info, Mint>>, 
+
     /// Multisig vault token account to transfer tokens from in case `spending_limit.mint` is an SPL token.
     #[account(
         mut,
-        token::mint = spending_limit.mint,
+        token::mint = mint,
         token::authority = vault,
     )]
     pub vault_token_account: Option<Account<'info, TokenAccount>>, // Vault Token Account
 
+
+    #[account(
+        mut,
+        token::mint = mint,
+        token::authority = destination,
+    )]
+    pub destination_token_account: Option<Account<'info, TokenAccount>>, // SPL token destination account
+    
+    
+    /// In case `spending_limit.mint` is an SPL token.
     pub token_program: Option<Program<'info, Token>>, // SPL token program
-    pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
+    
 }
 

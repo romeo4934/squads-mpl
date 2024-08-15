@@ -656,15 +656,14 @@ export type SquadsMpl = {
           "isSigner": false
         },
         {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "primaryMember",
           "isMut": true,
           "isSigner": true
-        },
-        {
-          "name": "destinationTokenAccount",
-          "isMut": true,
-          "isSigner": false,
-          "isOptional": true
         },
         {
           "name": "destination",
@@ -673,9 +672,16 @@ export type SquadsMpl = {
           "isOptional": true
         },
         {
-          "name": "vault",
-          "isMut": true,
-          "isSigner": false
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "vaultTokenAccount",
@@ -687,20 +693,19 @@ export type SquadsMpl = {
           ]
         },
         {
-          "name": "tokenProgram",
-          "isMut": false,
+          "name": "destinationTokenAccount",
+          "isMut": true,
           "isSigner": false,
           "isOptional": true
         },
         {
-          "name": "systemProgram",
+          "name": "tokenProgram",
           "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "In case `spending_limit.mint` is an SPL token."
+          ]
         }
       ],
       "args": [
@@ -1237,6 +1242,10 @@ export type SquadsMpl = {
     {
       "code": 6027,
       "name": "SpendingLimitMustBeForSol"
+    },
+    {
+      "code": 6028,
+      "name": "InvalidMint"
     }
   ]
 };
@@ -1899,15 +1908,14 @@ export const IDL: SquadsMpl = {
           "isSigner": false
         },
         {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "primaryMember",
           "isMut": true,
           "isSigner": true
-        },
-        {
-          "name": "destinationTokenAccount",
-          "isMut": true,
-          "isSigner": false,
-          "isOptional": true
         },
         {
           "name": "destination",
@@ -1916,9 +1924,16 @@ export const IDL: SquadsMpl = {
           "isOptional": true
         },
         {
-          "name": "vault",
-          "isMut": true,
-          "isSigner": false
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "vaultTokenAccount",
@@ -1930,20 +1945,19 @@ export const IDL: SquadsMpl = {
           ]
         },
         {
-          "name": "tokenProgram",
-          "isMut": false,
+          "name": "destinationTokenAccount",
+          "isMut": true,
           "isSigner": false,
           "isOptional": true
         },
         {
-          "name": "systemProgram",
+          "name": "tokenProgram",
           "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "In case `spending_limit.mint` is an SPL token."
+          ]
         }
       ],
       "args": [
@@ -2480,6 +2494,10 @@ export const IDL: SquadsMpl = {
     {
       "code": 6027,
       "name": "SpendingLimitMustBeForSol"
+    },
+    {
+      "code": 6028,
+      "name": "InvalidMint"
     }
   ]
 };

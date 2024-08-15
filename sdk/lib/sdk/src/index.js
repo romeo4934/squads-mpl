@@ -515,11 +515,11 @@ class Squads {
                 destination: isSol ? destination : null,
                 destinationTokenAccount: !isSol ? destinationTokenAccount : null,
                 vault: vaultPDA,
-                vaultTokenAccount: !isSol ? vaultTokenAccount : undefined,
+                vaultTokenAccount: !isSol ? vaultTokenAccount : null,
                 primaryMember,
+                mint: !isSol ? mint : null,
                 tokenProgram: !isSol ? spl_token_1.TOKEN_PROGRAM_ID : null,
-                systemProgram: anchor.web3.SystemProgram.programId,
-                rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+                systemProgram: isSol ? anchor.web3.SystemProgram.programId : null,
             });
         });
     }
