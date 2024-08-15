@@ -837,6 +837,7 @@ class Squads {
     amount: BN,
     destination: PublicKey,
     destinationTokenAccount: PublicKey | null,
+    vaultTokenAccount: PublicKey | null,
     primaryMember: PublicKey
   ): Promise<SquadsMethods> {
   const authorityIndexBN = new BN(vaultIndex, 10);
@@ -857,6 +858,7 @@ class Squads {
     destination: isSol ? destination : null, // If SOL, provide destination account
     destinationTokenAccount: !isSol ? destinationTokenAccount : null, // If SPL, provide destination token account
     vault: vaultPDA, // Use the computed vault PDA
+    vaultTokenAccount: !isSol ? vaultTokenAccount : null, // Vault token account for SPL
     primaryMember,
     tokenProgram: !isSol ? TOKEN_PROGRAM_ID : null, // If SPL, provide the token program
     systemProgram: anchor.web3.SystemProgram.programId,
@@ -871,6 +873,7 @@ class Squads {
     amount: BN,
     destination: PublicKey,
     destinationTokenAccount: PublicKey | null,
+    vaultTokenAccount: PublicKey | null,
     primaryMember: PublicKey
   ): Promise<void> {
     const methods = await this._spendingLimitUse(
@@ -880,6 +883,7 @@ class Squads {
       amount,
       destination,
       destinationTokenAccount,
+      vaultTokenAccount,
       primaryMember
     );
 

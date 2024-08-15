@@ -678,6 +678,15 @@ export type SquadsMpl = {
           "isSigner": false
         },
         {
+          "name": "vaultTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Multisig vault token account to transfer tokens from in case `spending_limit.mint` is an SPL token."
+          ]
+        },
+        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false,
@@ -1910,6 +1919,15 @@ export const IDL: SquadsMpl = {
           "name": "vault",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "vaultTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Multisig vault token account to transfer tokens from in case `spending_limit.mint` is an SPL token."
+          ]
         },
         {
           "name": "tokenProgram",

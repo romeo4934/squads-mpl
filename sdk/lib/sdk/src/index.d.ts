@@ -90,7 +90,7 @@ declare class Squads {
     removePrimaryMember(multisigPDA: PublicKey, removerSigner: anchor.web3.Keypair): Promise<MultisigAccount>;
     buildRemovePrimaryMember(multisigPDA: PublicKey, removerSigner: anchor.web3.Keypair): Promise<TransactionInstruction>;
     private _spendingLimitUse;
-    spendingLimitUse(multisig: PublicKey, mint: PublicKey, vaultIndex: number, amount: BN, destination: PublicKey, destinationTokenAccount: PublicKey | null, primaryMember: PublicKey): Promise<void>;
+    spendingLimitUse(multisig: PublicKey, mint: PublicKey, vaultIndex: number, amount: BN, destination: PublicKey, destinationTokenAccount: PublicKey | null, vaultTokenAccount: PublicKey | null, primaryMember: PublicKey): Promise<void>;
     createProgramManager(multisigPDA: PublicKey): Promise<ProgramManagerAccount>;
     createManagedProgram(multisigPDA: PublicKey, programAddress: PublicKey, name: string): Promise<ManagedProgramAccount>;
     createProgramUpgrade(multisigPDA: PublicKey, managedProgramPDA: PublicKey, bufferAddress: PublicKey, spillAddress: PublicKey, authorityAddress: PublicKey, upgradeName: string): Promise<ProgramUpgradeAccount>;

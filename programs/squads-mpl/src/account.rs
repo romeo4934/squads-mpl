@@ -538,6 +538,14 @@ pub struct SpendingLimitUse<'info> {
     )]
     pub vault: AccountInfo<'info>, // Vault from which the asset is transferred
 
+    /// Multisig vault token account to transfer tokens from in case `spending_limit.mint` is an SPL token.
+    #[account(
+        mut,
+        token::mint = spending_limit.mint,
+        token::authority = vault,
+    )]
+    pub vault_token_account: Option<Account<'info, TokenAccount>>, // Vault Token Account
+
     pub token_program: Option<Program<'info, Token>>, // SPL token program
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,

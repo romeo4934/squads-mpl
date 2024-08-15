@@ -502,7 +502,7 @@ class Squads {
             return yield methods.instruction();
         });
     }
-    _spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, primaryMember) {
+    _spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, vaultTokenAccount, primaryMember) {
         return __awaiter(this, void 0, void 0, function* () {
             const authorityIndexBN = new bn_js_1.default(vaultIndex, 10);
             const spendingLimitPDA = this.getSpendingLimitPDA(multisig, mint, vaultIndex);
@@ -515,6 +515,7 @@ class Squads {
                 destination: isSol ? destination : null,
                 destinationTokenAccount: !isSol ? destinationTokenAccount : null,
                 vault: vaultPDA,
+                vaultTokenAccount: !isSol ? vaultTokenAccount : undefined,
                 primaryMember,
                 tokenProgram: !isSol ? spl_token_1.TOKEN_PROGRAM_ID : null,
                 systemProgram: anchor.web3.SystemProgram.programId,
@@ -522,9 +523,9 @@ class Squads {
             });
         });
     }
-    spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, primaryMember) {
+    spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, vaultTokenAccount, primaryMember) {
         return __awaiter(this, void 0, void 0, function* () {
-            const methods = yield this._spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, primaryMember);
+            const methods = yield this._spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, vaultTokenAccount, primaryMember);
             yield methods.rpc();
         });
     }

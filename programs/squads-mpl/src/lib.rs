@@ -824,8 +824,14 @@ pub mod squads_mpl {
                 .as_ref()
                 .ok_or(MsError::MissingAccount)?; // Ensure destination token account is provided for SPL transfer
 
+            let vault_token_account = ctx
+                .accounts
+                .vault_token_account
+                .as_ref()
+                .ok_or(MsError::MissingAccount)?; // Ensure vault token account is provided for SPL transfer
+
             let cpi_accounts = Transfer {
-                from: ctx.accounts.vault.to_account_info(), // PDA representing the SPL token vault
+                from: vault_token_account.to_account_info(), // PDA representing the SPL token vault
                 to: destination_token_account.to_account_info(),
                 authority: ctx.accounts.vault.to_account_info(),
             };

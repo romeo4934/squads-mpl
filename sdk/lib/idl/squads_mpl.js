@@ -681,6 +681,15 @@ exports.IDL = {
                     "isSigner": false
                 },
                 {
+                    "name": "vaultTokenAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "isOptional": true,
+                    "docs": [
+                        "Multisig vault token account to transfer tokens from in case `spending_limit.mint` is an SPL token."
+                    ]
+                },
+                {
                     "name": "tokenProgram",
                     "isMut": false,
                     "isSigner": false,
