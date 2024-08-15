@@ -646,7 +646,7 @@ exports.IDL = {
             "args": []
         },
         {
-            "name": "spendingLimitSolUse",
+            "name": "spendingLimitUse",
             "accounts": [
                 {
                     "name": "multisig",
@@ -659,9 +659,21 @@ exports.IDL = {
                     "isSigner": false
                 },
                 {
+                    "name": "primaryMember",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "destinationTokenAccount",
+                    "isMut": true,
+                    "isSigner": false,
+                    "isOptional": true
+                },
+                {
                     "name": "destination",
                     "isMut": true,
-                    "isSigner": false
+                    "isSigner": false,
+                    "isOptional": true
                 },
                 {
                     "name": "vault",
@@ -669,9 +681,10 @@ exports.IDL = {
                     "isSigner": false
                 },
                 {
-                    "name": "primaryMember",
-                    "isMut": true,
-                    "isSigner": true
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false,
+                    "isOptional": true
                 },
                 {
                     "name": "systemProgram",

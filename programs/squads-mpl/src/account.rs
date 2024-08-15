@@ -486,60 +486,9 @@ pub struct RemoveSpendingLimit<'info> {
     pub system_program: Program<'info, System>,
 }
 
-#[derive(Accounts)]
-pub struct SpendingLimitSolUse<'info> {
-    #[account(
-        mut,
-        seeds = [b"squad", multisig.create_key.as_ref(), b"multisig"],
-        bump = multisig.bump,
-    )]
-    pub multisig: Account<'info, Ms>,
-
-    #[account(
-        mut,
-        seeds = [
-            b"squad",
-            multisig.key().as_ref(),
-            Pubkey::default().as_ref(),
-            &spending_limit.authority_index.to_le_bytes(),
-            b"spending_limit",
-        ],
-        bump = spending_limit.bump,
-        constraint = spending_limit.multisig == multisig.key() @MsError::InvalidInstructionAccount,
-        has_one = multisig @ MsError::InvalidInstructionAccount,
-    )]
-    pub spending_limit: Account<'info, SpendingLimit>,
-
-    /// CHECK: Could be any account
-    #[account(mut)]
-    pub destination: AccountInfo<'info>,
-
-    /// CHECK: All the required checks are done by checking the seeds and bump.
-    #[account(
-        mut,
-        seeds = [
-            b"squad",
-            multisig.key().as_ref(),
-            &spending_limit.authority_index.to_le_bytes(),
-            b"authority"
-        ],
-        bump = spending_limit.authority_bump,
-    )]
-    pub vault: AccountInfo<'info>, // Vault from which SOL is transferred
-
-    #[account(
-        mut,
-        constraint = multisig.primary_member.is_some() @ MsError::PrimaryMemberNotInMultisig,
-        constraint = multisig.primary_member.unwrap() == primary_member.key() @ MsError::UnauthorizedMember
-    )]
-    pub primary_member: Signer<'info>, // Primary member as signer
-
-    pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
-}
 
 #[derive(Accounts)]
-pub struct SpendingLimitSplUse<'info> {
+pub struct SpendingLimitUse<'info> {
     #[account(
         mut,
         seeds = [b"squad", multisig.create_key.as_ref(), b"multisig"],
@@ -570,8 +519,12 @@ pub struct SpendingLimitSplUse<'info> {
     pub primary_member: Signer<'info>, // Primary member as signer
 
     #[account(mut)]
-    pub destination_token_account: Account<'info, TokenAccount>,
+    pub destination_token_account: Option<Account<'info, TokenAccount>>, // SPL token destination account
     
+    /// CHECK: Could be any account
+    #[account(mut)]
+    pub destination: Option<AccountInfo<'info>>, // SOL destination account
+
     /// CHECK: All the required checks are done by checking the seeds and bump.
     #[account(
         mut,
@@ -583,9 +536,9 @@ pub struct SpendingLimitSplUse<'info> {
         ],
         bump = spending_limit.authority_bump,
     )]
-    pub vault: AccountInfo<'info>, // Vault from which tokens are transferred
+    pub vault: AccountInfo<'info>, // Vault from which the asset is transferred
 
-    pub token_program: Program<'info, Token>,
+    pub token_program: Option<Program<'info, Token>>, // SPL token program
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 }

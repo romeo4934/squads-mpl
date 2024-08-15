@@ -764,8 +764,8 @@ pub mod squads_mpl {
         ctx.accounts.multisig.set_change_index(new_index)
     }
     
-
-    pub fn spending_limit_sol_use(ctx: Context<SpendingLimitSolUse>,  amount: u64) -> Result<()> {
+    
+    pub fn spending_limit_use(ctx: Context<SpendingLimitUse>, amount: u64) -> Result<()> {
         let now = Clock::get()?.unix_timestamp;
 
         // Get a mutable reference to `spending_limit` account.
@@ -793,101 +793,68 @@ pub mod squads_mpl {
         // Subtract the amount from the remaining limit.
         spending_limit.remaining_amount = spending_limit.remaining_amount.checked_sub(amount).unwrap();
 
-        // Transfer SOL from the vault to the destination account.
-        anchor_lang::system_program::transfer(CpiContext::new_with_signer(
-            ctx.accounts.system_program.to_account_info(),
-            anchor_lang::system_program::Transfer {
-                from: ctx.accounts.vault.to_account_info(), // Vault associated with the authority seeds
-                to: ctx.accounts.destination.to_account_info(),
-            },
-            &[&[
+        // Determine transfer type based on mint
+        if spending_limit.mint == Pubkey::default() {
+            // Transfer SOL from the vault to the destination account.
+            let destination = ctx
+                .accounts
+                .destination
+                .as_ref()
+                .ok_or(MsError::MissingAccount)?; // Ensure destination account is provided for SOL transfer
+
+            anchor_lang::system_program::transfer(CpiContext::new_with_signer(
+                ctx.accounts.system_program.to_account_info(),
+                anchor_lang::system_program::Transfer {
+                    from: ctx.accounts.vault.to_account_info(), // Vault associated with the authority seeds
+                    to: destination.clone(),
+                },
+                &[&[
+                    b"squad",
+                    ctx.accounts.spending_limit.multisig.as_ref(),
+                    &ctx.accounts.spending_limit.authority_index.to_le_bytes(),
+                    b"authority",
+                    &[ctx.accounts.spending_limit.authority_bump],
+                ]],
+            ), amount)?;
+        } else {
+            // Transfer SPL tokens from the vault to the destination account.
+            let destination_token_account = ctx
+                .accounts
+                .destination_token_account
+                .as_ref()
+                .ok_or(MsError::MissingAccount)?; // Ensure destination token account is provided for SPL transfer
+
+            let cpi_accounts = Transfer {
+                from: ctx.accounts.vault.to_account_info(), // PDA representing the SPL token vault
+                to: destination_token_account.to_account_info(),
+                authority: ctx.accounts.vault.to_account_info(),
+            };
+
+            let seeds = &[
                 b"squad",
                 ctx.accounts.spending_limit.multisig.as_ref(),
                 &ctx.accounts.spending_limit.authority_index.to_le_bytes(),
                 b"authority",
                 &[ctx.accounts.spending_limit.authority_bump],
-            ]],
-        ), amount)?;
+            ];
 
-        Ok(())
-    }
-
-    pub fn spending_limit_spl_use(ctx: Context<SpendingLimitSplUse>, amount: u64) -> Result<()> {
-        let now = Clock::get()?.unix_timestamp;
-
-        // Get a mutable reference to `spending_limit` account.
-        let spending_limit = &mut ctx.accounts.spending_limit;
-
-        // Calculate the reset period in seconds.
-        let reset_period = spending_limit.period.to_seconds().unwrap();
-
-        // Calculate the timestamp difference between now and last reset.
-        let time_since_last_reset = now.checked_sub(spending_limit.last_reset).unwrap();
-
-        // Check if the reset period has passed.
-        if time_since_last_reset > reset_period {
-            // Reset remaining amount and update the last reset timestamp.
-            spending_limit.remaining_amount = spending_limit.amount;
-            let periods_passed = time_since_last_reset.checked_div(reset_period).unwrap();
-            spending_limit.last_reset += periods_passed * reset_period;
-        }
-
-        // Check if the amount exceeds the remaining limit.
-        if amount > spending_limit.remaining_amount {
-            return err!(MsError::SpendingLimitExceeded);
-        }
-
-        // Subtract the amount from the remaining limit.
-        spending_limit.remaining_amount = spending_limit.remaining_amount.checked_sub(amount).unwrap();
-
-        // Transfer SPL tokens from the vault to the destination account.
-        let cpi_accounts = Transfer {
-            from: ctx.accounts.vault.to_account_info(), // PDA representing the SPL token vault
-            to: ctx.accounts.destination_token_account.to_account_info(),
-            authority: ctx.accounts.vault.to_account_info(),
-        };
-        
-        let seeds = &[
-            b"squad",
-            ctx.accounts.spending_limit.multisig.as_ref(),
-            &ctx.accounts.spending_limit.authority_index.to_le_bytes(),
-            b"authority",
-            &[ctx.accounts.spending_limit.authority_bump],
-        ];
-        
-        let signer_seeds = &[&seeds[..]];
-
-        token::transfer(
-            CpiContext::new_with_signer(ctx.accounts.token_program.to_account_info(), cpi_accounts, signer_seeds),
-            amount,
-        )?;
-
-        Ok(())
-    }
-
- /*
-     // Transfer SPL token
-            let token_program = ctx.accounts.token_program.as_ref().ok_or(MsError::MissingAccount)?;
-            let vault_token_account = ctx.accounts.vault_token_account.as_ref().ok_or(MsError::MissingAccount)?;
-            let destination_token_account = ctx.accounts.destination_token_account.as_ref().ok_or(MsError::MissingAccount)?;
-            let mint = ctx.accounts.mint.as_ref().ok_or(MsError::MissingAccount)?;
-
-            let cpi_accounts = Transfer {
-                from: vault_token_account.to_account_info(), // PDA representing the SPL token vault
-                to: destination_token_account.to_account_info(),
-                authority: ctx.accounts.vault.to_account_info(),
-            };
+            let signer_seeds = &[&seeds[..]];
 
             token::transfer(
-                CpiContext::new_with_signer(token_program.to_account_info(), cpi_accounts, &[&[
-                    b"squad",
-                    ms.key().as_ref(),
-                    &0_u8.to_le_bytes(),
-                    b"authority",
-                    &[vault_bump],
-                ]]),
+                CpiContext::new_with_signer(
+                    ctx.accounts
+                        .token_program
+                        .as_ref()
+                        .ok_or(MsError::MissingAccount)?
+                        .to_account_info(),
+                    cpi_accounts,
+                    signer_seeds,
+                ),
                 amount,
             )?;
-    */
+        }
+
+        Ok(())
+    }
 
 }

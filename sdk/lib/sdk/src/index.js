@@ -40,6 +40,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Wallet = void 0;
 const web3_js_1 = require("@solana/web3.js");
+const spl_token_1 = require("@solana/spl-token"); // Ensure you have the correct import for TOKEN_PROGRAM_ID
 const constants_1 = require("./constants");
 const squads_mpl_json_1 = __importDefault(require("../../target/idl/squads_mpl.json"));
 const program_manager_json_1 = __importDefault(require("../../target/idl/program_manager.json"));
@@ -501,25 +502,29 @@ class Squads {
             return yield methods.instruction();
         });
     }
-    _spendingLimitSolUse(multisig, mint, vaultIndex, amount, destination, primaryMember) {
+    _spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, primaryMember) {
         return __awaiter(this, void 0, void 0, function* () {
             const authorityIndexBN = new bn_js_1.default(vaultIndex, 10);
             const spendingLimitPDA = this.getSpendingLimitPDA(multisig, mint, vaultIndex);
             const [vaultPDA] = (0, address_1.getAuthorityPDA)(multisig, authorityIndexBN, this.multisigProgramId);
-            return this.multisig.methods.spendingLimitSolUse(amount).accounts({
+            // Determine if this is for SOL or SPL based on mint
+            const isSol = mint.equals(web3_js_1.PublicKey.default);
+            return this.multisig.methods.spendingLimitUse(amount).accounts({
                 multisig,
                 spendingLimit: spendingLimitPDA,
-                destination,
+                destination: isSol ? destination : null,
+                destinationTokenAccount: !isSol ? destinationTokenAccount : null,
                 vault: vaultPDA,
                 primaryMember,
+                tokenProgram: !isSol ? spl_token_1.TOKEN_PROGRAM_ID : null,
                 systemProgram: anchor.web3.SystemProgram.programId,
                 rent: anchor.web3.SYSVAR_RENT_PUBKEY,
             });
         });
     }
-    spendingLimitSolUse(multisig, mint, vaultIndex, amount, destination, primaryMember) {
+    spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, primaryMember) {
         return __awaiter(this, void 0, void 0, function* () {
-            const methods = yield this._spendingLimitSolUse(multisig, mint, vaultIndex, amount, destination, primaryMember);
+            const methods = yield this._spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, primaryMember);
             yield methods.rpc();
         });
     }

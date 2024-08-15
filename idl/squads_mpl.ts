@@ -643,7 +643,7 @@ export type SquadsMpl = {
       "args": []
     },
     {
-      "name": "spendingLimitSolUse",
+      "name": "spendingLimitUse",
       "accounts": [
         {
           "name": "multisig",
@@ -656,9 +656,21 @@ export type SquadsMpl = {
           "isSigner": false
         },
         {
+          "name": "primaryMember",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "destinationTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
           "name": "destination",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "vault",
@@ -666,9 +678,10 @@ export type SquadsMpl = {
           "isSigner": false
         },
         {
-          "name": "primaryMember",
-          "isMut": true,
-          "isSigner": true
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "systemProgram",
@@ -1864,7 +1877,7 @@ export const IDL: SquadsMpl = {
       "args": []
     },
     {
-      "name": "spendingLimitSolUse",
+      "name": "spendingLimitUse",
       "accounts": [
         {
           "name": "multisig",
@@ -1877,9 +1890,21 @@ export const IDL: SquadsMpl = {
           "isSigner": false
         },
         {
+          "name": "primaryMember",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "destinationTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
           "name": "destination",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "vault",
@@ -1887,9 +1912,10 @@ export const IDL: SquadsMpl = {
           "isSigner": false
         },
         {
-          "name": "primaryMember",
-          "isMut": true,
-          "isSigner": true
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "systemProgram",

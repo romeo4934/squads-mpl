@@ -6,6 +6,8 @@ import {
   TransactionInstruction,
   Signer,
 } from "@solana/web3.js";
+
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token"; // Ensure you have the correct import for TOKEN_PROGRAM_ID
 import {
   DEFAULT_MULTISIG_PROGRAM_ID,
   DEFAULT_PROGRAM_MANAGER_PROGRAM_ID,
@@ -828,48 +830,56 @@ class Squads {
     return await methods.instruction();
   }
 
-  private async _spendingLimitSolUse(
-      multisig: PublicKey,
-      mint: PublicKey,
-      vaultIndex: number,
-      amount: BN,
-      destination: PublicKey,
-      primaryMember: PublicKey
-    ): Promise<SquadsMethods> {
-    const authorityIndexBN = new BN(vaultIndex, 10);
-      const spendingLimitPDA = this.getSpendingLimitPDA(
-      multisig,
-      mint,
-      vaultIndex
-    );
-        
-    const [vaultPDA] = getAuthorityPDA(multisig, authorityIndexBN, this.multisigProgramId);
-
-    return this.multisig.methods.spendingLimitSolUse(amount).accounts({
-      multisig,
-      spendingLimit: spendingLimitPDA,
-      destination,
-      vault: vaultPDA, // Use the computed vault PDA
-      primaryMember,
-      systemProgram: anchor.web3.SystemProgram.programId,
-      rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-    });
-  }
-
-  async spendingLimitSolUse(
+  private async _spendingLimitUse(
     multisig: PublicKey,
     mint: PublicKey,
     vaultIndex: number,
     amount: BN,
     destination: PublicKey,
+    destinationTokenAccount: PublicKey | null,
+    primaryMember: PublicKey
+  ): Promise<SquadsMethods> {
+  const authorityIndexBN = new BN(vaultIndex, 10);
+  const spendingLimitPDA = this.getSpendingLimitPDA(
+    multisig,
+    mint,
+    vaultIndex
+  );
+      
+  const [vaultPDA] = getAuthorityPDA(multisig, authorityIndexBN, this.multisigProgramId);
+
+  // Determine if this is for SOL or SPL based on mint
+  const isSol = mint.equals(PublicKey.default);
+
+  return this.multisig.methods.spendingLimitUse(amount).accounts({
+    multisig,
+    spendingLimit: spendingLimitPDA,
+    destination: isSol ? destination : null, // If SOL, provide destination account
+    destinationTokenAccount: !isSol ? destinationTokenAccount : null, // If SPL, provide destination token account
+    vault: vaultPDA, // Use the computed vault PDA
+    primaryMember,
+    tokenProgram: !isSol ? TOKEN_PROGRAM_ID : null, // If SPL, provide the token program
+    systemProgram: anchor.web3.SystemProgram.programId,
+    rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+  });
+}
+
+  async spendingLimitUse(
+    multisig: PublicKey,
+    mint: PublicKey,
+    vaultIndex: number,
+    amount: BN,
+    destination: PublicKey,
+    destinationTokenAccount: PublicKey | null,
     primaryMember: PublicKey
   ): Promise<void> {
-    const methods = await this._spendingLimitSolUse(
+    const methods = await this._spendingLimitUse(
       multisig,
       mint,
       vaultIndex,
       amount,
       destination,
+      destinationTokenAccount,
       primaryMember
     );
 
