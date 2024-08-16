@@ -22,6 +22,7 @@ import Squads, {
   getSpendingLimitPDA,
 } from "../sdk/src/index";
 import BN from "bn.js";
+import { agnosticExecute } from "../helpers/sdkExecute";
 
 import {memberListApprove} from "../helpers/approve";
 
@@ -108,7 +109,7 @@ describe("Programs", function(){
         console.log("Deploying SMPL Program...");
         deploySmpl();
         console.log("✔ SMPL Program deployed.");
-        
+
         program = anchor.workspace.SquadsMpl as Program<SquadsMpl>;
         squads = Squads.localnet(provider.wallet, {
           commitmentOrConfig: "processed",
