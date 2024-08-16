@@ -68,7 +68,7 @@ class Squads {
     static devnet(wallet, options) {
         return new Squads(Object.assign({ connection: new web3_js_1.Connection("https://api.devnet.solana.com", options === null || options === void 0 ? void 0 : options.commitmentOrConfig), wallet }, options));
     }
-    static fnet(wallet, options) {
+    static localnet(wallet, options) {
         return new Squads(Object.assign({ connection: new web3_js_1.Connection("http://localhost:8899", options === null || options === void 0 ? void 0 : options.commitmentOrConfig), wallet }, options));
     }
     _addPublicKeys(items, addresses) {

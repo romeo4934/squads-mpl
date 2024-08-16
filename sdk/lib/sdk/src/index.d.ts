@@ -27,7 +27,7 @@ declare class Squads {
         commitmentOrConfig?: Commitment | ConnectionConfig;
         multisigProgramId?: PublicKey;
     }): Squads;
-    static fnet(wallet: Wallet, options?: {
+    static localnet(wallet: Wallet, options?: {
         commitmentOrConfig?: Commitment | ConnectionConfig;
         multisigProgramId?: PublicKey;
     }): Squads;
