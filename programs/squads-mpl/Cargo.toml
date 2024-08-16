@@ -23,15 +23,11 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = "0.26.0"
-anchor-spl = "0.26.0"
+anchor-lang = "0.28.0"
+anchor-spl = "0.28.0"
 default-env = "0.1.1"
+borsh = "0.10.3"
 hex = "0.3.1"
 solana-security-txt = "1.0.1"
-solana-program = "<1.14.24"
-regex = "=1.9.6"
-cc = "=1.0.79"
-jobserver = "=0.1.25"
-toml_datetime = "=0.6.1"
-winnow = "=0.4.0"
+solana-program = "1.16.24"
 

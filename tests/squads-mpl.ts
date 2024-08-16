@@ -3,8 +3,6 @@ import fs from "fs";
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SquadsMpl } from "../idl/squads_mpl";
-import { ProgramManager } from "../idl/program_manager";
-import { Roles } from "../idl/roles";
 import { setTimeout } from "timers/promises";
 import { Token } from "@solana/spl-token"; 
 import { Period } from "../sdk/src/types"; // Adjust according to your project structure
@@ -18,13 +16,11 @@ import { LAMPORTS_PER_SOL, ParsedAccountData, SystemProgram } from "@solana/web3
 import Squads, {
   getMsPDA,
   getIxPDA,
-  getProgramManagerPDA,
   getAuthorityPDA,
   getTxPDA,
   getSpendingLimitPDA,
 } from "../sdk/src/index";
 import BN from "bn.js";
-import { getExecuteProxyInstruction, getUserRolePDA, getUserDelegatePDA, getRolesManager } from "../helpers/roles";
 import { agnosticExecute } from "../helpers/sdkExecute";
 
 import {memberListApprove} from "../helpers/approve";
@@ -36,22 +32,6 @@ const BPF_UPGRADE_ID = new anchor.web3.PublicKey(
 const deploySmpl = () => {
   const deployCmd = `solana program deploy --url localhost -v --program-id $(pwd)/target/deploy/squads_mpl-keypair.json $(pwd)/target/deploy/squads_mpl.so`;
   execSync(deployCmd);
-};
-
-const deployPm = () => {
-  const deployCmd = `solana program deploy --url localhost -v --program-id $(pwd)/target/deploy/program_manager-keypair.json $(pwd)/target/deploy/program_manager.so`;
-  execSync(deployCmd);
-};
-
-const deployRoles = () => {
-  const deployCmd = `solana program deploy --url localhost -v --program-id $(pwd)/target/deploy/roles-keypair.json $(pwd)/target/deploy/roles.so`;
-  execSync(deployCmd);
-};
-
-// will deploy a buffer for the program manager program
-const writeBuffer = (bufferKeypair: string) => {
-  const writeCmd = `solana program write-buffer --buffer ${bufferKeypair} --url localhost -v $(pwd)/target/deploy/program_manager.so`;
-  execSync(writeCmd);
 };
 
 const setBufferAuthority = (
@@ -122,7 +102,7 @@ describe("Programs", function(){
     const initialGuardiansKeys = Array.from({ length: 10 }).map(() => anchor.web3.Keypair.generate());
     const initialGuardians = initialGuardiansKeys.map((guardian) => guardian.publicKey);
 
-    // test suite
+    // test suite 
     describe("SMPL Basic functionality", function(){
       this.beforeAll(async function(){
         console.log("Deploying SMPL Program...");
@@ -133,18 +113,13 @@ describe("Programs", function(){
         squads = Squads.localnet(provider.wallet, {
           commitmentOrConfig: "processed",
           multisigProgramId: anchor.workspace.SquadsMpl.programId,
-          programManagerProgramId: anchor.workspace.ProgramManager.programId,
         });
-        // the program-manager program / provider
-        programManagerProgram = anchor.workspace
-          .ProgramManager as Program<ProgramManager>;
       
         creator = (program.provider as anchor.AnchorProvider).wallet;
   
         // the Multisig PDA to use for the test run
         randomCreateKey = anchor.web3.Keypair.generate().publicKey;
         [msPDA] = getMsPDA(randomCreateKey, squads.multisigProgramId);
-        [pmPDA] = getProgramManagerPDA(msPDA, squads.programManagerProgramId);
       
         member2 = anchor.web3.Keypair.generate();
       });

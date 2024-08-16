@@ -6,7 +6,7 @@
 use std::convert::TryInto;
 
 use anchor_lang::{prelude::*, solana_program::instruction::Instruction};
-use anchor_lang::solana_program::borsh::get_instance_packed_len;
+use anchor_lang::solana_program::borsh0_10::get_instance_packed_len;
 
 /// Ms is the basic state account for a multisig.
 #[account]
