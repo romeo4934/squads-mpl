@@ -1,8 +1,8 @@
 # Squads Multisig Program Library
 
-solana-cli 1.14.17
+solana-cli 1.16.24
 
-sh -c "$(curl -sSfL https://release.solana.com/v1.14.17/install)"
+sh -c "$(curl -sSfL https://release.solana.com/v1.16.24/install)"
 
 solana config set --keypair ~/.config/solana/id.json
 
