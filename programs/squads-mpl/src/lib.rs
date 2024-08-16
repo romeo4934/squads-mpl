@@ -11,8 +11,6 @@ use anchor_lang::{
     }
 };
 
-use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
-
 use hex::FromHex;
 
 use state::*;
@@ -765,7 +763,7 @@ pub mod squads_mpl {
     }
     
     
-    pub fn spending_limit_use(ctx: Context<SpendingLimitUse>, amount: u64) -> Result<()> {
+    pub fn spending_limit_use(ctx: Context<SpendingLimitUse>, amount: u64, decimals: u8,) -> Result<()> {
         let now = Clock::get()?.unix_timestamp;
 
         // Get a mutable reference to `spending_limit` account.
@@ -795,6 +793,10 @@ pub mod squads_mpl {
 
         // Determine transfer type based on mint
         if spending_limit.mint == Pubkey::default() {
+
+            // Check if decimals match 9 for SOL
+            require!(decimals == 9, MsError::InvalidDecimals);
+
             // Transfer SOL from the vault to the destination account.
             let destination = ctx
                 .accounts
@@ -830,10 +832,11 @@ pub mod squads_mpl {
                 .as_ref()
                 .ok_or(MsError::MissingAccount)?; // Ensure vault token account is provided for SPL transfer
 
-            let cpi_accounts = Transfer {
+            let cpi_accounts = anchor_spl::token::TransferChecked {
                 from: vault_token_account.to_account_info(), // PDA representing the SPL token vault
                 to: destination_token_account.to_account_info(),
                 authority: ctx.accounts.vault.to_account_info(),
+                mint: ctx.accounts.mint.as_ref().ok_or(MsError::MissingAccount)?.to_account_info(),
             };
 
             let seeds = &[
@@ -846,7 +849,7 @@ pub mod squads_mpl {
 
             let signer_seeds = &[&seeds[..]];
 
-            token::transfer(
+            anchor_spl::token::transfer_checked(
                 CpiContext::new_with_signer(
                     ctx.accounts
                         .token_program
@@ -857,6 +860,7 @@ pub mod squads_mpl {
                     signer_seeds,
                 ),
                 amount,
+                decimals,
             )?;
         }
 

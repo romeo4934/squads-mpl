@@ -712,6 +712,10 @@ export declare type SquadsMpl = {
                 {
                     "name": "amount";
                     "type": "u64";
+                },
+                {
+                    "name": "decimals";
+                    "type": "u8";
                 }
             ];
         }

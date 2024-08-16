@@ -715,6 +715,10 @@ exports.IDL = {
                 {
                     "name": "amount",
                     "type": "u64"
+                },
+                {
+                    "name": "decimals",
+                    "type": "u8"
                 }
             ]
         }

@@ -712,6 +712,10 @@ export type SquadsMpl = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "decimals",
+          "type": "u8"
         }
       ]
     }
@@ -1964,6 +1968,10 @@ export const IDL: SquadsMpl = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "decimals",
+          "type": "u8"
         }
       ]
     }

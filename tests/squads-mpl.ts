@@ -894,6 +894,8 @@ describe("Programs", function(){
         const amount = 1 * LAMPORTS_PER_SOL; // 1 SOL
         const period = { daily: {} }; // Daily reset period
 
+        const solDecimals = 9;
+
         let txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         let [txInstructions, txPDA] = await (
           await txBuilder.withAddSpendingLimit(mint, vaultIndex, amount, period)
@@ -911,7 +913,7 @@ describe("Programs", function(){
         const transferAmount = 0.5 * LAMPORTS_PER_SOL; // Transfer 0.5 SOL
 
        // use spendingLimitUse from the sdk
-       await squads.spendingLimitUse(msPDA, mint, vaultIndex, new BN(transferAmount), destination, null, null,creator.publicKey);
+       await squads.spendingLimitUse(msPDA, mint, vaultIndex, new BN(transferAmount), solDecimals, destination, null, null,creator.publicKey);
       
 
         // Verifications
@@ -927,7 +929,7 @@ describe("Programs", function(){
         const excessiveTransferAmount = expectedRemaining + 0.1 * LAMPORTS_PER_SOL; // Exceeds the remaining amount
 
         try {
-            await squads.spendingLimitUse(msPDA, mint, vaultIndex, new BN(excessiveTransferAmount), destination, null, null,creator.publicKey);
+            await squads.spendingLimitUse(msPDA, mint, vaultIndex, new BN(excessiveTransferAmount), solDecimals, destination, null, null,creator.publicKey);
             throw new Error("Spending limit transaction succeeded when it should have failed due to exceeding limit.");
         } catch (e) {
             expect(e.message).to.include("SpendingLimitExceeded");

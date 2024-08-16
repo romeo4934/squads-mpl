@@ -747,6 +747,7 @@ class Squads {
     mint: PublicKey,
     vaultIndex: number,
     amount: BN,
+    decimals: number,
     destination: PublicKey,
     destinationTokenAccount: PublicKey | null,
     vaultTokenAccount: PublicKey | null,
@@ -764,7 +765,7 @@ class Squads {
   // Determine if this is for SOL or SPL based on mint
   const isSol = mint.equals(PublicKey.default);
 
-  return this.multisig.methods.spendingLimitUse(amount).accounts({
+  return this.multisig.methods.spendingLimitUse(amount, decimals).accounts({
     multisig,
     spendingLimit: spendingLimitPDA,
     destination: isSol ? destination : null, // If SOL, provide destination account
@@ -783,6 +784,7 @@ class Squads {
     mint: PublicKey,
     vaultIndex: number,
     amount: BN,
+    decimals: number,
     destination: PublicKey,
     destinationTokenAccount: PublicKey | null,
     vaultTokenAccount: PublicKey | null,
@@ -793,6 +795,7 @@ class Squads {
       mint,
       vaultIndex,
       amount,
+      decimals,
       destination,
       destinationTokenAccount,
       vaultTokenAccount,

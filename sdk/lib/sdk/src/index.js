@@ -450,14 +450,14 @@ class Squads {
             return yield methods.instruction();
         });
     }
-    _spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, vaultTokenAccount, primaryMember) {
+    _spendingLimitUse(multisig, mint, vaultIndex, amount, decimals, destination, destinationTokenAccount, vaultTokenAccount, primaryMember) {
         return __awaiter(this, void 0, void 0, function* () {
             const authorityIndexBN = new bn_js_1.default(vaultIndex, 10);
             const spendingLimitPDA = this.getSpendingLimitPDA(multisig, mint, vaultIndex);
             const [vaultPDA] = (0, address_1.getAuthorityPDA)(multisig, authorityIndexBN, this.multisigProgramId);
             // Determine if this is for SOL or SPL based on mint
             const isSol = mint.equals(web3_js_1.PublicKey.default);
-            return this.multisig.methods.spendingLimitUse(amount).accounts({
+            return this.multisig.methods.spendingLimitUse(amount, decimals).accounts({
                 multisig,
                 spendingLimit: spendingLimitPDA,
                 destination: isSol ? destination : null,
@@ -471,9 +471,9 @@ class Squads {
             });
         });
     }
-    spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, vaultTokenAccount, primaryMember) {
+    spendingLimitUse(multisig, mint, vaultIndex, amount, decimals, destination, destinationTokenAccount, vaultTokenAccount, primaryMember) {
         return __awaiter(this, void 0, void 0, function* () {
-            const methods = yield this._spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, vaultTokenAccount, primaryMember);
+            const methods = yield this._spendingLimitUse(multisig, mint, vaultIndex, amount, decimals, destination, destinationTokenAccount, vaultTokenAccount, primaryMember);
             yield methods.rpc();
         });
     }
