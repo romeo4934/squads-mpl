@@ -108,7 +108,8 @@ describe("Programs", function(){
         console.log("Deploying SMPL Program...");
         deploySmpl();
         console.log("✔ SMPL Program deployed.");
-
+        
+        program = anchor.workspace.SquadsMpl as Program<SquadsMpl>;
         squads = Squads.localnet(provider.wallet, {
           commitmentOrConfig: "processed",
           multisigProgramId: anchor.workspace.SquadsMpl.programId,
