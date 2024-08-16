@@ -379,11 +379,7 @@ impl IncomingInstruction {
         // there are 3 extra bytes in a saved instruction account: index, bump, executed
         // this is used to determine how much space the incoming instruction
         // will used when saved
-
-        
-        // Serialize self using try_to_vec() to get the length
-        // anchor_lang::AnchorSerialize
-        self.try_to_vec().map(|vec| vec.len() + 3).unwrap_or_default()
+        get_instance_packed_len(&self).unwrap_or_default().checked_add(3).unwrap_or_default()
     }
 }
 
