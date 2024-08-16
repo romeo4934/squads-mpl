@@ -6,7 +6,7 @@
 use std::convert::TryInto;
 
 use anchor_lang::{prelude::*, solana_program::instruction::Instruction};
-use anchor_lang::solana_program::borsh::get_instance_packed_len;
+use anchor_lang::solana_program::borsh0_10::get_instance_packed_len;
 
 /// Ms is the basic state account for a multisig.
 #[account]
@@ -379,7 +379,11 @@ impl IncomingInstruction {
         // there are 3 extra bytes in a saved instruction account: index, bump, executed
         // this is used to determine how much space the incoming instruction
         // will used when saved
-        get_instance_packed_len(&self).unwrap_or_default().checked_add(3).unwrap_or_default()
+
+        
+        // Serialize self using try_to_vec() to get the length
+        // anchor_lang::AnchorSerialize
+        self.try_to_vec().map(|vec| vec.len() + 3).unwrap_or_default()
     }
 }
 

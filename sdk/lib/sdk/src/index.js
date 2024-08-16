@@ -43,7 +43,6 @@ const web3_js_1 = require("@solana/web3.js");
 const spl_token_1 = require("@solana/spl-token"); // Ensure you have the correct import for TOKEN_PROGRAM_ID
 const constants_1 = require("./constants");
 const squads_mpl_json_1 = __importDefault(require("../../target/idl/squads_mpl.json"));
-const program_manager_json_1 = __importDefault(require("../../target/idl/program_manager.json"));
 const anchor_1 = require("@coral-xyz/anchor");
 Object.defineProperty(exports, "Wallet", { enumerable: true, get: function () { return anchor_1.Wallet; } });
 const anchor_2 = require("@coral-xyz/anchor");
@@ -53,15 +52,12 @@ const anchor = __importStar(require("@coral-xyz/anchor"));
 const tx_builder_1 = require("./tx_builder");
 const transactions_1 = require("../../helpers/transactions");
 class Squads {
-    constructor({ connection, wallet, multisigProgramId, programManagerProgramId, }) {
+    constructor({ connection, wallet, multisigProgramId, }) {
         this.connection = connection;
         this.wallet = wallet;
         this.multisigProgramId = multisigProgramId !== null && multisigProgramId !== void 0 ? multisigProgramId : constants_1.DEFAULT_MULTISIG_PROGRAM_ID;
         this.provider = new anchor_2.AnchorProvider(this.connection, this.wallet, Object.assign(Object.assign({}, anchor_2.AnchorProvider.defaultOptions()), { commitment: "confirmed", preflightCommitment: "confirmed" }));
         this.multisig = new anchor_2.Program(squads_mpl_json_1.default, this.multisigProgramId, this.provider);
-        this.programManagerProgramId =
-            programManagerProgramId !== null && programManagerProgramId !== void 0 ? programManagerProgramId : constants_1.DEFAULT_PROGRAM_MANAGER_PROGRAM_ID;
-        this.programManager = new anchor_2.Program(program_manager_json_1.default, this.programManagerProgramId, this.provider);
     }
     static endpoint(endpoint, wallet, options) {
         return new Squads(Object.assign({ connection: new web3_js_1.Connection(endpoint, options === null || options === void 0 ? void 0 : options.commitmentOrConfig), wallet }, options));
@@ -72,7 +68,7 @@ class Squads {
     static devnet(wallet, options) {
         return new Squads(Object.assign({ connection: new web3_js_1.Connection("https://api.devnet.solana.com", options === null || options === void 0 ? void 0 : options.commitmentOrConfig), wallet }, options));
     }
-    static localnet(wallet, options) {
+    static fnet(wallet, options) {
         return new Squads(Object.assign({ connection: new web3_js_1.Connection("http://localhost:8899", options === null || options === void 0 ? void 0 : options.commitmentOrConfig), wallet }, options));
     }
     _addPublicKeys(items, addresses) {
@@ -81,7 +77,7 @@ class Squads {
     getTransactionBuilder(multisigPDA, authorityIndex) {
         return __awaiter(this, void 0, void 0, function* () {
             const multisig = yield this.getMultisig(multisigPDA);
-            return new tx_builder_1.TransactionBuilder(this.multisig.methods, this.programManager.methods, this.provider, multisig, authorityIndex, this.multisigProgramId);
+            return new tx_builder_1.TransactionBuilder(this.multisig.methods, this.provider, multisig, authorityIndex, this.multisigProgramId);
         });
     }
     getMultisig(address, commitment = "processed") {
@@ -120,42 +116,6 @@ class Squads {
             return this._addPublicKeys(accountData, addresses);
         });
     }
-    getProgramManager(address) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const accountData = yield this.programManager.account.programManager.fetch(address, "processed");
-            return Object.assign(Object.assign({}, accountData), { publicKey: address });
-        });
-    }
-    getProgramManagers(addresses) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const accountData = yield this.programManager.account.programManager.fetchMultiple(addresses, "processed");
-            return this._addPublicKeys(accountData, addresses);
-        });
-    }
-    getManagedProgram(address) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const accountData = yield this.programManager.account.managedProgram.fetch(address, "processed");
-            return Object.assign(Object.assign({}, accountData), { publicKey: address });
-        });
-    }
-    getManagedPrograms(addresses) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const accountData = yield this.programManager.account.managedProgram.fetchMultiple(addresses, "processed");
-            return this._addPublicKeys(accountData, addresses);
-        });
-    }
-    getProgramUpgrade(address) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const accountData = yield this.programManager.account.programUpgrade.fetch(address, "processed");
-            return Object.assign(Object.assign({}, accountData), { publicKey: address });
-        });
-    }
-    getProgramUpgrades(addresses) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const accountData = yield this.programManager.account.programUpgrade.fetchMultiple(addresses, "processed");
-            return this._addPublicKeys(accountData, addresses);
-        });
-    }
     getNextTransactionIndex(multisigPDA) {
         return __awaiter(this, void 0, void 0, function* () {
             const multisig = yield this.getMultisig(multisigPDA);
@@ -166,18 +126,6 @@ class Squads {
         return __awaiter(this, void 0, void 0, function* () {
             const transaction = yield this.getTransaction(transactionPDA);
             return transaction.instructionIndex + 1;
-        });
-    }
-    getNextProgramIndex(programManagerPDA) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const programManager = yield this.getProgramManager(programManagerPDA);
-            return programManager.managedProgramIndex + 1;
-        });
-    }
-    getNextUpgradeIndex(managedProgramPDA) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const managedProgram = yield this.getManagedProgram(managedProgramPDA);
-            return managedProgram.upgradeIndex + 1;
         });
     }
     getAuthorityPDA(multisigPDA, authorityIndex) {
@@ -527,47 +475,6 @@ class Squads {
         return __awaiter(this, void 0, void 0, function* () {
             const methods = yield this._spendingLimitUse(multisig, mint, vaultIndex, amount, destination, destinationTokenAccount, vaultTokenAccount, primaryMember);
             yield methods.rpc();
-        });
-    }
-    createProgramManager(multisigPDA) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const [programManagerPDA] = (0, address_1.getProgramManagerPDA)(multisigPDA, this.programManagerProgramId);
-            yield this.programManager.methods
-                .createProgramManager()
-                .accounts({ multisig: multisigPDA, programManager: programManagerPDA })
-                .rpc();
-            return yield this.getProgramManager(programManagerPDA);
-        });
-    }
-    createManagedProgram(multisigPDA, programAddress, name) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const [programManagerPDA] = (0, address_1.getProgramManagerPDA)(multisigPDA, this.programManagerProgramId);
-            const [managedProgramPDA] = (0, address_1.getManagedProgramPDA)(programManagerPDA, new bn_js_1.default(yield this.getNextProgramIndex(programManagerPDA), 10), this.programManagerProgramId);
-            yield this.programManager.methods
-                .createManagedProgram(programAddress, name)
-                .accounts({
-                multisig: multisigPDA,
-                programManager: programManagerPDA,
-                managedProgram: managedProgramPDA,
-            })
-                .rpc();
-            return yield this.getManagedProgram(managedProgramPDA);
-        });
-    }
-    createProgramUpgrade(multisigPDA, managedProgramPDA, bufferAddress, spillAddress, authorityAddress, upgradeName) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const [programManagerPDA] = (0, address_1.getProgramManagerPDA)(multisigPDA, this.programManagerProgramId);
-            const [programUpgradePDA] = (0, address_1.getProgramUpgradePDA)(managedProgramPDA, new bn_js_1.default(yield this.getNextUpgradeIndex(managedProgramPDA), 10), this.programManagerProgramId);
-            yield this.programManager.methods
-                .createProgramUpgrade(bufferAddress, spillAddress, authorityAddress, upgradeName)
-                .accounts({
-                multisig: multisigPDA,
-                programManager: programManagerPDA,
-                managedProgram: managedProgramPDA,
-                programUpgrade: programUpgradePDA,
-            })
-                .rpc();
-            return yield this.getProgramUpgrade(programUpgradePDA);
         });
     }
     // this will check to see if the multisig needs to be reallocated for

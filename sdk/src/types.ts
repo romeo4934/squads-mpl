@@ -1,5 +1,4 @@
 import { SquadsMpl } from "../../target/types/squads_mpl";
-import { ProgramManager } from "../../target/types/program_manager";
 import { Idl, IdlTypes, MethodsNamespace } from "@coral-xyz/anchor";
 import { IdlTypeDef } from "@coral-xyz/anchor/dist/cjs/idl";
 import {
@@ -27,12 +26,6 @@ export type TransactionAccount =
 export type InstructionAccount =
   AccountDefDictionary<SquadsMpl>["msInstruction"];
 
-export type ProgramManagerAccount =
-  AccountDefDictionary<ProgramManager>["programManager"];
-export type ManagedProgramAccount =
-  AccountDefDictionary<ProgramManager>["managedProgram"];
-export type ProgramUpgradeAccount =
-  AccountDefDictionary<ProgramManager>["programUpgrade"];
 
 export type SquadsMethods = MethodsBuilder<
   SquadsMpl,
@@ -41,11 +34,6 @@ export type SquadsMethods = MethodsBuilder<
 export type SquadsMethodsNamespace = MethodsNamespace<
   SquadsMpl,
   AllInstructions<SquadsMpl>
->;
-
-export type ProgramManagerMethodsNamespace = MethodsNamespace<
-  ProgramManager,
-  AllInstructions<ProgramManager>
 >;
 
 export type ApprovalMode = IdlTypes<SquadsMpl>["ApprovalMode"];

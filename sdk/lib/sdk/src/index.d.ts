@@ -1,6 +1,6 @@
 import { Connection, PublicKey, Commitment, ConnectionConfig, TransactionInstruction, Signer } from "@solana/web3.js";
 import { Wallet } from "@coral-xyz/anchor";
-import { InstructionAccount, ManagedProgramAccount, MultisigAccount, ProgramManagerAccount, ProgramUpgradeAccount, TransactionAccount, ApprovalMode, SpendingLimitAccount } from "./types";
+import { InstructionAccount, MultisigAccount, TransactionAccount, ApprovalMode, SpendingLimitAccount } from "./types";
 import BN from "bn.js";
 import * as anchor from "@coral-xyz/anchor";
 import { TransactionBuilder } from "./tx_builder";
@@ -10,33 +10,26 @@ declare class Squads {
     private readonly provider;
     readonly multisigProgramId: PublicKey;
     private readonly multisig;
-    readonly programManagerProgramId: PublicKey;
-    private readonly programManager;
-    constructor({ connection, wallet, multisigProgramId, programManagerProgramId, }: {
+    constructor({ connection, wallet, multisigProgramId, }: {
         connection: Connection;
         wallet: Wallet;
         multisigProgramId?: PublicKey;
-        programManagerProgramId?: PublicKey;
     });
     static endpoint(endpoint: string, wallet: Wallet, options?: {
         commitmentOrConfig?: Commitment | ConnectionConfig;
         multisigProgramId?: PublicKey;
-        programManagerProgramId?: PublicKey;
     }): Squads;
     static mainnet(wallet: Wallet, options?: {
         commitmentOrConfig?: Commitment | ConnectionConfig;
         multisigProgramId?: PublicKey;
-        programManagerProgramId?: PublicKey;
     }): Squads;
     static devnet(wallet: Wallet, options?: {
         commitmentOrConfig?: Commitment | ConnectionConfig;
         multisigProgramId?: PublicKey;
-        programManagerProgramId?: PublicKey;
     }): Squads;
-    static localnet(wallet: Wallet, options?: {
+    static fnet(wallet: Wallet, options?: {
         commitmentOrConfig?: Commitment | ConnectionConfig;
         multisigProgramId?: PublicKey;
-        programManagerProgramId?: PublicKey;
     }): Squads;
     private _addPublicKeys;
     getTransactionBuilder(multisigPDA: PublicKey, authorityIndex: number): Promise<TransactionBuilder>;
@@ -46,16 +39,8 @@ declare class Squads {
     getTransactions(addresses: PublicKey[]): Promise<(TransactionAccount | null)[]>;
     getInstruction(address: PublicKey): Promise<InstructionAccount>;
     getInstructions(addresses: PublicKey[]): Promise<(InstructionAccount | null)[]>;
-    getProgramManager(address: PublicKey): Promise<ProgramManagerAccount>;
-    getProgramManagers(addresses: PublicKey[]): Promise<(ProgramManagerAccount | null)[]>;
-    getManagedProgram(address: PublicKey): Promise<ManagedProgramAccount>;
-    getManagedPrograms(addresses: PublicKey[]): Promise<(ManagedProgramAccount | null)[]>;
-    getProgramUpgrade(address: PublicKey): Promise<ProgramUpgradeAccount>;
-    getProgramUpgrades(addresses: PublicKey[]): Promise<(ProgramUpgradeAccount | null)[]>;
     getNextTransactionIndex(multisigPDA: PublicKey): Promise<number>;
     getNextInstructionIndex(transactionPDA: PublicKey): Promise<number>;
-    getNextProgramIndex(programManagerPDA: PublicKey): Promise<number>;
-    getNextUpgradeIndex(managedProgramPDA: PublicKey): Promise<number>;
     getAuthorityPDA(multisigPDA: PublicKey, authorityIndex: number): PublicKey;
     getSpendingLimitPDA(multisigPDA: PublicKey, mint: PublicKey, vaultIndex: number): PublicKey;
     getSpendingLimit(multisig: PublicKey, mint: PublicKey, vaultIndex: number, commitment?: Commitment): Promise<SpendingLimitAccount>;
@@ -91,9 +76,6 @@ declare class Squads {
     buildRemovePrimaryMember(multisigPDA: PublicKey, removerSigner: anchor.web3.Keypair): Promise<TransactionInstruction>;
     private _spendingLimitUse;
     spendingLimitUse(multisig: PublicKey, mint: PublicKey, vaultIndex: number, amount: BN, destination: PublicKey, destinationTokenAccount: PublicKey | null, vaultTokenAccount: PublicKey | null, primaryMember: PublicKey): Promise<void>;
-    createProgramManager(multisigPDA: PublicKey): Promise<ProgramManagerAccount>;
-    createManagedProgram(multisigPDA: PublicKey, programAddress: PublicKey, name: string): Promise<ManagedProgramAccount>;
-    createProgramUpgrade(multisigPDA: PublicKey, managedProgramPDA: PublicKey, bufferAddress: PublicKey, spillAddress: PublicKey, authorityAddress: PublicKey, upgradeName: string): Promise<ProgramUpgradeAccount>;
     checkGetTopUpInstruction(publicKey: PublicKey): Promise<TransactionInstruction | null>;
 }
 export default Squads;

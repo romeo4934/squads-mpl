@@ -40,9 +40,8 @@ const address_1 = require("./address");
 const bn_js_1 = __importDefault(require("bn.js"));
 const anchor = __importStar(require("@coral-xyz/anchor"));
 class TransactionBuilder {
-    constructor(methods, managerMethods, provider, multisig, authorityIndex, programId, instructions) {
+    constructor(methods, provider, multisig, authorityIndex, programId, instructions) {
         this.methods = methods;
-        this.managerMethods = managerMethods;
         this.provider = provider;
         this.multisig = multisig;
         this.authorityIndex = authorityIndex;
@@ -64,7 +63,7 @@ class TransactionBuilder {
         });
     }
     _cloneWithInstructions(instructions) {
-        return new TransactionBuilder(this.methods, this.managerMethods, this.provider, this.multisig, this.authorityIndex, this.programId, instructions);
+        return new TransactionBuilder(this.methods, this.provider, this.multisig, this.authorityIndex, this.programId, instructions);
     }
     transactionPDA() {
         const [transactionPDA] = (0, address_1.getTxPDA)(this.multisig.publicKey, new bn_js_1.default(this.multisig.transactionIndex + 1), this.programId);
@@ -206,26 +205,6 @@ class TransactionBuilder {
                 multisig: this.multisig.publicKey,
                 spendingLimit: spendingLimitPDA,
                 systemProgram: anchor.web3.SystemProgram.programId,
-            })
-                .instruction();
-            return this.withInstruction(instruction);
-        });
-    }
-    // async withAddAuthority(): Promise<TransactionBuilder> {}
-    // async withSetExternalExecute(): Promise<TransactionBuilder> {}
-    withSetAsExecuted(programManagerPDA, managedProgramPDA, programUpgradePDA, transactionPDA, instructionPDA, authorityIndex) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const [authorityPDA] = (0, address_1.getAuthorityPDA)(this.multisig.publicKey, new bn_js_1.default(authorityIndex, 10), this.programId);
-            const instruction = yield this.managerMethods
-                .setAsExecuted()
-                .accounts({
-                multisig: this.multisig.publicKey,
-                programManager: programManagerPDA,
-                managedProgram: managedProgramPDA,
-                programUpgrade: programUpgradePDA,
-                transaction: transactionPDA,
-                instruction: instructionPDA,
-                authority: authorityPDA,
             })
                 .instruction();
             return this.withInstruction(instruction);
