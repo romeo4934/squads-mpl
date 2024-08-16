@@ -3,7 +3,6 @@ import fs from "fs";
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SquadsMpl } from "../idl/squads_mpl";
-import { Roles } from "../idl/roles";
 import { setTimeout } from "timers/promises";
 import { Token } from "@solana/spl-token"; 
 import { Period } from "../sdk/src/types"; // Adjust according to your project structure
