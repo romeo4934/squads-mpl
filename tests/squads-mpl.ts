@@ -4,7 +4,15 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SquadsMpl } from "../idl/squads_mpl";
 import { setTimeout } from "timers/promises";
-import { Token } from "@solana/spl-token"; 
+import { Token, createMint,
+    createAccount,
+    getAccount,
+    createAssociatedTokenAccount,
+    getOrCreateAssociatedTokenAccount,
+    transfer,
+    mintTo,
+    TOKEN_PROGRAM_ID,
+    ASSOCIATED_TOKEN_PROGRAM_ID, } from "@solana/spl-token"; 
 import { Period } from "../sdk/src/types"; // Adjust according to your project structure
 
 import {
@@ -853,12 +861,10 @@ describe("Programs", function(){
         // Step 4: Create and send the transaction adding the spending limit
         const addSpendingLimitTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
         await provider.sendAndConfirm(addSpendingLimitTx, undefined, { commitment: "confirmed" });
-
         // Step 5: Approve the transaction
         await squads.approveTransaction(txPDA);
         // Step 6: Execute the transaction
         await squads.executeTransaction(txPDA);
-
         // Verify the spending limit was added
         const msState = await squads.getMultisig(msPDA);
 
@@ -936,6 +942,106 @@ describe("Programs", function(){
         }
 
       });
+
+      it(`Use spending limit to transfer SPL tokens`, async function() {
+        // Step 1: Create a new mint
+        const mintAuthority = anchor.web3.Keypair.generate();
+
+        // Fund the mintAuthority account
+        const tx = await provider.connection.requestAirdrop(
+          mintAuthority.publicKey,
+          anchor.web3.LAMPORTS_PER_SOL
+        );
+
+        await provider.connection.confirmTransaction(tx);
+
+        const mint = await createMint(
+          provider.connection, 
+          mintAuthority ,
+          mintAuthority.publicKey, 
+          null, 
+          9,
+          undefined,
+          undefined,
+          TOKEN_PROGRAM_ID
+        );
+        // Step 2: Create an associated token account for the vault (assuming index 1)
+        const vaultIndex = 1;
+        const [vaultPDA] = getAuthorityPDA(msPDA, new BN(vaultIndex,10), anchor.workspace.SquadsMpl.programId);
+
+        const vaultTokenAccount = await getOrCreateAssociatedTokenAccount(
+          provider.connection, 
+          mintAuthority ,
+          mint, 
+          vaultPDA, 
+          true
+        );
+
+        // Step 3: Mint some SPL tokens to the vault's associated token account
+        const amountSPLTokens = 1000 * 10 ** 9; // Mint 1000 tokens
+        await mintTo(
+          provider.connection, 
+          mintAuthority,
+          mint,
+          vaultTokenAccount.address,
+          mintAuthority, 
+          amountSPLTokens, 
+          [],
+          undefined,
+          TOKEN_PROGRAM_ID
+        );
+
+        // Step 4: Set up a spending limit for the SPL tokens
+        const limitAmount = new BN(500 * 10 ** 9); // Setting spending limit to 500 tokens
+        const period = { daily: {} }; // Daily reset period
+        let txBuilder = await squads.getTransactionBuilder(msPDA, 0);
+        let [txInstructions, txPDA] = await (
+          await txBuilder.withAddSpendingLimit(mint, vaultIndex, limitAmount, period)
+        ).getInstructions({ approvalByMultisig: {} });
+        let activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
+        const addSpendingLimitTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
+        await provider.sendAndConfirm(addSpendingLimitTx);
+        await setTimeout(2000);
+        await squads.approveTransaction(txPDA);
+        await squads.executeTransaction(txPDA);
+
+        
+
+        // Step 5: Use the spending limit to transfer SPL tokens
+        const destination = anchor.web3.Keypair.generate().publicKey;
+        const destinationTokenAccount = await createAssociatedTokenAccount(
+          provider.connection, 
+          mintAuthority,
+          mint, 
+          destination,
+          undefined,
+          TOKEN_PROGRAM_ID,
+          ASSOCIATED_TOKEN_PROGRAM_ID
+        );
+        await setTimeout(2000);
+
+        const transferAmount = new BN(300 * 10 ** 9); // Transfer 300 tokens
+        await squads.spendingLimitUse(msPDA, mint, vaultIndex, transferAmount, 9, destination, destinationTokenAccount, vaultTokenAccount.address, creator.publicKey);
+        // Verifications
+        const destinationAccountInfo = await getAccount(provider.connection, destinationTokenAccount);
+        expect(destinationAccountInfo.amount.toString()).to.equal(transferAmount.toString());
+
+        // Step 6: Verify the remaining amount in the spending limit
+        const spendingLimit = await squads.getSpendingLimit(msPDA, mint, vaultIndex);
+        const expectedRemaining = limitAmount.sub(transferAmount);
+        expect(spendingLimit.remainingAmount.toString()).to.equal(expectedRemaining.toString());
+
+        // Step 7: Attempt to use the spending limit to transfer more than the remaining amount
+        const excessiveTransferAmount = expectedRemaining.add(new BN(100 * 10 ** 9)); // Exceeds the remaining amount
+
+        try {
+            await squads.spendingLimitUse(msPDA, mint, vaultIndex, excessiveTransferAmount, 9, destination, destinationTokenAccount, vaultTokenAccount.address, creator.publicKey);
+            throw new Error("Spending limit transaction succeeded when it should have failed due to exceeding limit.");
+        } catch (e) {
+            expect(e.message).to.include("SpendingLimitExceeded");
+        }
+        await setTimeout(2000);
+      }); 
 
       
       it(`Guardian removes primary member, and verify that the primary member cannot execute the previously approved transaction`, async function() {

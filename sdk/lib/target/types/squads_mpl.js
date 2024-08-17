@@ -671,8 +671,7 @@ exports.IDL = {
                 {
                     "name": "destination",
                     "isMut": true,
-                    "isSigner": false,
-                    "isOptional": true
+                    "isSigner": false
                 },
                 {
                     "name": "systemProgram",
@@ -1253,6 +1252,10 @@ exports.IDL = {
         {
             "code": 6028,
             "name": "InvalidMint"
+        },
+        {
+            "code": 6029,
+            "name": "InvalidDecimals"
         }
     ]
 };

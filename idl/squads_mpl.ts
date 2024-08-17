@@ -668,8 +668,7 @@ export type SquadsMpl = {
         {
           "name": "destination",
           "isMut": true,
-          "isSigner": false,
-          "isOptional": true
+          "isSigner": false
         },
         {
           "name": "systemProgram",
@@ -1250,6 +1249,10 @@ export type SquadsMpl = {
     {
       "code": 6028,
       "name": "InvalidMint"
+    },
+    {
+      "code": 6029,
+      "name": "InvalidDecimals"
     }
   ]
 };
@@ -1924,8 +1927,7 @@ export const IDL: SquadsMpl = {
         {
           "name": "destination",
           "isMut": true,
-          "isSigner": false,
-          "isOptional": true
+          "isSigner": false
         },
         {
           "name": "systemProgram",
@@ -2506,6 +2508,10 @@ export const IDL: SquadsMpl = {
     {
       "code": 6028,
       "name": "InvalidMint"
+    },
+    {
+      "code": 6029,
+      "name": "InvalidDecimals"
     }
   ]
 };

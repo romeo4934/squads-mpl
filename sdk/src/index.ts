@@ -768,7 +768,7 @@ class Squads {
   return this.multisig.methods.spendingLimitUse(amount, decimals).accounts({
     multisig,
     spendingLimit: spendingLimitPDA,
-    destination: isSol ? destination : null, // If SOL, provide destination account
+    destination: destination,
     destinationTokenAccount: !isSol ? destinationTokenAccount : null, // If SPL, provide destination token account
     vault: vaultPDA, // Use the computed vault PDA
     vaultTokenAccount: !isSol ? vaultTokenAccount : null, // Vault token account for SPL

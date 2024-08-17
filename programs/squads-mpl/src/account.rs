@@ -530,7 +530,7 @@ pub struct SpendingLimitUse<'info> {
 
     /// CHECK: Could be any account
     #[account(mut)]
-    pub destination: Option<AccountInfo<'info>>, // SOL destination account
+    pub destination: AccountInfo<'info>, // SOL destination account
     
     pub system_program: Option<Program<'info, System>>,
 

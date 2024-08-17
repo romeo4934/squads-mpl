@@ -669,7 +669,6 @@ export declare type SquadsMpl = {
                     "name": "destination";
                     "isMut": true;
                     "isSigner": false;
-                    "isOptional": true;
                 },
                 {
                     "name": "systemProgram";
@@ -1250,6 +1249,10 @@ export declare type SquadsMpl = {
         {
             "code": 6028;
             "name": "InvalidMint";
+        },
+        {
+            "code": 6029;
+            "name": "InvalidDecimals";
         }
     ];
 };
