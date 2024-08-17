@@ -46,7 +46,6 @@ pub mod squads_mpl {
     use super::*;
 
     pub const MAX_TIME_LOCK: u32 = 3 * 30 * 24 * 60 * 60; // 3 months
-    pub const MAX_GUARDIANS: usize = 10; // Set maximum number of guardians to 10
 
     /// Creates a new multisig account
     // instruction to create a multisig
@@ -79,6 +78,11 @@ pub mod squads_mpl {
         // make sure we don't exceed u16 on first call
         if total_members > usize::from(u16::MAX) {
             return err!(MsError::MaxMembersReached);
+        }
+
+        // Check if the maximum number of guardians is reached
+        if guardians.len() > MAX_GUARDIANS {
+            return err!(MsError::MaxGuardiansReached);
         }
 
         // make sure threshold is valid

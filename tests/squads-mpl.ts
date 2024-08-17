@@ -75,7 +75,7 @@ const getIxAuthority = async (txPda: anchor.web3.PublicKey, index: anchor.BN, pr
   );
 };
 
-const MAX_GUARDIANS = 10;
+const MAX_GUARDIANS = 5;
 const ONE_MINUTE = 60 * 1; 
 
 let provider;
@@ -107,7 +107,7 @@ describe("Programs", function(){
 
     let threshold = 1;
     let timeLock = 0; // Set the time lock to 0 for no delay
-    const initialGuardiansKeys = Array.from({ length: 10 }).map(() => anchor.web3.Keypair.generate());
+    const initialGuardiansKeys = Array.from({ length: MAX_GUARDIANS }).map(() => anchor.web3.Keypair.generate());
     const initialGuardians = initialGuardiansKeys.map((guardian) => guardian.publicKey);
 
     // test suite 
@@ -419,7 +419,7 @@ describe("Programs", function(){
         33 +        // primary member (one byte for option + 32 for Pubkey)
         4 +         // time lock
         4 +         // for guardians vec length
-        (10* 32); // each guardian is a public key (32 bytes)
+        (MAX_GUARDIANS * 32); // each guardian is a public key (32 bytes)
         
         const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 32) - currNumKeys;
         // if there is less than 1 spot left, calculate rent needed for realloc of 10 more keys

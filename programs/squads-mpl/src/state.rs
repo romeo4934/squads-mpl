@@ -35,6 +35,8 @@ pub struct Ms {
     pub guardians: Vec<Pubkey>,          // List of guardians
 }
 
+pub const MAX_GUARDIANS: usize = 5; // Set maximum number of guardians to 5
+
 impl Ms {
     pub const SIZE_WITHOUT_MEMBERS: usize = 8 + // Anchor disriminator
     2 +         // threshold value
@@ -48,7 +50,7 @@ impl Ms {
     33 +        // primary member (one byte for option + 32 for Pubkey)
     4 +        // time lock
     4 +         // for guardians vec length
-    (10* 32); // each guardian is a public key (32 bytes)
+    (MAX_GUARDIANS * 32); // each guardian is a public key (32 bytes)
 
 
     /// Initializes the new multisig account
