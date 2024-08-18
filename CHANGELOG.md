@@ -8,12 +8,12 @@
 - The primary member can execute any transaction with a time lock.
 - Add guardians in the multisig account that can remove primary member in case of emergency and cancel current pending transactions.
 - Add spending limit PDA to allow primary member to send for SOL or SPL tokens with limit and frequency from a specific vault.
-- Upgrade to Anchor 0.29.0 and Anchor SPL 0.29.0
+- Upgrade to Anchor 0.29.0 and Anchor SPL 0.29.0 (https://github.com/romeo4934/squads-mpl/commit/eb30f4ef6a29e029f34b3260a5dc926d93f5c501) and (https://github.com/romeo4934/squads-mpl/pull/1)
 
 ### Bug fixes
 
-- Execution of a transaction is now checking the current index of multisig
-- Removes deprecated fields from transactions and instructions
+- Execution of a transaction is now checking the current index of multisig (https://github.com/romeo4934/squads-mpl/commit/b7055c95d4e91fb75d7292b1fa5201ea04d215b6) and (https://github.com/romeo4934/squads-mpl/commit/033ea83f3f131e2c9e4f5016b0f19f3542b6058d)
+- Removes deprecated fields from transactions and instructions (https://github.com/romeo4934/squads-mpl/commit/6de6e009dbe83aef96dd554293663ba1c5e9a145)
 
 ## [1.3.0](https://github.com/Squads-Protocol/squads-mpl/compare/v1.2.0...v1.3.0) (2023-02-13)
 
