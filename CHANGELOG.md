@@ -4,10 +4,11 @@
 
 ### Features
 
-- Add primary member than can execute any transaction with a time lock
-- Add guardians that can remove primary member in case of emergency
-- Add spending limit to multisig to allow sending for SOL or SPL tokens for primary member
-- Upgrade to Anchor 0.29.0
+- Add a primary member in the multisig account
+- The primary member can execute any transaction with a time lock
+- Add guardians in the multisig account that can remove primary member in case of emergency
+- Add spending limit PDA to allow primary member to send for SOL or SPL tokens with limit and frequency from a specific vault.
+- Upgrade to Anchor 0.29.0 and Anchor SPL 0.29.0
 
 ### Bug fixes
 
