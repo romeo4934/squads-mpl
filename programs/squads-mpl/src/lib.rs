@@ -107,7 +107,7 @@ pub mod squads_mpl {
             create_key,
             members,
             primary_member,
-            *ctx.bumps.get("multisig").unwrap(),
+            ctx.bumps.multisig,
             time_lock,
             guardians, 
         )
@@ -182,7 +182,7 @@ pub mod squads_mpl {
                 ctx.program_id,
                 ctx.accounts,
                 ctx.remaining_accounts,
-                ctx.bumps.clone(),
+                MsAuthBumps{},
             ),
             old_member,
         )?;
@@ -201,7 +201,7 @@ pub mod squads_mpl {
                 ctx.program_id,
                 ctx.accounts,
                 ctx.remaining_accounts,
-                ctx.bumps.clone(),
+                MsAuthReallocBumps{},
             ),
             new_member,
         )?;
@@ -282,7 +282,7 @@ pub mod squads_mpl {
             ctx.accounts.creator.key(),
             ms.key(),
             ms.transaction_index,
-            *ctx.bumps.get("transaction").unwrap(),
+            ctx.bumps.transaction,
             authority_index,
             authority_bump,
             mode, // Initialize with mode
@@ -312,7 +312,7 @@ pub mod squads_mpl {
         ctx.accounts.instruction.init(
             tx.instruction_index,
             incoming_instruction,
-            *ctx.bumps.get("instruction").unwrap(),
+            ctx.bumps.instruction,
         )
     }
 
@@ -753,7 +753,7 @@ pub mod squads_mpl {
             mint,
             amount,
             period,
-            *ctx.bumps.get("spending_limit").unwrap(),
+            ctx.bumps.spending_limit,
         )?;
 
         let new_index = ctx.accounts.multisig.transaction_index;
