@@ -812,15 +812,18 @@ class Squads {
     const ms = await this.getMultisig(publicKey);
     const currDataSize = msAccount.value.data.length;
     const currNumKeys = ms.keys.length;
-    const SIZE_WITHOUT_MEMBERS = 8 + // Anchor disriminator
+    const SIZE_WITHOUT_MEMBERS = 8 + // Anchor discriminator
         2 +         // threshold value
         2 +         // authority index
         4 +         // transaction index
         4 +         // processed internal transaction index
         1 +         // PDA bump
         32 +        // creator
-        1 +         // allow external execute
-        4;          // for vec length
+        4 +         // for vec length
+        33 +        // primary member (one byte for option + 32 for Pubkey)
+        4 +         // time lock
+        4 +         // for guardians vec length
+        (5 * 32); // each guardian is a public key (32 bytes) and there are 5 guardians cf. MAX_GUARDIANS
 
     const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 32) - currNumKeys;
 

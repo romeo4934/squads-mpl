@@ -414,7 +414,6 @@ describe("Programs", function(){
         4 +         // processed internal transaction index
         1 +         // PDA bump
         32 +        // creator
-        1 +         // allow external execute
         4 +         // for vec length
         33 +        // primary member (one byte for option + 32 for Pubkey)
         4 +         // time lock

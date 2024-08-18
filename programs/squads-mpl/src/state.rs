@@ -26,8 +26,6 @@ pub struct Ms {
     pub bump: u8,                       // bump for the multisig seed.
 
     pub create_key: Pubkey,             // random key(or not) used to seed the multisig pda.
-                                   
-    pub allow_external_execute: bool,   // DEPRECATED - allow non-member keys to execute txs
 
     pub keys: Vec<Pubkey>,              // keys of the members/owners of the multisig.
     pub primary_member: Option<Pubkey>, // Optional primary member
@@ -45,7 +43,6 @@ impl Ms {
     4 +         // processed internal transaction index
     1 +         // PDA bump
     32 +        // creator
-    1 +         // allow external execute
     4 +          // for vec length
     33 +        // primary member (one byte for option + 32 for Pubkey)
     4 +        // time lock
@@ -62,7 +59,6 @@ impl Ms {
         self.ms_change_index= 0;
         self.bump = bump;
         self.create_key = create_key;
-        self.allow_external_execute = false;
         self.time_lock = time_lock; // Initialize with the time_lock
         self.primary_member = primary_member;
         self.guardians = guardians;
@@ -316,12 +312,10 @@ pub struct MsInstruction {
     pub data: Vec<u8>,
     pub instruction_index: u8,
     pub bump: u8,
-    pub executed: bool, // deprecated in favor for executed_index in the MsTransaction
 }
 
 impl MsInstruction {
-    pub const MAXIMUM_SIZE: usize = 1280;   // no longer used but kept for reference, was previously a client side limitation for sizing.
-
+    
     /// Initializes the instruction account
     pub fn init(&mut self, instruction_index: u8, incoming_instruction: IncomingInstruction, bump: u8) -> Result<()> {
         self.bump = bump;
@@ -329,7 +323,6 @@ impl MsInstruction {
         self.program_id = incoming_instruction.program_id;
         self.keys = incoming_instruction.keys;
         self.data = incoming_instruction.data;
-        self.executed = false;
         Ok(())
     }
 }
@@ -381,7 +374,7 @@ impl IncomingInstruction {
         // there are 3 extra bytes in a saved instruction account: index, bump, executed
         // this is used to determine how much space the incoming instruction
         // will used when saved
-        get_instance_packed_len(&self).unwrap_or_default().checked_add(3).unwrap_or_default()
+        get_instance_packed_len(&self).unwrap_or_default().checked_add(2).unwrap_or_default()
     }
 }
 
