@@ -130,7 +130,7 @@ pub mod squads_mpl {
         }
         let curr_data_size = multisig_account_info.data.borrow().len();
         let spots_left =
-            ((curr_data_size - Ms::SIZE_WITHOUT_MEMBERS) / 32) - ctx.accounts.multisig.keys.len() ;
+            ((curr_data_size - Ms::SIZE_WITHOUT_MEMBERS) / 32) - ctx.accounts.multisig.keys.len();
 
         // if not enough, add (10 * 32) to size - bump it up by 10 accounts
         if spots_left < 1 {
