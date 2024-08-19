@@ -796,7 +796,7 @@ pub mod squads_mpl {
             let destination = ctx
                 .accounts
                 .destination
-                .as_ref(); // TO BE VERIFIED
+                .as_ref();
 
             anchor_lang::system_program::transfer(CpiContext::new_with_signer(
                 ctx.accounts.system_program.as_ref().ok_or(MsError::MissingAccount)?.to_account_info(),
