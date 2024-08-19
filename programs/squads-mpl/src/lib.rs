@@ -784,16 +784,17 @@ pub mod squads_mpl {
             // Reset remaining amount and update the last reset timestamp.
             spending_limit.remaining_amount = spending_limit.amount;
             let periods_passed = time_since_last_reset.checked_div(reset_period).unwrap();
-            spending_limit.last_reset += periods_passed * reset_period;
+            spending_limit.last_reset = spending_limit
+                .last_reset
+                .checked_add(periods_passed.checked_mul(reset_period).unwrap())
+                .unwrap();
         }
 
-        // Check if the amount exceeds the remaining limit.
-        if amount > spending_limit.remaining_amount {
-            return err!(MsError::SpendingLimitExceeded);
-        }
-
-        // Subtract the amount from the remaining limit.
-        spending_limit.remaining_amount = spending_limit.remaining_amount.checked_sub(amount).unwrap();
+        // Subtract the amount from the remaining limit, ensuring it does not exceed.
+        spending_limit.remaining_amount = spending_limit
+            .remaining_amount
+            .checked_sub(amount)
+            .ok_or(MsError::SpendingLimitExceeded)?;
 
         // Determine transfer type based on mint
         if spending_limit.mint == Pubkey::default() {
