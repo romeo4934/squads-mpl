@@ -732,24 +732,11 @@ pub mod squads_mpl {
 
     pub fn add_spending_limit(ctx: Context<CreateSpendingLimit>, mint: Pubkey, authority_index: u32, amount: u64, period: Period) -> Result<()> {
         let spending_limit = &mut ctx.accounts.spending_limit;        
-        let ms = &ctx.accounts.multisig;
-
-        // Compute the authority_bump
-        let (_, authority_bump) = Pubkey::find_program_address(
-            &[
-                b"squad",
-                ms.key().as_ref(),
-                &authority_index.to_le_bytes(),
-                b"authority",
-            ],
-            ctx.program_id,
-        );
-
+        
         // Initialize the spending limit account
         spending_limit.init(
             ctx.accounts.multisig.key(),
             authority_index,
-            authority_bump,
             mint,
             amount,
             period,
@@ -778,6 +765,9 @@ pub mod squads_mpl {
 
         // Calculate the timestamp difference between now and last reset.
         let time_since_last_reset = now.checked_sub(spending_limit.last_reset).unwrap();
+
+        // Vault bump
+        let vault_bump = ctx.bumps.vault;
 
         // Check if the reset period has passed.
         if time_since_last_reset > reset_period {
@@ -819,7 +809,7 @@ pub mod squads_mpl {
                     ctx.accounts.spending_limit.multisig.as_ref(),
                     &ctx.accounts.spending_limit.authority_index.to_le_bytes(),
                     b"authority",
-                    &[ctx.accounts.spending_limit.authority_bump],
+                    &[vault_bump],
                 ]],
             ), amount)?;
         } else {
@@ -848,7 +838,7 @@ pub mod squads_mpl {
                 ctx.accounts.spending_limit.multisig.as_ref(),
                 &ctx.accounts.spending_limit.authority_index.to_le_bytes(),
                 b"authority",
-                &[ctx.accounts.spending_limit.authority_bump],
+                &[vault_bump],
             ];
 
             let signer_seeds = &[&seeds[..]];

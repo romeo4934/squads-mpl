@@ -519,7 +519,7 @@ pub struct SpendingLimitUse<'info> {
             &spending_limit.authority_index.to_le_bytes(),
             b"authority"
         ],
-        bump = spending_limit.authority_bump,
+        bump,
     )]
     pub vault: AccountInfo<'info>, // Vault from which the asset is transferred
 
