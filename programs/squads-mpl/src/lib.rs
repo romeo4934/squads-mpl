@@ -766,6 +766,9 @@ pub mod squads_mpl {
         // Calculate the timestamp difference between now and last reset.
         let time_since_last_reset = now.checked_sub(spending_limit.last_reset).unwrap();
 
+        // Multisig
+        let multisig_key = ctx.accounts.multisig.key();
+
         // Vault bump
         let vault_bump = ctx.bumps.vault;
 
@@ -806,7 +809,7 @@ pub mod squads_mpl {
                 },
                 &[&[
                     b"squad",
-                    ctx.accounts.spending_limit.multisig.as_ref(),
+                    multisig_key.as_ref(),
                     &ctx.accounts.spending_limit.authority_index.to_le_bytes(),
                     b"authority",
                     &[vault_bump],
@@ -835,7 +838,7 @@ pub mod squads_mpl {
 
             let seeds = &[
                 b"squad",
-                ctx.accounts.spending_limit.multisig.as_ref(),
+                multisig_key.as_ref(),
                 &ctx.accounts.spending_limit.authority_index.to_le_bytes(),
                 b"authority",
                 &[vault_bump],
