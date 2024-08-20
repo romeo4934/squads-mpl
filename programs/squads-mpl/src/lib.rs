@@ -731,6 +731,11 @@ pub mod squads_mpl {
     }
 
     pub fn add_spending_limit(ctx: Context<CreateSpendingLimit>, mint: Pubkey, authority_index: u32, amount: u64, period: Period) -> Result<()> {
+        // Ensure amount is strictly positive
+        if amount == 0 {
+            return err!(MsError::InvalidAmount);
+        }
+        
         let spending_limit = &mut ctx.accounts.spending_limit;        
         
         // Initialize the spending limit account

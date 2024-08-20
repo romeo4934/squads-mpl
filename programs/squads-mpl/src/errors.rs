@@ -36,5 +36,6 @@ pub enum MsError {
     SpendingLimitExceeded, // Error for exceeding spending limit
     SpendingLimitMustBeForSol, // Error for spending limit not being for SOL
     InvalidMint, // Error for invalid mint
+    InvalidAmount, // Error for invalid amount
     InvalidDecimals, // Error for incorrect decimals
 }
