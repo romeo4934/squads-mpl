@@ -816,6 +816,18 @@ pub mod squads_mpl {
                 ]],
             ), amount)?;
         } else {
+
+            // Add logging for SPL token transfer
+            msg!(
+                "token_program {} mint {} vault {} destination {} amount {} decimals {}",
+                &ctx.accounts.token_program.as_ref().ok_or(MsError::MissingAccount)?.key,
+                &ctx.accounts.mint.as_ref().ok_or(MsError::MissingAccount)?.key(),
+                &ctx.accounts.vault.key,
+                &ctx.accounts.destination.as_ref().key(),
+                amount,
+                decimals
+            );
+
             // Transfer SPL tokens from the vault to the destination account.
             let destination_token_account = ctx
                 .accounts
