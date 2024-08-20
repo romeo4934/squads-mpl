@@ -766,10 +766,9 @@ pub mod squads_mpl {
         // Calculate the timestamp difference between now and last reset.
         let time_since_last_reset = now.checked_sub(spending_limit.last_reset).unwrap();
 
-        // Multisig
-        let multisig_key = ctx.accounts.multisig.key();
 
-        // Vault bump
+        let multisig_key = ctx.accounts.multisig.key();
+        let destination = ctx.accounts.destination.as_ref();
         let vault_bump = ctx.bumps.vault;
 
         // Check if the reset period has passed.
@@ -795,14 +794,11 @@ pub mod squads_mpl {
             // Check if decimals match 9 for SOL
             require!(decimals == 9, MsError::InvalidDecimals);
 
-            // Transfer SOL from the vault to the destination account.
-            let destination = ctx
-                .accounts
-                .destination
-                .as_ref();
+            // Ensure system program is provided for SOL transfer
+            let system_program = ctx.accounts.system_program.as_ref().ok_or(MsError::MissingAccount)?;
 
             anchor_lang::system_program::transfer(CpiContext::new_with_signer(
-                ctx.accounts.system_program.as_ref().ok_or(MsError::MissingAccount)?.to_account_info(),
+                system_program.to_account_info(),
                 anchor_lang::system_program::Transfer {
                     from: ctx.accounts.vault.to_account_info(), // Vault associated with the authority seeds
                     to: destination.clone(),
@@ -817,35 +813,33 @@ pub mod squads_mpl {
             ), amount)?;
         } else {
 
+            // Transfer SPL tokens from the vault to the destination account.
+            // Ensure destination token account is provided for SPL transfer
+            let destination_token_account = ctx.accounts.destination_token_account.as_ref().ok_or(MsError::MissingAccount)?;
+
+            // Ensure vault token account is provided for SPL transfer
+            let vault_token_account = ctx.accounts.vault_token_account.as_ref().ok_or(MsError::MissingAccount)?;
+            // Ensure mint is provided for SPL transfer
+            let mint = ctx.accounts.mint.as_ref().ok_or(MsError::MissingAccount)?;
+            // Ensure token program is provided for SPL transfer
+            let token_program = ctx.accounts.token_program.as_ref().ok_or(MsError::MissingAccount)?;
+
             // Add logging for SPL token transfer
             msg!(
                 "token_program {} mint {} vault {} destination {} amount {} decimals {}",
-                &ctx.accounts.token_program.as_ref().ok_or(MsError::MissingAccount)?.key,
-                &ctx.accounts.mint.as_ref().ok_or(MsError::MissingAccount)?.key(),
+                token_program.key,
+                mint.key(),
                 &ctx.accounts.vault.key,
-                &ctx.accounts.destination.as_ref().key(),
+                destination.key(),
                 amount,
                 decimals
             );
-
-            // Transfer SPL tokens from the vault to the destination account.
-            let destination_token_account = ctx
-                .accounts
-                .destination_token_account
-                .as_ref()
-                .ok_or(MsError::MissingAccount)?; // Ensure destination token account is provided for SPL transfer
-
-            let vault_token_account = ctx
-                .accounts
-                .vault_token_account
-                .as_ref()
-                .ok_or(MsError::MissingAccount)?; // Ensure vault token account is provided for SPL transfer
 
             let cpi_accounts = anchor_spl::token::TransferChecked {
                 from: vault_token_account.to_account_info(), // PDA representing the SPL token vault
                 to: destination_token_account.to_account_info(),
                 authority: ctx.accounts.vault.to_account_info(),
-                mint: ctx.accounts.mint.as_ref().ok_or(MsError::MissingAccount)?.to_account_info(),
+                mint: mint.to_account_info(),
             };
 
             let seeds = &[
@@ -860,11 +854,7 @@ pub mod squads_mpl {
 
             anchor_spl::token::transfer_checked(
                 CpiContext::new_with_signer(
-                    ctx.accounts
-                        .token_program
-                        .as_ref()
-                        .ok_or(MsError::MissingAccount)?
-                        .to_account_info(),
+                    token_program.to_account_info(),
                     cpi_accounts,
                     signer_seeds,
                 ),
