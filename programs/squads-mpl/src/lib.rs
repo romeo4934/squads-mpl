@@ -57,14 +57,13 @@ pub mod squads_mpl {
         _meta: String,        // a string of metadata that can be used to describe the multisig on-chain as a memo ie. '{"name":"My Multisig","description":"This is a my multisig"}'
         primary_member: Option<Pubkey>, // Optional admin key
         time_lock: u32, // time lock duration when a transaction is approved by admin
-        admin_revoker: Option<Pubkey>  // Optional key to revoke the admin
+        admin_revoker: Option<Pubkey>  // Optional Key that can revoke the admin privileges and cancel pending transactions
     ) -> Result<()> {
         // sort the members and remove duplicates
         let mut members = members;
         members.sort();
         members.dedup();
 
-        
         // check we don't exceed u16
         let total_members = members.len();
         if total_members < 1 {
