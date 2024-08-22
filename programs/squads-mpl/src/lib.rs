@@ -354,11 +354,11 @@ pub mod squads_mpl {
                     }
                     _ => return err!(MsError::InvalidTransactionState),
                 };
-                
+
                 ctx.accounts.transaction.ready_to_execute()?;
             }
             ApprovalMode::ApprovalByMultisig => {
-                // No additional checks needed here as they are already performed during transaction approval
+                // No additional checks needed here
             }
         }
 
