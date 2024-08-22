@@ -342,6 +342,37 @@ pub mod squads_mpl {
         if ctx.accounts.transaction.approved.len() >= usize::from(ctx.accounts.multisig.threshold) {
             ctx.accounts.transaction.ready_to_execute()?;
         }
+
+        match ctx.accounts.transaction.mode {
+            ApprovalMode::ApprovalByPrimaryMember => {
+                let primary_member = ctx.accounts.multisig.primary_member.ok_or(MsError::NoPrimaryMemberSpecified)?;
+                if ctx.accounts.member.key() != primary_member {
+                    return err!(MsError::UnauthorizedMember);
+                }
+
+                let time_lock = ctx.accounts.multisig.time_lock;
+                let current_time = Clock::get()?.unix_timestamp;
+
+                // Extract the approval time from the Active status
+                let approval_time = match ctx.accounts.transaction.status {
+                    MsTransactionStatus::Active { timestamp } => timestamp,
+                    _ => return err!(MsError::InvalidTransactionState),
+                };
+
+                let elapsed_time = current_time.checked_sub(approval_time).ok_or(MsError::TimeError)?;
+
+                // Check if the time lock condition is satisfied
+                if elapsed_time < i64::from(time_lock) {
+                    return err!(MsError::TimeLockNotSatisfied);
+                }
+
+                ctx.accounts.transaction.ready_to_execute()?;
+            }
+            ApprovalMode::ApprovalByMultisig => {
+                // No additional checks needed here as they are already performed during transaction approval
+            }
+        }
+
         Ok(())
     }
 
@@ -421,34 +452,6 @@ pub mod squads_mpl {
             // if no instructions were found, mark it as executed and move on
             ctx.accounts.transaction.set_executed()?;
             return Ok(());
-        }
-
-        match ctx.accounts.transaction.mode {
-            ApprovalMode::ApprovalByPrimaryMember => {
-                let primary_member = ctx.accounts.multisig.primary_member.ok_or(MsError::NoPrimaryMemberSpecified)?;
-                if ctx.accounts.member.key() != primary_member {
-                    return err!(MsError::UnauthorizedMember);
-                }
-
-                let time_lock = ctx.accounts.multisig.time_lock;
-                let current_time = Clock::get()?.unix_timestamp;
-
-                // Extract the approval time from the ExecuteReady status
-                let approval_time = match ctx.accounts.transaction.status {
-                    MsTransactionStatus::ExecuteReady { timestamp } => timestamp,
-                    _ => return err!(MsError::InvalidTransactionState),
-                };
-
-                let elapsed_time = current_time.checked_sub(approval_time).ok_or(MsError::TimeError)?;
-
-                // Check if the time lock condition is satisfied
-                if elapsed_time < i64::from(time_lock) {
-                    return err!(MsError::TimeLockNotSatisfied);
-                }
-            }
-            ApprovalMode::ApprovalByMultisig => {
-                // No additional checks needed here as they are already performed during transaction approval
-            }
         }
 
         // use for derivation for the authority

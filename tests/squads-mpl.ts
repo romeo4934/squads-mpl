@@ -560,7 +560,35 @@ describe("Programs", function(){
         expect(txState.status).to.have.property("executeReady");
       });
 
-      it(`Change threshold test`, async function(){
+      it(`Update the timelock to 1 minute`, async function() {  
+        // Step 1: Get the transaction builder
+        const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
+        
+        // Step 2: Add instruction to update the timelock
+        const [txInstructions, txPDA] = await ( await txBuilder
+            .withUpdateTimeLock(ONE_MINUTE)
+            ).getInstructions({ approvalByMultisig: {} });
+
+        // Step 3: Add activation instruction
+        const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
+
+        // Step 4: Create and send the transaction updating the timelock
+        const updateTimeLockTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
+
+        await provider.sendAndConfirm(updateTimeLockTx, undefined, { commitment: "confirmed" });
+
+        // Step 5: Approve the transaction
+        await squads.approveTransaction(txPDA);
+
+        // Step 6: Execute the transaction
+        await squads.executeTransaction(txPDA);
+
+        // Verify the timelock was updated
+        let msState = await squads.getMultisig(msPDA);
+        expect(msState.timeLock).to.equal(ONE_MINUTE);
+      });
+
+      it(`Change threshold to 2`, async function(){
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         const [txInstructions, txPDA] = await (
           await txBuilder.withChangeThreshold(2)
@@ -625,6 +653,7 @@ describe("Programs", function(){
           expect(e.message).to.contain("Error processing Instruction");
         }
       });
+      
 
       it(`Change vote from approved to rejected`, async function(){
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
@@ -668,14 +697,16 @@ describe("Programs", function(){
         ).is.lessThan(0);
       });
 
-      it(`Add a new member & change threshold (conjoined)`, async function(){
+     
+
+      it(`Add a new member & change threshold to 3 (conjoined)`, async function(){
         const newMember = anchor.web3.Keypair.generate().publicKey;
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         let msState =  await squads.getMultisig(msPDA);
         const startKeys = msState.keys.length;
         const startTxIndex = msState.transactionIndex;
         const [txInstructions, txPDA] = await (
-          await txBuilder.withAddMemberAndChangeThreshold(newMember, 1)
+          await txBuilder.withAddMemberAndChangeThreshold(newMember, 3)
         ).getInstructions({approvalByMultisig: {}});
         const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
 
@@ -750,37 +781,13 @@ describe("Programs", function(){
         msState = await squads.getMultisig(msPDA);
         threshold = msState.threshold;
         expect((msState.keys as any[]).length).to.equal(startKeys + 1);
-        expect(msState.threshold).to.equal(1);
+        expect(msState.threshold).to.equal(3);
       });
 
-
+      
 
       it(`Create Tx with ApprovalByPrimaryMember and enforce time lock delay`, async function() {     
-        // Step 1: Get the transaction builder
-        const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         
-        // Step 2: Add instruction to update the timelock
-        const [txInstructions, txPDA] = await ( await txBuilder
-            .withUpdateTimeLock(ONE_MINUTE)
-            ).getInstructions({ approvalByMultisig: {} });
-
-        // Step 3: Add activation instruction
-        const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
-
-        // Step 4: Create and send the transaction updating the timelock
-        const updateTimeLockTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
-
-        await provider.sendAndConfirm(updateTimeLockTx, undefined, { commitment: "confirmed" });
-
-        // Step 5: Approve the transaction
-        await squads.approveTransaction(txPDA);
-
-        // Step 6: Execute the transaction
-        await squads.executeTransaction(txPDA);
-
-        // Verify the timelock was updated
-        let msState = await squads.getMultisig(msPDA);
-        expect(msState.timeLock).to.equal(ONE_MINUTE);
         
         // create authority to use (Vault, index 1)
         const authorityPDA = squads.getAuthorityPDA(msPDA, 1);
@@ -795,9 +802,6 @@ describe("Programs", function(){
         let txState = await squads.createTransaction(msPDA, 1,  {approvalByPrimaryMember: {}});
         await squads.addInstruction(txState.publicKey, testIx);
         await squads.activateTransaction(txState.publicKey);
-        await squads.approveTransaction(txState.publicKey);
-        txState = await squads.getTransaction(txState.publicKey);
-        expect(txState.status).to.have.property("executeReady");
 
         // move funds to auth/vault
         const moveFundsToMsPDATx = await createBlankTransaction(
@@ -814,11 +818,13 @@ describe("Programs", function(){
         const authorityPDAFunded = await squads.connection.getAccountInfo(
           authorityPDA
         );
-        expect(authorityPDAFunded.lamports).to.equal(603000000);        
+        expect(authorityPDAFunded.lamports).to.equal(603000000);  
+        txState = await squads.getTransaction(txState.publicKey);
+        expect(txState.status).to.have.property("active");
 
         // Try to execute the transaction immediately (should fail)
         try {
-            await squads.executeTransaction(txState.publicKey);
+            await squads.approveTransaction(txState.publicKey);
             throw new Error("Transaction succeeded before time lock delay, which should not happen.");
         } catch (e) {
             expect(e.message).to.include("TimeLockNotSatisfied");
@@ -829,10 +835,55 @@ describe("Programs", function(){
         // Wait for the time lock duration
         await setTimeout((timeLock + 60) * 1000);  // Adding extra buffer to account for any delay in execution
         console.log("Time lock duration passed, executing transaction...");
+        
         // Execute the transaction after the time lock delay
+        await squads.approveTransaction(txState.publicKey);
+        txState = await squads.getTransaction(txState.publicKey);
+        expect(txState.status).to.have.property("executeReady");
         await squads.executeTransaction(txState.publicKey);
         const executedTxState = await squads.getTransaction(txState.publicKey);
         expect(executedTxState.status).to.have.property("executed");
+      });
+
+      it(`Change threshold back to 1`, async function(){
+        const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
+        const [txInstructions, txPDA] = await (
+          await txBuilder.withChangeThreshold(1)
+        ).getInstructions({approvalByPrimaryMember: {}});
+        const emptyTx = await createBlankTransaction(
+          squads.connection,
+          creator.publicKey
+        );
+        emptyTx.add(...txInstructions);
+        await provider.sendAndConfirm(emptyTx);
+        await setTimeout(2000);
+        // get the ix
+        let ixState = await squads.getInstruction(
+          getIxPDA(txPDA, new BN(1, 10), squads.multisigProgramId)[0]
+        );
+        expect(ixState.instructionIndex).to.equal(1);
+
+        // activate the tx
+        let txState = await squads.activateTransaction(txPDA);
+        await setTimeout(2000);
+        expect(txState.status).to.have.property("active");
+
+        await setTimeout((timeLock + 60) * 1000);  // Adding extra buffer to account for any delay in execution
+
+        // approve the tx
+        await squads.approveTransaction(txPDA);
+
+        // get the TX
+        txState = await squads.getTransaction(txPDA);
+        expect(txState.status).to.have.property("executeReady");
+
+        // execute the tx
+        txState = await squads.executeTransaction(txPDA);
+        const msState = await squads.getMultisig(msPDA);
+
+        expect(msState.threshold).to.equal(1);
+        expect(txState.status).to.have.property("executed");
+        threshold = msState.threshold;
       });
 
       // Add this inside the describe block named "SMPL Basic functionality"
@@ -1056,9 +1107,8 @@ describe("Programs", function(){
         let txState = await squads.createTransaction(msPDA, 1, { approvalByPrimaryMember: {} });
         await squads.addInstruction(txState.publicKey, testIx);
         await squads.activateTransaction(txState.publicKey);
-        await squads.approveTransaction(txState.publicKey);
         txState = await squads.getTransaction(txState.publicKey);
-        expect(txState.status).to.have.property("executeReady");
+        expect(txState.status).to.have.property("active");  
 
         // Step 3: Guardian drafts and approves a transaction to remove the primary member
         
@@ -1086,7 +1136,7 @@ describe("Programs", function(){
 
         // Step 4: Verify the primary member cannot execute the previously approved transaction
         try {
-          await squads.executeTransaction(txState.publicKey);
+          await squads.approveTransaction(txState.publicKey);
           throw new Error("Transaction was incorrectly executed by primary member.");
         } catch (e) {
           expect(e.message).to.include("DeprecatedTransaction");
