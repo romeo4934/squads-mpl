@@ -480,7 +480,7 @@ exports.IDL = {
             "args": []
         },
         {
-            "name": "updatePrimaryMember",
+            "name": "updateAdminSettings",
             "docs": [
                 "The instruction to update the primary member of the multisig."
             ],
@@ -494,6 +494,16 @@ exports.IDL = {
             "args": [
                 {
                     "name": "newPrimaryMember",
+                    "type": {
+                        "option": "publicKey"
+                    }
+                },
+                {
+                    "name": "newTimeLock",
+                    "type": "u32"
+                },
+                {
+                    "name": "adminRevoker",
                     "type": {
                         "option": "publicKey"
                     }
@@ -515,25 +525,6 @@ exports.IDL = {
                 }
             ],
             "args": []
-        },
-        {
-            "name": "updateTimeLock",
-            "docs": [
-                "The instruction to update the time lock duration of the multisig."
-            ],
-            "accounts": [
-                {
-                    "name": "multisig",
-                    "isMut": true,
-                    "isSigner": true
-                }
-            ],
-            "args": [
-                {
-                    "name": "newTimeLock",
-                    "type": "u32"
-                }
-            ]
         },
         {
             "name": "addSpendingLimit",

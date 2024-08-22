@@ -563,7 +563,7 @@ describe("Programs", function(){
         
         // Step 2: Add instruction to update the timelock
         const [txInstructions, txPDA] = await ( await txBuilder
-            .withUpdateTimeLock(ONE_MINUTE)
+            .withUpdateAdminSettings(creator.publicKey, ONE_MINUTE, initialGuardiansKeys.publicKey)
             ).getInstructions({ approvalByMultisig: {} });
 
         // Step 3: Add activation instruction

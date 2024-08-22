@@ -142,21 +142,13 @@ export class TransactionBuilder {
     return this.withInstruction(instruction);
   }
 
-  async withUpdateTimeLock(timeLock: number): Promise<TransactionBuilder> {
-    const instruction = await this.methods
-        .updateTimeLock(timeLock)
-        .accounts({
-            multisig: this.multisig.publicKey,
-        })
-        .instruction();
-    return this.withInstruction(instruction);
-  }
-
-  async withUpdatePrimaryMember(
-    newPrimaryMember: PublicKey | null
+  async withUpdateAdminSettings(
+    newPrimaryMember: PublicKey | null,
+    newTimeLock: number,
+    adminRevoker: PublicKey | null
   ): Promise<TransactionBuilder> {
     const instruction = await this.methods
-      .updatePrimaryMember(newPrimaryMember)
+      .updateAdminSettings(newPrimaryMember,newTimeLock,adminRevoker)
       .accounts({
         multisig: this.multisig.publicKey,
       })

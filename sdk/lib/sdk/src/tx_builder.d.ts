@@ -19,8 +19,7 @@ export declare class TransactionBuilder {
     withRemoveMember(member: PublicKey): Promise<TransactionBuilder>;
     withRemoveMemberAndChangeThreshold(member: PublicKey, threshold: number): Promise<TransactionBuilder>;
     withChangeThreshold(threshold: number): Promise<TransactionBuilder>;
-    withUpdateTimeLock(timeLock: number): Promise<TransactionBuilder>;
-    withUpdatePrimaryMember(newPrimaryMember: PublicKey | null): Promise<TransactionBuilder>;
+    withUpdateAdminSettings(newPrimaryMember: PublicKey | null, newTimeLock: number, adminRevoker: PublicKey | null): Promise<TransactionBuilder>;
     withAddSpendingLimit(mint: PublicKey, vaultIndex: number, amount: number, period: Period): Promise<TransactionBuilder>;
     withRemoveSpendingLimit(mint: PublicKey, vaultIndex: number): Promise<TransactionBuilder>;
     getInstructions(approvalMode: ApprovalMode): Promise<[TransactionInstruction[], PublicKey]>;

@@ -55,9 +55,9 @@ pub mod squads_mpl {
         create_key: Pubkey,   // the public key used to seed the original multisig creation
         members: Vec<Pubkey>, // a list of members (Public Keys) to use for the multisig
         _meta: String,        // a string of metadata that can be used to describe the multisig on-chain as a memo ie. '{"name":"My Multisig","description":"This is a my multisig"}'
-        primary_member: Option<Pubkey>, // Optional primary member
-        time_lock: u32, // Add time_lock parameter
-        admin_revoker: Option<Pubkey>  // Add guardians parameter
+        primary_member: Option<Pubkey>, // Optional admin key
+        time_lock: u32, // time lock duration when a transaction is approved by admin
+        admin_revoker: Option<Pubkey>  // Optional key to revoke the admin
     ) -> Result<()> {
         // sort the members and remove duplicates
         let mut members = members;
@@ -630,16 +630,27 @@ pub mod squads_mpl {
     }
 
        /// The instruction to update the primary member of the multisig.
-    pub fn update_primary_member(ctx: Context<MsAuth>, new_primary_member: Option<Pubkey>) -> Result<()> {
+    pub fn update_admin_settings(ctx: Context<MsAuth>, new_primary_member: Option<Pubkey>, new_time_lock: u32, admin_revoker: Option<Pubkey>) -> Result<()> {
         // If a new primary member is provided, ensure it is in the member list
         if let Some(ref primary_member) = new_primary_member {
             if !ctx.accounts.multisig.keys.contains(primary_member) {
                 return err!(MsError::PrimaryMemberNotInMultisig);
             }
         }
+
+        // Ensure the new time lock is within the maximum allowable duration
+        if new_time_lock > MAX_TIME_LOCK {
+            return err!(MsError::TimeLockExceedsMaximum);
+        }
+
+        // Update the time lock duration
+        ctx.accounts.multisig.time_lock = new_time_lock;
         
         // Update the primary member
         ctx.accounts.multisig.primary_member = new_primary_member;
+
+        // Update the admin revoker
+        ctx.accounts.multisig.admin_revoker = admin_revoker;
 
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
@@ -650,22 +661,6 @@ pub mod squads_mpl {
     pub fn remove_primary_member(ctx: Context<RemovePrimaryMember>) -> Result<()> {
         // Remove the primary member
         ctx.accounts.multisig.primary_member = None;
-
-        // Mark the change by updating the change index to deprecate any active transactions
-        let new_index = ctx.accounts.multisig.transaction_index;
-        // set the change index, which will deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)
-    }
-
-    /// The instruction to update the time lock duration of the multisig.
-    pub fn update_time_lock(ctx: Context<MsAuth>, new_time_lock: u32) -> Result<()> {
-        // Ensure the new time lock is within the maximum allowable duration
-        if new_time_lock > MAX_TIME_LOCK {
-            return err!(MsError::TimeLockExceedsMaximum);
-        }
-
-        // Update the time lock duration
-        ctx.accounts.multisig.time_lock = new_time_lock;
 
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;

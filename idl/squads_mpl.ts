@@ -477,7 +477,7 @@ export type SquadsMpl = {
       "args": []
     },
     {
-      "name": "updatePrimaryMember",
+      "name": "updateAdminSettings",
       "docs": [
         "The instruction to update the primary member of the multisig."
       ],
@@ -491,6 +491,16 @@ export type SquadsMpl = {
       "args": [
         {
           "name": "newPrimaryMember",
+          "type": {
+            "option": "publicKey"
+          }
+        },
+        {
+          "name": "newTimeLock",
+          "type": "u32"
+        },
+        {
+          "name": "adminRevoker",
           "type": {
             "option": "publicKey"
           }
@@ -512,25 +522,6 @@ export type SquadsMpl = {
         }
       ],
       "args": []
-    },
-    {
-      "name": "updateTimeLock",
-      "docs": [
-        "The instruction to update the time lock duration of the multisig."
-      ],
-      "accounts": [
-        {
-          "name": "multisig",
-          "isMut": true,
-          "isSigner": true
-        }
-      ],
-      "args": [
-        {
-          "name": "newTimeLock",
-          "type": "u32"
-        }
-      ]
     },
     {
       "name": "addSpendingLimit",
@@ -1687,7 +1678,7 @@ export const IDL: SquadsMpl = {
       "args": []
     },
     {
-      "name": "updatePrimaryMember",
+      "name": "updateAdminSettings",
       "docs": [
         "The instruction to update the primary member of the multisig."
       ],
@@ -1701,6 +1692,16 @@ export const IDL: SquadsMpl = {
       "args": [
         {
           "name": "newPrimaryMember",
+          "type": {
+            "option": "publicKey"
+          }
+        },
+        {
+          "name": "newTimeLock",
+          "type": "u32"
+        },
+        {
+          "name": "adminRevoker",
           "type": {
             "option": "publicKey"
           }
@@ -1722,25 +1723,6 @@ export const IDL: SquadsMpl = {
         }
       ],
       "args": []
-    },
-    {
-      "name": "updateTimeLock",
-      "docs": [
-        "The instruction to update the time lock duration of the multisig."
-      ],
-      "accounts": [
-        {
-          "name": "multisig",
-          "isMut": true,
-          "isSigner": true
-        }
-      ],
-      "args": [
-        {
-          "name": "newTimeLock",
-          "type": "u32"
-        }
-      ]
     },
     {
       "name": "addSpendingLimit",
