@@ -344,23 +344,19 @@ pub mod squads_mpl {
             ctx.accounts.transaction.ready_to_execute()?;
         }
 
-        match ctx.accounts.transaction.mode {
-            ApprovalMode::ApprovalByPrimaryMember => {
-                
-                // Enforce time lock condition
-                match ctx.accounts.transaction.status {
-                    MsTransactionStatus::Active { timestamp } => {
-                        require!(Clock::get()?.unix_timestamp - timestamp >= i64::from(ctx.accounts.multisig.time_lock), MsError::TimeLockNotSatisfied);
-                    }
-                    _ => return err!(MsError::InvalidTransactionState),
-                };
-
-                ctx.accounts.transaction.ready_to_execute()?;
-            }
-            ApprovalMode::ApprovalByMultisig => {
-                // No additional checks needed here
-            }
+        // if ApprovalMode is ApprovalByPrimaryMember then Enforce time lock condition
+        if let ApprovalMode::ApprovalByPrimaryMember = ctx.accounts.transaction.mode {
+            
+            match ctx.accounts.transaction.status {
+                MsTransactionStatus::Active { timestamp } => {
+                    require!(Clock::get()?.unix_timestamp - timestamp >= i64::from(ctx.accounts.multisig.time_lock), MsError::TimeLockNotSatisfied);
+                }
+                _ => return err!(MsError::InvalidTransactionState),
+            };
+            ctx.accounts.transaction.ready_to_execute()?;
         }
+            
+        
 
         Ok(())
     }

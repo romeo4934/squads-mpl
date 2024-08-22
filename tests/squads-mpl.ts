@@ -1133,7 +1133,7 @@ describe("Programs", function(){
         // Verify the state has no primary member
         const msState = await squads.getMultisig(msPDA);
         expect(msState.primaryMember).to.be.null;
-
+        await setTimeout(2000);
         // Step 4: Verify the primary member cannot execute the previously approved transaction
         try {
           await squads.approveTransaction(txState.publicKey);
