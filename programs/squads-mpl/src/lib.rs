@@ -253,8 +253,9 @@ pub mod squads_mpl {
     pub fn create_transaction(ctx: Context<CreateTransaction>, authority_index: u32, mode: ApprovalMode,) -> Result<()> {
         match mode {
             ApprovalMode::ApprovalByPrimaryMember => {
-                if ctx.accounts.multisig.primary_member.is_none() {
-                    return err!(MsError::NoPrimaryMemberSpecified);
+                let primary_member = ctx.accounts.multisig.primary_member.ok_or(MsError::NoPrimaryMemberSpecified)?;
+                if ctx.accounts.creator.key() != primary_member {
+                    return err!(MsError::UnauthorizedMember);
                 }
             }
             ApprovalMode::ApprovalByMultisig => {}
