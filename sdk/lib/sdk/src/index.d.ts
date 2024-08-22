@@ -45,8 +45,8 @@ declare class Squads {
     getSpendingLimitPDA(multisigPDA: PublicKey, mint: PublicKey, vaultIndex: number): PublicKey;
     getSpendingLimit(multisig: PublicKey, mint: PublicKey, vaultIndex: number, commitment?: Commitment): Promise<SpendingLimitAccount>;
     private _createMultisig;
-    createMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, guardians?: PublicKey[]): Promise<MultisigAccount>;
-    buildCreateMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, guardians?: PublicKey[]): Promise<TransactionInstruction>;
+    createMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, adminRevoker?: PublicKey | null): Promise<MultisigAccount>;
+    buildCreateMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, adminRevoker?: PublicKey | null): Promise<TransactionInstruction>;
     private _createTransaction;
     createTransaction(multisigPDA: PublicKey, authorityIndex: number, approvalMode: ApprovalMode): Promise<TransactionAccount>;
     buildCreateTransaction(multisigPDA: PublicKey, authorityIndex: number, transactionIndex: number, approvalMode: ApprovalMode): Promise<TransactionInstruction>;

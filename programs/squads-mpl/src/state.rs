@@ -30,10 +30,8 @@ pub struct Ms {
     pub keys: Vec<Pubkey>,              // keys of the members/owners of the multisig.
     pub primary_member: Option<Pubkey>, // Optional primary member
     pub time_lock: u32,                 // Time lock in seconds, 0 for no delay
-    pub guardians: Vec<Pubkey>,          // List of guardians
+    pub admin_revoker: Option<Pubkey>,          // Key that can revoke the admin privileges and cancel pending transactions
 }
-
-pub const MAX_GUARDIANS: usize = 5; // Set maximum number of guardians to 5
 
 impl Ms {
     pub const SIZE_WITHOUT_MEMBERS: usize = 8 + // Anchor disriminator
@@ -46,12 +44,11 @@ impl Ms {
     4 +          // for vec length
     33 +        // primary member (one byte for option + 32 for Pubkey)
     4 +        // time lock
-    4 +         // for guardians vec length
-    (MAX_GUARDIANS * 32); // each guardian is a public key (32 bytes)
+    33;         // admin_revoker  (one byte for option + 32 for Pubkey)
 
 
     /// Initializes the new multisig account
-    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, primary_member: Option<Pubkey>, bump: u8, time_lock: u32, guardians: Vec<Pubkey>) -> Result<()> {
+    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, primary_member: Option<Pubkey>, bump: u8, time_lock: u32, admin_revoker: Option<Pubkey>) -> Result<()> {
         self.threshold = threshold;
         self.keys = members;
         self.authority_index = 1;   // default vault is the first authority
@@ -61,7 +58,7 @@ impl Ms {
         self.create_key = create_key;
         self.time_lock = time_lock; // Initialize with the time_lock
         self.primary_member = primary_member;
-        self.guardians = guardians;
+        self.admin_revoker = admin_revoker;
         Ok(())
     }
 
@@ -71,31 +68,6 @@ impl Ms {
             Ok(ind)=> Some(ind),
             _ => None
         }
-    }
-
-    /// Checks to see if the key is a guardian
-    pub fn is_guardian(&self, guardian: Pubkey) -> Option<usize> {
-        match self.guardians.binary_search(&guardian) {
-            Ok(ind)=> Some(ind),
-            _ => None
-        }
-    }
-
-
-    pub fn add_guardian(&mut self, guardian: Pubkey) -> Result<()> {
-        if matches!(self.is_guardian(guardian), None) {
-            self.guardians.push(guardian);
-            self.guardians.sort();
-        }
-        Ok(())
-    }
-
-    /// Removes a guardian from the multisig. Is a no-op if the guardian is not in the multisig.
-    pub fn remove_guardian(&mut self, guardian: Pubkey) -> Result<()> {
-        if let Some(ind) = self.is_guardian(guardian) {
-            self.guardians.remove(ind);
-        }
-        Ok(())
     }
 
     /// Updates the change index, deprecating any active/draft transactions

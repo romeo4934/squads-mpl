@@ -107,8 +107,7 @@ describe("Programs", function(){
 
     let threshold = 1;
     let timeLock = 0; // Set the time lock to 0 for no delay
-    const initialGuardiansKeys = Array.from({ length: MAX_GUARDIANS }).map(() => anchor.web3.Keypair.generate());
-    const initialGuardians = initialGuardiansKeys.map((guardian) => guardian.publicKey);
+    const initialGuardiansKeys =  anchor.web3.Keypair.generate();
 
     // test suite 
     describe("SMPL Basic functionality", function(){
@@ -143,7 +142,7 @@ describe("Programs", function(){
             "https://example.com/image.png",
             creator.publicKey, // primary member
             0,              // time lock (1 hour)
-            initialGuardians               // 10 guardians
+            initialGuardiansKeys.publicKey               // 1 admin revoker
           );
         }catch(e){
           console.log("Error in createMultisig tx");
@@ -405,7 +404,6 @@ describe("Programs", function(){
         const currDataSize = msAccount.value.data.length;
         // get the current number of keys
         const currNumKeys = msStateCheck.keys.length;
-        const currNumGuardians = msStateCheck.guardians.length;
         // get the number of spots left
         const SIZE_WITHOUT_MEMBERS = 8 + // Anchor discriminator
         2 +         // threshold value
@@ -417,8 +415,7 @@ describe("Programs", function(){
         4 +         // for vec length
         33 +        // primary member (one byte for option + 32 for Pubkey)
         4 +         // time lock
-        4 +         // for guardians vec length
-        (MAX_GUARDIANS * 32); // each guardian is a public key (32 bytes)
+        33;         // admin_revoker
         
         const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 32) - currNumKeys;
         // if there is less than 1 spot left, calculate rent needed for realloc of 10 more keys
@@ -1113,21 +1110,21 @@ describe("Programs", function(){
         // Step 3: Guardian drafts and approves a transaction to remove the primary member
         
         await provider.connection.requestAirdrop(
-          initialGuardiansKeys[0].publicKey,
+          initialGuardiansKeys.publicKey,
           anchor.web3.LAMPORTS_PER_SOL
         );
         const removePrimaryMemberTx = await program.methods
           .removePrimaryMember()
           .accounts({
             multisig: msPDA,
-            remover: initialGuardiansKeys[0].publicKey,
+            remover: initialGuardiansKeys.publicKey,
           })
-          .signers([initialGuardiansKeys[0]])
+          .signers([initialGuardiansKeys])
           .transaction();
         try {
-          await provider.sendAndConfirm(removePrimaryMemberTx, [initialGuardiansKeys[0]], undefined, {commitment: "confirmed"});
+          await provider.sendAndConfirm(removePrimaryMemberTx, [initialGuardiansKeys], undefined, {commitment: "confirmed"});
         } catch (e) {
-          console.log(initialGuardiansKeys[0].publicKey.toBase58(), " signing error");
+          console.log(initialGuardiansKeys.publicKey.toBase58(), " signing error");
         }
           
         // Verify the state has no primary member

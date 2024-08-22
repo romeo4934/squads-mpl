@@ -143,29 +143,28 @@ class Squads {
     }
     _createMultisig(threshold, createKey, initialMembers, metadata, primaryMember, // Add primaryMember
     timeLock, // Add timeLock
-    guardians // Add guardians
-    ) {
+    adminRevoker) {
         if (!initialMembers.find((member) => member.equals(this.wallet.publicKey))) {
             initialMembers.push(this.wallet.publicKey);
         }
         const [multisigPDA] = (0, address_1.getMsPDA)(createKey, this.multisigProgramId);
         return [
             this.multisig.methods
-                .create(threshold, createKey, initialMembers, metadata, primaryMember, timeLock, guardians)
+                .create(threshold, createKey, initialMembers, metadata, primaryMember, timeLock, adminRevoker)
                 .accounts({ multisig: multisigPDA, creator: this.wallet.publicKey }),
             multisigPDA,
         ];
     }
-    createMultisig(threshold, createKey, initialMembers, name = "", description = "", image = "", primaryMember = null, timeLock = 0, guardians = []) {
+    createMultisig(threshold, createKey, initialMembers, name = "", description = "", image = "", primaryMember = null, timeLock = 0, adminRevoker = null) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [methods, multisigPDA] = this._createMultisig(threshold, createKey, initialMembers, JSON.stringify({ name, description, image }), primaryMember, timeLock, guardians);
+            const [methods, multisigPDA] = this._createMultisig(threshold, createKey, initialMembers, JSON.stringify({ name, description, image }), primaryMember, timeLock, adminRevoker);
             yield methods.rpc();
             return yield this.getMultisig(multisigPDA);
         });
     }
-    buildCreateMultisig(threshold, createKey, initialMembers, name = "", description = "", image = "", primaryMember = null, timeLock = 0, guardians = []) {
+    buildCreateMultisig(threshold, createKey, initialMembers, name = "", description = "", image = "", primaryMember = null, timeLock = 0, adminRevoker = null) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [methods] = this._createMultisig(threshold, createKey, initialMembers, JSON.stringify({ name, description, image }), primaryMember, timeLock, guardians);
+            const [methods] = this._createMultisig(threshold, createKey, initialMembers, JSON.stringify({ name, description, image }), primaryMember, timeLock, adminRevoker);
             return yield methods.instruction();
         });
     }
@@ -485,15 +484,18 @@ class Squads {
             const ms = yield this.getMultisig(publicKey);
             const currDataSize = msAccount.value.data.length;
             const currNumKeys = ms.keys.length;
-            const SIZE_WITHOUT_MEMBERS = 8 + // Anchor disriminator
+            const SIZE_WITHOUT_MEMBERS = 8 + // Anchor discriminator
                 2 + // threshold value
                 2 + // authority index
                 4 + // transaction index
                 4 + // processed internal transaction index
                 1 + // PDA bump
                 32 + // creator
-                1 + // allow external execute
-                4; // for vec length
+                4 + // for vec length
+                33 + // primary member (one byte for option + 32 for Pubkey)
+                4 + // time lock
+                4 + // for guardians vec length
+                (5 * 32); // each guardian is a public key (32 bytes) and there are 5 guardians cf. MAX_GUARDIANS
             const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 32) - currNumKeys;
             if (spotsLeft < 1) {
                 const neededLen = currDataSize + (10 * 32);

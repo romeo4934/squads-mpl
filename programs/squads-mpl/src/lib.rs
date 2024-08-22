@@ -57,18 +57,14 @@ pub mod squads_mpl {
         _meta: String,        // a string of metadata that can be used to describe the multisig on-chain as a memo ie. '{"name":"My Multisig","description":"This is a my multisig"}'
         primary_member: Option<Pubkey>, // Optional primary member
         time_lock: u32, // Add time_lock parameter
-        guardians: Vec<Pubkey>  // Add guardians parameter
+        admin_revoker: Option<Pubkey>  // Add guardians parameter
     ) -> Result<()> {
         // sort the members and remove duplicates
         let mut members = members;
         members.sort();
         members.dedup();
 
-        // sort the guardians and remove duplicates
-        let mut guardians = guardians;
-        guardians.sort();
-        guardians.dedup();
-
+        
         // check we don't exceed u16
         let total_members = members.len();
         if total_members < 1 {
@@ -78,11 +74,6 @@ pub mod squads_mpl {
         // make sure we don't exceed u16 on first call
         if total_members > usize::from(u16::MAX) {
             return err!(MsError::MaxMembersReached);
-        }
-
-        // Check if the maximum number of guardians is reached
-        if guardians.len() > MAX_GUARDIANS {
-            return err!(MsError::MaxGuardiansReached);
         }
 
         // make sure threshold is valid
@@ -109,7 +100,7 @@ pub mod squads_mpl {
             primary_member,
             ctx.bumps.multisig,
             time_lock,
-            guardians, 
+            admin_revoker, 
         )
     }
 
@@ -676,40 +667,6 @@ pub mod squads_mpl {
         // Update the time lock duration
         ctx.accounts.multisig.time_lock = new_time_lock;
 
-        // Mark the change by updating the change index to deprecate any active transactions
-        let new_index = ctx.accounts.multisig.transaction_index;
-        // set the change index, which will deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)
-    }
-
-    /// The instruction to add a new guardian to the multisig.
-    pub fn add_guardian(ctx: Context<MsAuth>, new_guardian: Pubkey) -> Result<()> {
-        // Check if the guardian already exists
-        if ctx.accounts.multisig.is_guardian(new_guardian).is_some() {
-            return err!(MsError::GuardianAlreadyExists);
-        }
-
-        // Check if the maximum number of guardians is reached
-        if ctx.accounts.multisig.guardians.len() >= MAX_GUARDIANS {
-            return err!(MsError::MaxGuardiansReached);
-        }
-
-        // Add the guardian
-        ctx.accounts.multisig.add_guardian(new_guardian)?;
-        // Mark the change by updating the change index to deprecate any active transactions
-        let new_index = ctx.accounts.multisig.transaction_index;
-        // set the change index, which will deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)
-    }
-
-    /// The instruction to remove a guardian from the multisig.
-    pub fn remove_guardian(ctx: Context<MsAuth>, old_guardian: Pubkey) -> Result<()> {
-        // Check if the guardian exists
-        if ctx.accounts.multisig.is_guardian(old_guardian).is_none() {
-            return err!(MsError::GuardianNotFound);
-        }
-
-        ctx.accounts.multisig.remove_guardian(old_guardian)?;
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
         // set the change index, which will deprecate any active transactions

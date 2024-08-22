@@ -54,9 +54,9 @@ export declare type SquadsMpl = {
                     "type": "u32";
                 },
                 {
-                    "name": "guardians";
+                    "name": "adminRevoker";
                     "type": {
-                        "vec": "publicKey";
+                        "option": "publicKey";
                     };
                 }
             ];
@@ -533,44 +533,6 @@ export declare type SquadsMpl = {
             ];
         },
         {
-            "name": "addGuardian";
-            "docs": [
-                "The instruction to add a new guardian to the multisig."
-            ];
-            "accounts": [
-                {
-                    "name": "multisig";
-                    "isMut": true;
-                    "isSigner": true;
-                }
-            ];
-            "args": [
-                {
-                    "name": "newGuardian";
-                    "type": "publicKey";
-                }
-            ];
-        },
-        {
-            "name": "removeGuardian";
-            "docs": [
-                "The instruction to remove a guardian from the multisig."
-            ];
-            "accounts": [
-                {
-                    "name": "multisig";
-                    "isMut": true;
-                    "isSigner": true;
-                }
-            ];
-            "args": [
-                {
-                    "name": "oldGuardian";
-                    "type": "publicKey";
-                }
-            ];
-        },
-        {
             "name": "addSpendingLimit";
             "accounts": [
                 {
@@ -669,7 +631,6 @@ export declare type SquadsMpl = {
                     "name": "destination";
                     "isMut": true;
                     "isSigner": false;
-                    "isOptional": true;
                 },
                 {
                     "name": "systemProgram";
@@ -754,10 +715,6 @@ export declare type SquadsMpl = {
                         "type": "publicKey";
                     },
                     {
-                        "name": "allowExternalExecute";
-                        "type": "bool";
-                    },
-                    {
                         "name": "keys";
                         "type": {
                             "vec": "publicKey";
@@ -774,9 +731,9 @@ export declare type SquadsMpl = {
                         "type": "u32";
                     },
                     {
-                        "name": "guardians";
+                        "name": "adminRevoker";
                         "type": {
-                            "vec": "publicKey";
+                            "option": "publicKey";
                         };
                     }
                 ];
@@ -888,10 +845,6 @@ export declare type SquadsMpl = {
                     {
                         "name": "bump";
                         "type": "u8";
-                    },
-                    {
-                        "name": "executed";
-                        "type": "bool";
                     }
                 ];
             };
@@ -917,13 +870,6 @@ export declare type SquadsMpl = {
                             "The index of the vault that the spending limit is for."
                         ];
                         "type": "u32";
-                    },
-                    {
-                        "name": "authorityBump";
-                        "docs": [
-                            "Authority bump"
-                        ];
-                        "type": "u8";
                     },
                     {
                         "name": "mint";
@@ -1250,6 +1196,14 @@ export declare type SquadsMpl = {
         {
             "code": 6028;
             "name": "InvalidMint";
+        },
+        {
+            "code": 6029;
+            "name": "InvalidAmount";
+        },
+        {
+            "code": 6030;
+            "name": "InvalidDecimals";
         }
     ];
 };

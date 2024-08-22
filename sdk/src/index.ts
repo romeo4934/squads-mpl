@@ -261,7 +261,7 @@ class Squads {
       metadata: string,
       primaryMember: PublicKey | null, // Add primaryMember
       timeLock: number, // Add timeLock
-      guardians: PublicKey[] // Add guardians
+      adminRevoker: PublicKey | null, // Add adminRevoker
   ): [SquadsMethods, PublicKey] {
     if (
         !initialMembers.find((member) => member.equals(this.wallet.publicKey))
@@ -271,7 +271,7 @@ class Squads {
     const [multisigPDA] = getMsPDA(createKey, this.multisigProgramId);
     return [
       this.multisig.methods
-          .create(threshold, createKey, initialMembers, metadata, primaryMember, timeLock, guardians)
+          .create(threshold, createKey, initialMembers, metadata, primaryMember, timeLock, adminRevoker)
           .accounts({multisig: multisigPDA, creator: this.wallet.publicKey}),
       multisigPDA,
     ];
@@ -286,7 +286,7 @@ class Squads {
       image = "",
       primaryMember: PublicKey | null = null,
       timeLock = 0,
-      guardians: PublicKey[] = []
+      adminRevoker: PublicKey | null = null, // Add adminRevoker
   ): Promise<MultisigAccount> {
     const [methods, multisigPDA] = this._createMultisig(
         threshold,
@@ -295,7 +295,7 @@ class Squads {
         JSON.stringify({name, description, image}),
         primaryMember,
         timeLock,
-        guardians
+        adminRevoker
     );
     await methods.rpc();
     return await this.getMultisig(multisigPDA);
@@ -310,7 +310,7 @@ class Squads {
       image = "",
       primaryMember: PublicKey | null = null,
       timeLock = 0,
-      guardians: PublicKey[] = []
+      adminRevoker: PublicKey | null = null, // Add adminRevoker
   ): Promise<TransactionInstruction> {
     const [methods] = this._createMultisig(
         threshold,
@@ -319,7 +319,7 @@ class Squads {
         JSON.stringify({name, description, image}),
         primaryMember,
         timeLock,
-        guardians
+        adminRevoker
     );
     return await methods.instruction();
   }

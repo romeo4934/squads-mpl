@@ -23,7 +23,7 @@ use crate::errors::*;
 /// 6. time_lock: u32
 /// 7. guardians: Vec<Pubkey>
 #[derive(Accounts)]
-#[instruction(threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, meta: String, primary_member: Option<Pubkey>,  time_lock: u32, guardians: Vec<Pubkey>)]
+#[instruction(threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, meta: String, primary_member: Option<Pubkey>,  time_lock: u32, admin_revoker: Pubkey)]
 pub struct Create<'info> {
     #[account(
         init,
@@ -401,7 +401,8 @@ pub struct RemovePrimaryMember<'info> {
 
     #[account(
         mut,
-        constraint = multisig.is_guardian(remover.key()).is_some() @MsError::UnauthorizedMember,
+        constraint = multisig.admin_revoker.is_some() @ MsError::UnauthorizedMember,
+        constraint = multisig.admin_revoker.unwrap() == remover.key() @ MsError::UnauthorizedMember,
     )]
     pub remover: Signer<'info>,
 }

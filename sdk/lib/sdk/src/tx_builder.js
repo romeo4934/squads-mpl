@@ -147,28 +147,6 @@ class TransactionBuilder {
             return this.withInstruction(instruction);
         });
     }
-    withAddGuardian(guardian) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const instruction = yield this.methods
-                .addGuardian(guardian)
-                .accounts({
-                multisig: this.multisig.publicKey,
-            })
-                .instruction();
-            return this.withInstruction(instruction);
-        });
-    }
-    withRemoveGuardian(guardian) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const instruction = yield this.methods
-                .removeGuardian(guardian)
-                .accounts({
-                multisig: this.multisig.publicKey,
-            })
-                .instruction();
-            return this.withInstruction(instruction);
-        });
-    }
     withUpdatePrimaryMember(newPrimaryMember) {
         return __awaiter(this, void 0, void 0, function* () {
             const instruction = yield this.methods

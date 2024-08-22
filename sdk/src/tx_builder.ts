@@ -152,26 +152,6 @@ export class TransactionBuilder {
     return this.withInstruction(instruction);
   }
 
-  async withAddGuardian(guardian: PublicKey): Promise<TransactionBuilder> {
-    const instruction = await this.methods
-      .addGuardian(guardian)
-      .accounts({
-        multisig: this.multisig.publicKey,
-      })
-      .instruction();
-    return this.withInstruction(instruction);
-  }
-
-  async withRemoveGuardian(guardian: PublicKey): Promise<TransactionBuilder> {
-    const instruction = await this.methods
-      .removeGuardian(guardian)
-      .accounts({
-        multisig: this.multisig.publicKey,
-      })
-      .instruction();
-    return this.withInstruction(instruction);
-  }
-
   async withUpdatePrimaryMember(
     newPrimaryMember: PublicKey | null
   ): Promise<TransactionBuilder> {
