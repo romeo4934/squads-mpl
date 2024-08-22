@@ -251,15 +251,13 @@ pub mod squads_mpl {
     /// instructions, whereas authorities 1 or greater refer to a vault,
     /// upgrade authority, or other.
     pub fn create_transaction(ctx: Context<CreateTransaction>, authority_index: u32, mode: ApprovalMode,) -> Result<()> {
-        match mode {
-            ApprovalMode::ApprovalByPrimaryMember => {
-                let primary_member = ctx.accounts.multisig.primary_member.ok_or(MsError::NoPrimaryMemberSpecified)?;
-                if ctx.accounts.creator.key() != primary_member {
-                    return err!(MsError::UnauthorizedMember);
-                }
+        
+        if let ApprovalMode::ApprovalByPrimaryMember = mode {
+            let primary_member = ctx.accounts.multisig.primary_member.ok_or(MsError::NoPrimaryMemberSpecified)?;
+            if ctx.accounts.creator.key() != primary_member {
+                return err!(MsError::UnauthorizedMember);
             }
-            ApprovalMode::ApprovalByMultisig => {}
-        }
+        }   
         
         let ms = &mut ctx.accounts.multisig;
         let authority_bump = match authority_index {
