@@ -48,7 +48,7 @@ impl Ms {
 
 
     /// Initializes the new multisig account
-    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, primary_member: Option<Pubkey>, bump: u8, time_lock: u32, admin_revoker: Option<Pubkey>) -> Result<()> {
+    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, bump: u8, primary_member: Option<Pubkey>, time_lock: u32, admin_revoker: Option<Pubkey>) -> Result<()> {
         self.threshold = threshold;
         self.keys = members;
         self.authority_index = 1;   // default vault is the first authority

@@ -96,8 +96,8 @@ pub mod squads_mpl {
             threshold,
             create_key,
             members,
-            primary_member,
             ctx.bumps.multisig,
+            primary_member,
             time_lock,
             admin_revoker, 
         )
