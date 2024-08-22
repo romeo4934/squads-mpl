@@ -28,9 +28,9 @@ pub struct Ms {
     pub create_key: Pubkey,             // random key(or not) used to seed the multisig pda.
 
     pub keys: Vec<Pubkey>,              // keys of the members/owners of the multisig.
-    pub primary_member: Option<Pubkey>, // Optional primary member
-    pub time_lock: u32,                 // Time lock in seconds, 0 for no delay
-    pub admin_revoker: Option<Pubkey>,          // Key that can revoke the admin privileges and cancel pending transactions
+    pub primary_member: Option<Pubkey>, // Optional admin 
+    pub time_lock: u32,                 //// time lock duration in seconds when a transaction is approved by admin
+    pub admin_revoker: Option<Pubkey>,  // Key that can revoke the admin privileges and cancel pending transactions
 }
 
 impl Ms {
