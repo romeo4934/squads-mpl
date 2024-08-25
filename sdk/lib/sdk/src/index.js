@@ -141,30 +141,28 @@ class Squads {
             return Object.assign(Object.assign({}, accountData), { publicKey: spendingLimitPDA });
         });
     }
-    _createMultisig(threshold, createKey, initialMembers, metadata, primaryMember, // Add primaryMember
-    timeLock, // Add timeLock
-    adminRevoker) {
-        if (!initialMembers.find((member) => member.equals(this.wallet.publicKey))) {
-            initialMembers.push(this.wallet.publicKey);
+    _createMultisig(threshold, createKey, initialMembers, metadata, timeLock) {
+        if (!initialMembers.find((member) => member.key.equals(this.wallet.publicKey))) {
+            initialMembers.push({ key: this.wallet.publicKey, removerAuthority: null });
         }
         const [multisigPDA] = (0, address_1.getMsPDA)(createKey, this.multisigProgramId);
         return [
             this.multisig.methods
-                .create(threshold, createKey, initialMembers, metadata, timeLock, primaryMember, adminRevoker)
+                .create(threshold, createKey, initialMembers, metadata, timeLock)
                 .accounts({ multisig: multisigPDA, creator: this.wallet.publicKey }),
             multisigPDA,
         ];
     }
     createMultisig(threshold, createKey, initialMembers, name = "", description = "", image = "", primaryMember = null, timeLock = 0, adminRevoker = null) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [methods, multisigPDA] = this._createMultisig(threshold, createKey, initialMembers, JSON.stringify({ name, description, image }), primaryMember, timeLock, adminRevoker);
+            const [methods, multisigPDA] = this._createMultisig(threshold, createKey, initialMembers, JSON.stringify({ name, description, image }), timeLock);
             yield methods.rpc();
             return yield this.getMultisig(multisigPDA);
         });
     }
-    buildCreateMultisig(threshold, createKey, initialMembers, name = "", description = "", image = "", primaryMember = null, timeLock = 0, adminRevoker = null) {
+    buildCreateMultisig(threshold, createKey, initialMembers, name = "", description = "", image = "", timeLock = 0) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [methods] = this._createMultisig(threshold, createKey, initialMembers, JSON.stringify({ name, description, image }), primaryMember, timeLock, adminRevoker);
+            const [methods] = this._createMultisig(threshold, createKey, initialMembers, JSON.stringify({ name, description, image }), timeLock);
             return yield methods.instruction();
         });
     }

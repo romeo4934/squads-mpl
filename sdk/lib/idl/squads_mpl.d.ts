@@ -36,7 +36,9 @@ export declare type SquadsMpl = {
                 {
                     "name": "members";
                     "type": {
-                        "vec": "publicKey";
+                        "vec": {
+                            "defined": "Member";
+                        };
                     };
                 },
                 {
@@ -46,18 +48,6 @@ export declare type SquadsMpl = {
                 {
                     "name": "timeLock";
                     "type": "u32";
-                },
-                {
-                    "name": "primaryMember";
-                    "type": {
-                        "option": "publicKey";
-                    };
-                },
-                {
-                    "name": "adminRevoker";
-                    "type": {
-                        "option": "publicKey";
-                    };
                 }
             ];
         },
@@ -89,7 +79,9 @@ export declare type SquadsMpl = {
             "args": [
                 {
                     "name": "newMember";
-                    "type": "publicKey";
+                    "type": {
+                        "defined": "Member";
+                    };
                 }
             ];
         },
@@ -428,20 +420,8 @@ export declare type SquadsMpl = {
             ];
             "args": [
                 {
-                    "name": "newPrimaryMember";
-                    "type": {
-                        "option": "publicKey";
-                    };
-                },
-                {
                     "name": "newTimeLock";
                     "type": "u32";
-                },
-                {
-                    "name": "adminRevoker";
-                    "type": {
-                        "option": "publicKey";
-                    };
                 }
             ];
         },
@@ -670,24 +650,14 @@ export declare type SquadsMpl = {
                     {
                         "name": "keys";
                         "type": {
-                            "vec": "publicKey";
-                        };
-                    },
-                    {
-                        "name": "primaryMember";
-                        "type": {
-                            "option": "publicKey";
+                            "vec": {
+                                "defined": "Member";
+                            };
                         };
                     },
                     {
                         "name": "timeLock";
                         "type": "u32";
-                    },
-                    {
-                        "name": "adminRevoker";
-                        "type": {
-                            "option": "publicKey";
-                        };
                     },
                     {
                         "name": "spendingLimitEnabled";
@@ -894,6 +864,24 @@ export declare type SquadsMpl = {
         }
     ];
     "types": [
+        {
+            "name": "Member";
+            "type": {
+                "kind": "struct";
+                "fields": [
+                    {
+                        "name": "key";
+                        "type": "publicKey";
+                    },
+                    {
+                        "name": "removerAuthority";
+                        "type": {
+                            "option": "publicKey";
+                        };
+                    }
+                ];
+            };
+        },
         {
             "name": "MsAccountMeta";
             "docs": [

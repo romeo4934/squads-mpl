@@ -38,6 +38,8 @@ export type SquadsMethodsNamespace = MethodsNamespace<
 
 export type ApprovalMode = IdlTypes<SquadsMpl>["ApprovalMode"];
 
+export type Member = IdlTypes<SquadsMpl>["Member"];
+
 export type Period = IdlTypes<SquadsMpl>["Period"];
 
 export type SpendingLimitAccount = AccountDefDictionary<SquadsMpl>["spendingLimit"];

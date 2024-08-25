@@ -39,7 +39,9 @@ exports.IDL = {
                 {
                     "name": "members",
                     "type": {
-                        "vec": "publicKey"
+                        "vec": {
+                            "defined": "Member"
+                        }
                     }
                 },
                 {
@@ -49,18 +51,6 @@ exports.IDL = {
                 {
                     "name": "timeLock",
                     "type": "u32"
-                },
-                {
-                    "name": "primaryMember",
-                    "type": {
-                        "option": "publicKey"
-                    }
-                },
-                {
-                    "name": "adminRevoker",
-                    "type": {
-                        "option": "publicKey"
-                    }
                 }
             ]
         },
@@ -92,7 +82,9 @@ exports.IDL = {
             "args": [
                 {
                     "name": "newMember",
-                    "type": "publicKey"
+                    "type": {
+                        "defined": "Member"
+                    }
                 }
             ]
         },
@@ -431,20 +423,8 @@ exports.IDL = {
             ],
             "args": [
                 {
-                    "name": "newPrimaryMember",
-                    "type": {
-                        "option": "publicKey"
-                    }
-                },
-                {
                     "name": "newTimeLock",
                     "type": "u32"
-                },
-                {
-                    "name": "adminRevoker",
-                    "type": {
-                        "option": "publicKey"
-                    }
                 }
             ]
         },
@@ -673,24 +653,14 @@ exports.IDL = {
                     {
                         "name": "keys",
                         "type": {
-                            "vec": "publicKey"
-                        }
-                    },
-                    {
-                        "name": "primaryMember",
-                        "type": {
-                            "option": "publicKey"
+                            "vec": {
+                                "defined": "Member"
+                            }
                         }
                     },
                     {
                         "name": "timeLock",
                         "type": "u32"
-                    },
-                    {
-                        "name": "adminRevoker",
-                        "type": {
-                            "option": "publicKey"
-                        }
                     },
                     {
                         "name": "spendingLimitEnabled",
@@ -897,6 +867,24 @@ exports.IDL = {
         }
     ],
     "types": [
+        {
+            "name": "Member",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "key",
+                        "type": "publicKey"
+                    },
+                    {
+                        "name": "removerAuthority",
+                        "type": {
+                            "option": "publicKey"
+                        }
+                    }
+                ]
+            }
+        },
         {
             "name": "MsAccountMeta",
             "docs": [

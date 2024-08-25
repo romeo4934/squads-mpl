@@ -21,7 +21,7 @@ import {
   MultisigAccount,
   SquadsMethods,
   TransactionAccount,
-  ApprovalMode,
+  Member,
   SpendingLimitAccount
 } from "./types";
 import {
@@ -255,21 +255,19 @@ class Squads {
   private _createMultisig(
       threshold: number,
       createKey: PublicKey,
-      initialMembers: PublicKey[],
+      initialMembers: Member[],
       metadata: string,
-      primaryMember: PublicKey | null, // Add primaryMember
       timeLock: number, // Add timeLock
-      adminRevoker: PublicKey | null, // Add adminRevoker
   ): [SquadsMethods, PublicKey] {
     if (
-        !initialMembers.find((member) => member.equals(this.wallet.publicKey))
+        !initialMembers.find((member) => member.key.equals(this.wallet.publicKey))
     ) {
-      initialMembers.push(this.wallet.publicKey);
+      initialMembers.push({ key: this.wallet.publicKey, removerAuthority: null });
     }
     const [multisigPDA] = getMsPDA(createKey, this.multisigProgramId);
     return [
       this.multisig.methods
-          .create(threshold, createKey, initialMembers, metadata, timeLock, primaryMember, adminRevoker)
+          .create(threshold, createKey, initialMembers, metadata, timeLock,)
           .accounts({multisig: multisigPDA, creator: this.wallet.publicKey}),
       multisigPDA,
     ];
@@ -278,7 +276,7 @@ class Squads {
   async createMultisig(
       threshold: number,
       createKey: PublicKey,
-      initialMembers: PublicKey[],
+      initialMembers: Member[],
       name = "",
       description = "",
       image = "",
@@ -291,9 +289,7 @@ class Squads {
         createKey,
         initialMembers,
         JSON.stringify({name, description, image}),
-        primaryMember,
         timeLock,
-        adminRevoker
     );
     await methods.rpc();
     return await this.getMultisig(multisigPDA);
@@ -302,22 +298,18 @@ class Squads {
   async buildCreateMultisig(
       threshold: number,
       createKey: PublicKey,
-      initialMembers: PublicKey[],
+      initialMembers: Member[],
       name = "",
       description = "",
       image = "",
-      primaryMember: PublicKey | null = null,
       timeLock = 0,
-      adminRevoker: PublicKey | null = null, // Add adminRevoker
   ): Promise<TransactionInstruction> {
     const [methods] = this._createMultisig(
         threshold,
         createKey,
         initialMembers,
         JSON.stringify({name, description, image}),
-        primaryMember,
         timeLock,
-        adminRevoker
     );
     return await methods.instruction();
   }

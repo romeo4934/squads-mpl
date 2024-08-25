@@ -143,7 +143,7 @@ describe("Programs", function(){
           await squads.createMultisig(
             threshold,
             randomCreateKey,
-            memberList.map((m) => m.publicKey),
+            memberList.map((m) => ({ key: m.publicKey, removerAuthority: null })),
             "Test Multisig",
             "Description for testing",
             "https://example.com/image.png",

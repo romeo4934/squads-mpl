@@ -23,12 +23,12 @@ use crate::errors::*;
 /// 6. time_lock: u32
 /// 7. guardians: Vec<Pubkey>
 #[derive(Accounts)]
-#[instruction(threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, meta: String, primary_member: Option<Pubkey>,  time_lock: u32, primary_member_revoker: Pubkey)]
+#[instruction(threshold: u16, create_key: Pubkey, members: Vec<Member>, meta: String, time_lock: u32)]
 pub struct Create<'info> {
     #[account(
         init,
         payer = creator,
-        space = Ms::SIZE_WITHOUT_MEMBERS + (members.len() * 32),
+        space = Ms::SIZE_WITHOUT_MEMBERS + (members.len() * Member::INIT_SPACE),
         seeds = [b"squad", create_key.as_ref(), b"multisig"], bump
     )]
     pub multisig: Account<'info, Ms>,

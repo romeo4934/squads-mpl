@@ -1,7 +1,7 @@
 import {
   MultisigAccount,
   SquadsMethodsNamespace,
-  ApprovalMode,
+  Member,
   Period
 } from "./types";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
@@ -86,7 +86,7 @@ export class TransactionBuilder {
       this.instructions.concat(newInstructions)
     );
   }
-  async withAddMember(member: PublicKey): Promise<TransactionBuilder> {
+  async withAddMember(member: Member): Promise<TransactionBuilder> {
     const instructions = []
     const instruction = await this.methods
       .addMember(member)
@@ -119,12 +119,10 @@ export class TransactionBuilder {
   }
 
   async withUpdateMultisigSettings(
-    newPrimaryMember: PublicKey | null,
     newTimeLock: number,
-    adminRevoker: PublicKey | null
   ): Promise<TransactionBuilder> {
     const instruction = await this.methods
-      .updateMultisigSettings(newPrimaryMember,newTimeLock,adminRevoker)
+      .updateMultisigSettings(newTimeLock)
       .accounts({
         multisig: this.multisig.publicKey,
       })
