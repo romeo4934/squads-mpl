@@ -632,9 +632,23 @@ pub mod squads_mpl {
         let new_index = ctx.accounts.multisig.transaction_index;
         ctx.accounts.multisig.set_change_index(new_index)
     }
+
+    pub fn pause_spending_limit(ctx: Context<PauseSpendingLimit>) -> Result<()> {
+        // Disable spending limit
+        ctx.accounts.multisig.spending_limit_enabled = false;
+
+        // Mark the change by updating the change index to deprecate any active transactions
+        let new_index = ctx.accounts.multisig.transaction_index;
+        ctx.accounts.multisig.set_change_index(new_index)
+    }
     
     
     pub fn spending_limit_use(ctx: Context<SpendingLimitUse>, amount: u64, decimals: u8,) -> Result<()> {
+        // Ensure spending limit is enabled
+        if !ctx.accounts.multisig.spending_limit_enabled {
+            return err!(MsError::SpendingLimitDisabled);
+        }
+
         let now = Clock::get()?.unix_timestamp;
 
         // Get a mutable reference to `spending_limit` account.

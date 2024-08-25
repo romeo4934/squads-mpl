@@ -38,4 +38,5 @@ pub enum MsError {
     InvalidMint, // Error for invalid mint
     InvalidAmount, // Error for invalid amount
     InvalidDecimals, // Error for incorrect decimals
+    SpendingLimitDisabled, // Error for spending limit disabled
 }

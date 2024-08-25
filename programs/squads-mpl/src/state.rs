@@ -31,6 +31,8 @@ pub struct Ms {
     pub primary_member: Option<Pubkey>, // Optional admin 
     pub time_lock: u32,                 //// time lock duration in seconds when a transaction is approved by admin
     pub admin_revoker: Option<Pubkey>,  // Key that can revoke the admin privileges and cancel pending transactions
+    pub spending_limit_enabled: bool,   // Spending limit enabled
+    pub spending_limit_disabler_authority: Option<Pubkey>, // Spending limit disabler authority
 }
 
 impl Ms {
@@ -44,7 +46,9 @@ impl Ms {
     4 +          // for vec length
     33 +        // primary member (one byte for option + 32 for Pubkey)
     4 +         // time lock
-    33;         // admin_revoker  (one byte for option + 32 for Pubkey)
+    33 +         // admin_revoker  (one byte for option + 32 for Pubkey)
+    1 +         // spending limit enabled
+    33;         // spending limit disabler authority (one byte for option + 32 for Pubkey)
 
 
     /// Initializes the new multisig account
@@ -59,6 +63,8 @@ impl Ms {
         self.time_lock = time_lock; // Initialize with the time_lock
         self.primary_member = primary_member;
         self.admin_revoker = admin_revoker;
+        self.spending_limit_enabled = true;
+        self.spending_limit_disabler_authority = None;
         Ok(())
     }
 

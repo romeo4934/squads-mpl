@@ -485,6 +485,23 @@ pub struct RemoveSpendingLimit<'info> {
     pub system_program: Program<'info, System>,
 }
 
+/// The account context for pausing the spending limit
+/// 1. multisig account [signer]
+/// 2. spending_limit_disabler_authority account [signer]
+#[derive(Accounts)]
+pub struct PauseSpendingLimit<'info> {
+    #[account(
+        mut,
+        seeds = [b"squad", multisig.create_key.as_ref(), b"multisig"],
+        bump = multisig.bump,
+        constraint = multisig.spending_limit_disabler_authority.unwrap() == disabler.key() @ MsError::UnauthorizedMember,
+    )]
+    pub multisig: Account<'info, Ms>,
+
+    #[account(mut)]
+    pub disabler: Signer<'info>,
+}
+
 
 #[derive(Accounts)]
 pub struct SpendingLimitUse<'info> {

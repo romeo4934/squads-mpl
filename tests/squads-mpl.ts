@@ -422,7 +422,9 @@ describe("Programs", function(){
         4 +         // for vec length
         33 +        // primary member (one byte for option + 32 for Pubkey)
         4 +         // time lock
-        33;         // admin_revoker
+        33 +         // admin_revoker
+        1 +         // spending limit enabled
+        33;         // spending limit disabler authority (one byte for option + 32 for Pubkey)
         
         const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 32) - currNumKeys;
         // if there is less than 1 spot left, calculate rent needed for realloc of 10 more keys
