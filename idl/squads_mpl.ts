@@ -490,6 +490,10 @@ export type SquadsMpl = {
       ],
       "args": [
         {
+          "name": "createKey",
+          "type": "publicKey"
+        },
+        {
           "name": "mint",
           "type": "publicKey"
         },
@@ -500,6 +504,10 @@ export type SquadsMpl = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "member",
+          "type": "publicKey"
         },
         {
           "name": "period",
@@ -781,6 +789,13 @@ export type SquadsMpl = {
         "kind": "struct",
         "fields": [
           {
+            "name": "createKey",
+            "docs": [
+              "create key used to seed the spending limit pda"
+            ],
+            "type": "publicKey"
+          },
+          {
             "name": "multisig",
             "docs": [
               "The multisig this belongs to."
@@ -811,6 +826,10 @@ export type SquadsMpl = {
               "so 1 SOL would be `1_000_000_000` and 1 USDC would be `1_000_000`."
             ],
             "type": "u64"
+          },
+          {
+            "name": "member",
+            "type": "publicKey"
           },
           {
             "name": "period",
@@ -1623,6 +1642,10 @@ export const IDL: SquadsMpl = {
       ],
       "args": [
         {
+          "name": "createKey",
+          "type": "publicKey"
+        },
+        {
           "name": "mint",
           "type": "publicKey"
         },
@@ -1633,6 +1656,10 @@ export const IDL: SquadsMpl = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "member",
+          "type": "publicKey"
         },
         {
           "name": "period",
@@ -1914,6 +1941,13 @@ export const IDL: SquadsMpl = {
         "kind": "struct",
         "fields": [
           {
+            "name": "createKey",
+            "docs": [
+              "create key used to seed the spending limit pda"
+            ],
+            "type": "publicKey"
+          },
+          {
             "name": "multisig",
             "docs": [
               "The multisig this belongs to."
@@ -1944,6 +1978,10 @@ export const IDL: SquadsMpl = {
               "so 1 SOL would be `1_000_000_000` and 1 USDC would be `1_000_000`."
             ],
             "type": "u64"
+          },
+          {
+            "name": "member",
+            "type": "publicKey"
           },
           {
             "name": "period",
