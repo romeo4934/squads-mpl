@@ -594,12 +594,28 @@ pub mod squads_mpl {
     }
 
     pub fn remove_primary_member(ctx: Context<RemovePrimaryMember>) -> Result<()> {
-        // Remove the primary member
-        ctx.accounts.multisig.primary_member = None;
+        // Ensure there is a primary member to remove
+        let primary_member = ctx
+            .accounts
+            .multisig
+            .primary_member
+            .ok_or(MsError::NoPrimaryMemberSpecified)?;
+
+        // If there is only one key in this multisig, reject the removal
+        if ctx.accounts.multisig.keys.len() == 1 {
+            return err!(MsError::CannotRemoveSoloMember);
+        }
+
+        // Remove the primary member from the multisig
+        ctx.accounts.multisig.remove_member(primary_member)?;
+
+        // Ensure the threshold is still valid after removal
+        if ctx.accounts.multisig.keys.len() < usize::from(ctx.accounts.multisig.threshold) {
+            return err!(MsError::InvalidThreshold);
+        }
 
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
-        // set the change index, which will deprecate any active transactions
         ctx.accounts.multisig.set_change_index(new_index)
     }
 
