@@ -740,9 +740,9 @@ describe("Programs", function(){
             break;
           }
 
-          const inMultisig = (msState.keys as anchor.web3.PublicKey[]).findIndex(
+          const inMultisig = (msState.keys as { key: anchor.web3.PublicKey }[]).findIndex(
             (k) => {
-              return k.toBase58() == memberList[i].publicKey.toBase58();
+              return k.key.toBase58() == memberList[i].publicKey.toBase58();
             }
           );
           if (inMultisig < 0) {
