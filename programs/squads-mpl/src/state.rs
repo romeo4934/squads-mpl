@@ -27,10 +27,8 @@ pub struct Ms {
 
     pub create_key: Pubkey,             // random key(or not) used to seed the multisig pda.
 
-    pub keys: Vec<Pubkey>,              // keys of the members/owners of the multisig.
+    pub keys: Vec<Member>,              // keys of the members/owners of the multisig.
     pub time_lock: u32,                 //// time lock duration in seconds before a transaction can be executed
-    pub primary_member: Option<Pubkey>, // Optional primary member of the multisig
-    pub primary_member_revoker: Option<Pubkey>,  // Optional authority that can remove the primary member of the multisig
     pub spending_limit_enabled: bool,   // Spending limit enabled
     pub spending_limit_disabler_authority: Option<Pubkey>, // Spending limit disabler authority
 }
@@ -45,14 +43,12 @@ impl Ms {
     32 +        // creator
     4 +          // for vec length
     4 +         // time lock
-    33 +        // primary member (one byte for option + 32 for Pubkey)
-    33 +         // primary_member_revoker  (one byte for option + 32 for Pubkey)
     1 +         // spending limit enabled
     33;         // spending limit disabler authority (one byte for option + 32 for Pubkey)
 
 
     /// Initializes the new multisig account
-    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, bump: u8, time_lock: u32, primary_member: Option<Pubkey>, primary_member_revoker: Option<Pubkey>) -> Result<()> {
+    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Member>, bump: u8, time_lock: u32) -> Result<()> {
         self.threshold = threshold;
         self.keys = members;
         self.authority_index = 1;   // default vault is the first authority
@@ -61,19 +57,14 @@ impl Ms {
         self.bump = bump;
         self.create_key = create_key;
         self.time_lock = time_lock; // Initialize with the time_lock
-        self.primary_member = primary_member;
-        self.primary_member_revoker = primary_member_revoker;
         self.spending_limit_enabled = true;
         self.spending_limit_disabler_authority = None;
         Ok(())
     }
 
     /// Checks to see if the key is a member of the multisig
-    pub fn is_member(&self, member: Pubkey) -> Option<usize> {
-        match self.keys.binary_search(&member) {
-            Ok(ind)=> Some(ind),
-            _ => None
-        }
+    pub fn is_member(&self, member_key: Pubkey) -> Option<usize> {
+        self.keys.iter().position(|m| m.key == member_key)
     }
 
     /// Updates the change index, deprecating any active/draft transactions
@@ -92,21 +83,18 @@ impl Ms {
     }
 
     /// Adds a member to the multisig. Is a no-op if the member is already in the multisig.
-    pub fn add_member(&mut self, member: Pubkey) -> Result<()>{
-        if matches!(self.is_member(member), None) {
+    pub fn add_member(&mut self, member: Member) -> Result<()>{
+        if self.is_member(member.key).is_none() {
             self.keys.push(member);
-            self.keys.sort();
+            self.keys.sort_by_key(|m| m.key);
         }
         Ok(())
     }
 
     /// Removes a member from the multisig. Is a no-op if the member is not in the multisig.
-    pub fn remove_member(&mut self, member: Pubkey) -> Result<()>{
-        if let Some(ind) = self.is_member(member) {
-            self.keys.remove(ind);
-            if self.keys.len() < usize::from(self.threshold) {
-                self.threshold = self.keys.len().try_into().unwrap();
-            }
+    pub fn remove_member(&mut self, member_key: Pubkey) -> Result<()>{
+        if let Some(index) = self.is_member(member_key) {
+            self.keys.remove(index);
         }
         Ok(())
     }
@@ -117,6 +105,12 @@ impl Ms {
         Ok(())
     }
 
+}
+
+#[derive(AnchorDeserialize, AnchorSerialize, InitSpace, Eq, PartialEq, Clone)]
+pub struct Member {
+    pub key: Pubkey,
+    pub remover_authority: Option<Pubkey>,
 }
 
 /// MsTransactionStatus enum of the current status of the Multisig Transaction.

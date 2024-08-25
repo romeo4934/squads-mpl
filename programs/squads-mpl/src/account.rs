@@ -400,8 +400,7 @@ pub struct RemovePrimaryMember<'info> {
 
     #[account(
         mut,
-        constraint = multisig.primary_member_revoker.is_some() @ MsError::UnauthorizedMember,
-        constraint = multisig.primary_member_revoker.unwrap() == remover.key() @ MsError::UnauthorizedMember,
+        constraint = true @ MsError::UnauthorizedMember, // TO BE FIXED
     )]
     pub remover: Signer<'info>,
 }

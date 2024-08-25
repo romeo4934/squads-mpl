@@ -53,16 +53,13 @@ pub mod squads_mpl {
         ctx: Context<Create>,
         threshold: u16,       // threshold of members required to sign
         create_key: Pubkey,   // the public key used to seed the original multisig creation
-        members: Vec<Pubkey>, // a list of members (Public Keys) to use for the multisig
+        members: Vec<Member>, // a list of members (Public Keys) to use for the multisig
         _meta: String,        // a string of metadata that can be used to describe the multisig on-chain as a memo ie. '{"name":"My Multisig","description":"This is a my multisig"}'
         time_lock: u32, // time lock duration before a transaction can be approved
-        primary_member: Option<Pubkey>, // Optional primary member of the multisig
-        primary_member_revoker: Option<Pubkey>  // Optional authority that can remove the primary member of the multisig
     ) -> Result<()> {
         // sort the members and remove duplicates
         let mut members = members;
-        members.sort();
-        members.dedup();
+        members.sort_by_key(|m| m.key);
 
         // check we don't exceed u16
         let total_members = members.len();
@@ -85,21 +82,12 @@ pub mod squads_mpl {
             return err!(MsError::TimeLockExceedsMaximum);
         }
 
-        // Ensure primary member is in member list
-        if let Some(primary_member) = primary_member {
-            if !members.contains(&primary_member) {
-                return err!(MsError::PrimaryMemberNotInMultisig);
-            }
-        }
-
         ctx.accounts.multisig.init(
             threshold,
             create_key,
             members,
             ctx.bumps.multisig,
             time_lock,
-            primary_member,
-            primary_member_revoker, 
         )
     }
 
@@ -107,7 +95,7 @@ pub mod squads_mpl {
     /// Adds member/key to the multisig and reallocates space if neccessary
     /// If the multisig needs to be reallocated, it must be prefunded with
     /// enough lamports to cover the new size.
-    pub fn add_member(ctx: Context<MsAuthRealloc>, new_member: Pubkey) -> Result<()> {
+    pub fn add_member(ctx: Context<MsAuthRealloc>, new_member: Member) -> Result<()> {
         // if max is already reached, we can't have more members
         if ctx.accounts.multisig.keys.len() >= usize::from(u16::MAX) {
             return err!(MsError::MaxMembersReached);
@@ -565,7 +553,7 @@ pub mod squads_mpl {
     }
 
        /// The instruction to update the multisig settings.
-    pub fn update_multisig_settings(ctx: Context<MsAuth>, new_primary_member: Option<Pubkey>, new_time_lock: u32, primary_member_revoker: Option<Pubkey>) -> Result<()> {
+    pub fn update_multisig_settings(ctx: Context<MsAuth>, new_time_lock: u32,) -> Result<()> {
         // Ensure the new time lock is within the maximum allowable duration
         if new_time_lock > MAX_TIME_LOCK {
             return err!(MsError::TimeLockExceedsMaximum);
@@ -573,19 +561,6 @@ pub mod squads_mpl {
 
         // Update the time lock duration
         ctx.accounts.multisig.time_lock = new_time_lock;
-
-        // If a new primary member is provided, ensure it is in the member list
-        if let Some(ref primary_member) = new_primary_member {
-            if !ctx.accounts.multisig.keys.contains(primary_member) {
-                return err!(MsError::PrimaryMemberNotInMultisig);
-            }
-        }
-
-        // Update the primary member
-        ctx.accounts.multisig.primary_member = new_primary_member;
-
-        // Update the primary member revoker
-        ctx.accounts.multisig.primary_member_revoker = primary_member_revoker;
 
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
@@ -595,24 +570,7 @@ pub mod squads_mpl {
 
     pub fn remove_primary_member(ctx: Context<RemovePrimaryMember>) -> Result<()> {
         // Ensure there is a primary member to remove
-        let primary_member = ctx
-            .accounts
-            .multisig
-            .primary_member
-            .ok_or(MsError::NoPrimaryMemberSpecified)?;
-
-        // If there is only one key in this multisig, reject the removal
-        if ctx.accounts.multisig.keys.len() == 1 {
-            return err!(MsError::CannotRemoveSoloMember);
-        }
-
-        // Remove the primary member from the multisig
-        ctx.accounts.multisig.remove_member(primary_member)?;
-
-        // Ensure the threshold is still valid after removal
-        if ctx.accounts.multisig.keys.len() < usize::from(ctx.accounts.multisig.threshold) {
-            return err!(MsError::InvalidThreshold);
-        }
+        // TO BE FIXED
 
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
