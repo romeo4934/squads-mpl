@@ -19,9 +19,7 @@ use crate::errors::*;
 /// 2. create_key: Pubkey
 /// 3. members: Vec<Pubkey>
 /// 4. meta: String (for optional on-chain memo)
-/// 5. primary_member: Option<Pubkey>
-/// 6. time_lock: u32
-/// 7. guardians: Vec<Pubkey>
+/// 5. time_lock: u32
 #[derive(Accounts)]
 #[instruction(threshold: u16, create_key: Pubkey, members: Vec<Member>, meta: String, time_lock: u32)]
 pub struct Create<'info> {

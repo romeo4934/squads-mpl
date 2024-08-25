@@ -55,7 +55,7 @@ pub mod squads_mpl {
         create_key: Pubkey,   // the public key used to seed the original multisig creation
         members: Vec<Member>, // a list of members (Public Keys) to use for the multisig
         _meta: String,        // a string of metadata that can be used to describe the multisig on-chain as a memo ie. '{"name":"My Multisig","description":"This is a my multisig"}'
-        time_lock: u32, // time lock duration before a transaction can be approved
+        time_lock: u32,       // time lock duration before a transaction can be approved
     ) -> Result<()> {
         // sort the members and remove duplicates
         let mut members = members;
