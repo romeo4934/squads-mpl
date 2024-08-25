@@ -30,7 +30,7 @@ pub struct Ms {
     pub keys: Vec<Member>,              // keys of the members/owners of the multisig.
     pub time_lock: u32,                 //// time lock duration in seconds before a transaction can be executed
     pub spending_limit_enabled: bool,   // Spending limit enabled
-    pub guardian: Option<Pubkey>,       // Guardian can pause spending limit and remove without a vote some members
+    pub guardian: Option<Pubkey>,       // Guardian can disable spending limit and remove some members without a vote 
 }
 
 impl Ms {
