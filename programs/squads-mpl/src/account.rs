@@ -522,10 +522,9 @@ pub struct SpendingLimitUse<'info> {
 
     #[account(
         mut,
-        constraint = multisig.primary_member.is_some() @ MsError::PrimaryMemberNotInMultisig,
-        constraint = multisig.primary_member.unwrap() == primary_member.key() @ MsError::UnauthorizedMember
+        constraint = spending_limit.member == member.key() @ MsError::UnauthorizedMember
     )]
-    pub primary_member: Signer<'info>, // Primary member as signer
+    pub member: Signer<'info>, // Primary member as signer
 
     /// CHECK: Could be any account
     #[account(mut)]

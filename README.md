@@ -4,9 +4,7 @@ solana-cli 1.18.22
 
 solana config set --keypair ~/.config/solana/id.json
 
-- make spending limit with a member and a create key
 - pause all spending limits (pause with 1 and unpause methods with signature)
-
 - rename primary member and admin revoker
 - create a special method to remove member calling multisaig.remove_member
 
