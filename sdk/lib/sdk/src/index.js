@@ -168,11 +168,11 @@ class Squads {
             return yield methods.instruction();
         });
     }
-    _createTransaction(multisigPDA, authorityIndex, transactionIndex, approvalMode) {
+    _createTransaction(multisigPDA, authorityIndex, transactionIndex) {
         return __awaiter(this, void 0, void 0, function* () {
             const [transactionPDA] = (0, address_1.getTxPDA)(multisigPDA, new bn_js_1.default(transactionIndex, 10), this.multisigProgramId);
             return [
-                this.multisig.methods.createTransaction(authorityIndex, approvalMode).accounts({
+                this.multisig.methods.createTransaction(authorityIndex).accounts({
                     multisig: multisigPDA,
                     transaction: transactionPDA,
                     creator: this.wallet.publicKey,
@@ -181,17 +181,17 @@ class Squads {
             ];
         });
     }
-    createTransaction(multisigPDA, authorityIndex, approvalMode) {
+    createTransaction(multisigPDA, authorityIndex) {
         return __awaiter(this, void 0, void 0, function* () {
             const nextTransactionIndex = yield this.getNextTransactionIndex(multisigPDA);
-            const [methods, transactionPDA] = yield this._createTransaction(multisigPDA, authorityIndex, nextTransactionIndex, approvalMode);
+            const [methods, transactionPDA] = yield this._createTransaction(multisigPDA, authorityIndex, nextTransactionIndex);
             yield methods.rpc();
             return yield this.getTransaction(transactionPDA);
         });
     }
-    buildCreateTransaction(multisigPDA, authorityIndex, transactionIndex, approvalMode) {
+    buildCreateTransaction(multisigPDA, authorityIndex, transactionIndex) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [methods] = yield this._createTransaction(multisigPDA, authorityIndex, transactionIndex, approvalMode);
+            const [methods] = yield this._createTransaction(multisigPDA, authorityIndex, transactionIndex);
             return yield methods.instruction();
         });
     }

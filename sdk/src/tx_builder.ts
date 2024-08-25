@@ -99,33 +99,9 @@ export class TransactionBuilder {
         this.instructions.concat(instructions)
     );
   }
-  async withAddMemberAndChangeThreshold(
-    member: PublicKey,
-    threshold: number
-  ): Promise<TransactionBuilder> {
-    const instruction = await this.methods
-      .addMemberAndChangeThreshold(member, threshold)
-      .accounts({
-        multisig: this.multisig.publicKey,
-      })
-      .instruction();
-    return this.withInstruction(instruction);
-  }
   async withRemoveMember(member: PublicKey): Promise<TransactionBuilder> {
     const instruction = await this.methods
       .removeMember(member)
-      .accounts({
-        multisig: this.multisig.publicKey,
-      })
-      .instruction();
-    return this.withInstruction(instruction);
-  }
-  async withRemoveMemberAndChangeThreshold(
-    member: PublicKey,
-    threshold: number
-  ): Promise<TransactionBuilder> {
-    const instruction = await this.methods
-      .removeMemberAndChangeThreshold(member, threshold)
       .accounts({
         multisig: this.multisig.publicKey,
       })
@@ -195,7 +171,7 @@ export class TransactionBuilder {
   }
   
 
-  async getInstructions(approvalMode: ApprovalMode): Promise<[TransactionInstruction[], PublicKey]> {
+  async getInstructions(): Promise<[TransactionInstruction[], PublicKey]> {
     const transactionPDA = this.transactionPDA();
     const wrappedAddInstructions = await Promise.all(
       this.instructions.map((rawInstruction, index) =>
@@ -203,7 +179,7 @@ export class TransactionBuilder {
       )
     );
     const createTxInstruction = await this.methods
-      .createTransaction(this.authorityIndex, approvalMode)
+      .createTransaction(this.authorityIndex)
       .accounts({
         multisig: this.multisig.publicKey,
         transaction: transactionPDA,
@@ -214,8 +190,8 @@ export class TransactionBuilder {
     this.instructions = [];
     return [instructions, transactionPDA];
   }
-  async executeInstructions(approvalMode: ApprovalMode): Promise<[TransactionInstruction[], PublicKey]> {
-    const [instructions, transactionPDA] = await this.getInstructions(approvalMode);
+  async executeInstructions(): Promise<[TransactionInstruction[], PublicKey]> {
+    const [instructions, transactionPDA] = await this.getInstructions();
     const { blockhash } = await this.provider.connection.getLatestBlockhash();
     const lastValidBlockHeight =
       await this.provider.connection.getBlockHeight();

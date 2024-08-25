@@ -1,4 +1,4 @@
-import { MultisigAccount, SquadsMethodsNamespace, ApprovalMode, Period } from "./types";
+import { MultisigAccount, SquadsMethodsNamespace, Period } from "./types";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { AnchorProvider } from "@coral-xyz/anchor";
 export declare class TransactionBuilder {
@@ -15,13 +15,11 @@ export declare class TransactionBuilder {
     withInstruction(instruction: TransactionInstruction): TransactionBuilder;
     withInstructions(instructions: TransactionInstruction[]): TransactionBuilder;
     withAddMember(member: PublicKey): Promise<TransactionBuilder>;
-    withAddMemberAndChangeThreshold(member: PublicKey, threshold: number): Promise<TransactionBuilder>;
     withRemoveMember(member: PublicKey): Promise<TransactionBuilder>;
-    withRemoveMemberAndChangeThreshold(member: PublicKey, threshold: number): Promise<TransactionBuilder>;
     withChangeThreshold(threshold: number): Promise<TransactionBuilder>;
     withUpdateAdminSettings(newPrimaryMember: PublicKey | null, newTimeLock: number, adminRevoker: PublicKey | null): Promise<TransactionBuilder>;
     withAddSpendingLimit(mint: PublicKey, vaultIndex: number, amount: number, period: Period): Promise<TransactionBuilder>;
     withRemoveSpendingLimit(mint: PublicKey, vaultIndex: number): Promise<TransactionBuilder>;
-    getInstructions(approvalMode: ApprovalMode): Promise<[TransactionInstruction[], PublicKey]>;
-    executeInstructions(approvalMode: ApprovalMode): Promise<[TransactionInstruction[], PublicKey]>;
+    getInstructions(): Promise<[TransactionInstruction[], PublicKey]>;
+    executeInstructions(): Promise<[TransactionInstruction[], PublicKey]>;
 }

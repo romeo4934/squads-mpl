@@ -113,62 +113,6 @@ export type SquadsMpl = {
       ]
     },
     {
-      "name": "removeMemberAndChangeThreshold",
-      "docs": [
-        "The instruction to change the threshold of the multisig and simultaneously remove a member"
-      ],
-      "accounts": [
-        {
-          "name": "multisig",
-          "isMut": true,
-          "isSigner": true
-        }
-      ],
-      "args": [
-        {
-          "name": "oldMember",
-          "type": "publicKey"
-        },
-        {
-          "name": "newThreshold",
-          "type": "u16"
-        }
-      ]
-    },
-    {
-      "name": "addMemberAndChangeThreshold",
-      "docs": [
-        "The instruction to change the threshold of the multisig and simultaneously add a member"
-      ],
-      "accounts": [
-        {
-          "name": "multisig",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "newMember",
-          "type": "publicKey"
-        },
-        {
-          "name": "newThreshold",
-          "type": "u16"
-        }
-      ]
-    },
-    {
       "name": "changeThreshold",
       "docs": [
         "The instruction to change the threshold of the multisig"
@@ -240,12 +184,6 @@ export type SquadsMpl = {
         {
           "name": "authorityIndex",
           "type": "u32"
-        },
-        {
-          "name": "mode",
-          "type": {
-            "defined": "ApprovalMode"
-          }
         }
       ]
     },
@@ -793,12 +731,6 @@ export type SquadsMpl = {
           {
             "name": "executedIndex",
             "type": "u8"
-          },
-          {
-            "name": "mode",
-            "type": {
-              "defined": "ApprovalMode"
-            }
           }
         ]
       }
@@ -1314,62 +1246,6 @@ export const IDL: SquadsMpl = {
       ]
     },
     {
-      "name": "removeMemberAndChangeThreshold",
-      "docs": [
-        "The instruction to change the threshold of the multisig and simultaneously remove a member"
-      ],
-      "accounts": [
-        {
-          "name": "multisig",
-          "isMut": true,
-          "isSigner": true
-        }
-      ],
-      "args": [
-        {
-          "name": "oldMember",
-          "type": "publicKey"
-        },
-        {
-          "name": "newThreshold",
-          "type": "u16"
-        }
-      ]
-    },
-    {
-      "name": "addMemberAndChangeThreshold",
-      "docs": [
-        "The instruction to change the threshold of the multisig and simultaneously add a member"
-      ],
-      "accounts": [
-        {
-          "name": "multisig",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "newMember",
-          "type": "publicKey"
-        },
-        {
-          "name": "newThreshold",
-          "type": "u16"
-        }
-      ]
-    },
-    {
       "name": "changeThreshold",
       "docs": [
         "The instruction to change the threshold of the multisig"
@@ -1441,12 +1317,6 @@ export const IDL: SquadsMpl = {
         {
           "name": "authorityIndex",
           "type": "u32"
-        },
-        {
-          "name": "mode",
-          "type": {
-            "defined": "ApprovalMode"
-          }
         }
       ]
     },
@@ -1994,12 +1864,6 @@ export const IDL: SquadsMpl = {
           {
             "name": "executedIndex",
             "type": "u8"
-          },
-          {
-            "name": "mode",
-            "type": {
-              "defined": "ApprovalMode"
-            }
           }
         ]
       }

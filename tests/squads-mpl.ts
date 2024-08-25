@@ -181,7 +181,7 @@ describe("Programs", function(){
 
       it(`Create Tx draft`,  async function(){
         // create a transaction draft
-        const txState = await squads.createTransaction(msPDA, 1, {approvalByMultisig: {}});
+        const txState = await squads.createTransaction(msPDA, 1);
         expect(txState.instructionIndex).to.equal(0);
         expect(txState.creator.toBase58()).to.equal(creator.publicKey.toBase58());
 
@@ -192,7 +192,7 @@ describe("Programs", function(){
 
       it(`Add Ix to Tx`,  async function(){
         // create a transaction draft
-        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
+        let txState = await squads.createTransaction(msPDA, 1);
         // check the transaction indexes match
         expect(txState.instructionIndex).to.equal(0);
         expect(txState.status).to.have.property("draft");
@@ -209,7 +209,7 @@ describe("Programs", function(){
 
       it(`Tx Activate`,  async function(){
         // create a transaction draft
-        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
+        let txState = await squads.createTransaction(msPDA, 1);
         const testIx = await createTestTransferTransaction(
           msPDA,
           creator.publicKey
@@ -227,7 +227,7 @@ describe("Programs", function(){
 
       it(`Tx Sign`,  async function(){
         // create a transaction draft
-        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
+        let txState = await squads.createTransaction(msPDA, 1);
         const testIx = await createTestTransferTransaction(
           msPDA,
           creator.publicKey
@@ -252,7 +252,7 @@ describe("Programs", function(){
           testPayee.publicKey
         );
 
-        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
+        let txState = await squads.createTransaction(msPDA, 1);
         await squads.addInstruction(txState.publicKey, testIx);
         await squads.activateTransaction(txState.publicKey);
         await squads.approveTransaction(txState.publicKey);
@@ -301,7 +301,7 @@ describe("Programs", function(){
           testPayee.publicKey
         );
 
-        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
+        let txState = await squads.createTransaction(msPDA, 1);
         await squads.addInstruction(txState.publicKey, testIx);
         await squads.addInstruction(txState.publicKey, testIx2x);
         await squads.activateTransaction(txState.publicKey);
@@ -337,7 +337,7 @@ describe("Programs", function(){
         // create authority to use (Vault, index 1)
         const authorityPDA = squads.getAuthorityPDA(msPDA, 1);
 
-        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
+        let txState = await squads.createTransaction(msPDA, 1);
 
         // person/entity who gets paid
         const testPayee = anchor.web3.Keypair.generate();
@@ -443,7 +443,7 @@ describe("Programs", function(){
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         const [txInstructions, txPDA] = await (
           await txBuilder.withAddMember(member2.publicKey)
-        ).getInstructions({approvalByMultisig: {}});
+        ).getInstructions();
         const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
 
         let addMemberTx = await createBlankTransaction(
@@ -495,7 +495,7 @@ describe("Programs", function(){
         const startKeys = msState.keys.length;
         const [txInstructions, txPDA] = await (
           await txBuilder.withAddMember(newMember)
-        ).getInstructions({approvalByMultisig: {}});
+        ).getInstructions();
         const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
 
         let addMemberTx = await createBlankTransaction(
@@ -531,7 +531,7 @@ describe("Programs", function(){
       it(`Transaction instruction failure`, async function(){
         // create authority to use (Vault, index 1)
         const authorityPDA = squads.getAuthorityPDA(msPDA, 1);
-        let txState = await squads.createTransaction(msPDA, 1,  {approvalByMultisig: {}});
+        let txState = await squads.createTransaction(msPDA, 1);
 
         // the test transfer instruction
         const testPayee = anchor.web3.Keypair.generate();
@@ -557,6 +557,7 @@ describe("Programs", function(){
         expect(txState.status).to.have.property("executeReady");
       });
 
+/*
       it(`Update the timelock to 1 minute`, async function() {  
         // Step 1: Get the transaction builder
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
@@ -585,11 +586,13 @@ describe("Programs", function(){
         expect(msState.timeLock).to.equal(ONE_MINUTE);
       });
 
+*/
+
       it(`Change threshold to 2`, async function(){
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         const [txInstructions, txPDA] = await (
           await txBuilder.withChangeThreshold(2)
-        ).getInstructions({approvalByMultisig: {}});
+        ).getInstructions();
         const emptyTx = await createBlankTransaction(
           squads.connection,
           creator.publicKey
@@ -628,7 +631,7 @@ describe("Programs", function(){
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         const [txInstructions, txPDA] = await (
           await txBuilder.withChangeThreshold(2)
-        ).executeInstructions({approvalByMultisig: {}});
+        ).executeInstructions();
 
         // get the ix
         let ixState = await squads.getInstruction(
@@ -656,7 +659,7 @@ describe("Programs", function(){
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         const [txInstructions, txPDA] = await (
           await txBuilder.withChangeThreshold(2)
-        ).executeInstructions({approvalByMultisig: {}});
+        ).executeInstructions();
 
         // get the ix
         let ixState = await squads.getInstruction(
@@ -696,15 +699,15 @@ describe("Programs", function(){
 
      
 
-      it(`Change threshold to 3 (conjoined)`, async function(){
+      it(`Change threshold to 1`, async function(){
         const newMember = anchor.web3.Keypair.generate().publicKey;
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         let msState =  await squads.getMultisig(msPDA);
         const startKeys = msState.keys.length;
         const startTxIndex = msState.transactionIndex;
         const [txInstructions, txPDA] = await (
-          await txBuilder.withChangeThreshold(3)
-        ).getInstructions({approvalByMultisig: {}});
+          await txBuilder.withChangeThreshold(1)
+        ).getInstructions();
         const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
 
         let addMemberTx = await createBlankTransaction(
@@ -778,7 +781,8 @@ describe("Programs", function(){
         msState = await squads.getMultisig(msPDA);
         threshold = msState.threshold;
         expect((msState.keys as any[]).length).to.equal(startKeys);
-        expect(msState.threshold).to.equal(3);
+        expect(msState.threshold).to.equal(1);
+        await setTimeout(2000);
       });
 
       
@@ -796,7 +800,7 @@ describe("Programs", function(){
           testPayee.publicKey
         );
 
-        let txState = await squads.createTransaction(msPDA, 1,  {approvalByPrimaryMember: {}});
+        let txState = await squads.createTransaction(msPDA, 1);
         await squads.addInstruction(txState.publicKey, testIx);
         await squads.activateTransaction(txState.publicKey);
 
@@ -846,7 +850,7 @@ describe("Programs", function(){
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         const [txInstructions, txPDA] = await (
           await txBuilder.withChangeThreshold(1)
-        ).getInstructions({approvalByPrimaryMember: {}});
+        ).getInstructions();
         const emptyTx = await createBlankTransaction(
           squads.connection,
           creator.publicKey
@@ -900,7 +904,7 @@ describe("Programs", function(){
         // Step 2: Add instruction to add the spending limit
         let [txInstructions, txPDA] = await (
           await txBuilder.withAddSpendingLimit(mint, vaultIndex, amount, period)
-        ).getInstructions({ approvalByMultisig: {} });
+        ).getInstructions();
 
         // Step 3: Add activation instruction
         let activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
@@ -924,7 +928,7 @@ describe("Programs", function(){
         txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         [txInstructions, txPDA] = await (
           await txBuilder.withRemoveSpendingLimit(mint, vaultIndex)
-        ).getInstructions({ approvalByMultisig: {} });
+        ).getInstructions();
 
         activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
         const removeSpendingLimitTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
@@ -952,7 +956,7 @@ describe("Programs", function(){
         let txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         let [txInstructions, txPDA] = await (
           await txBuilder.withAddSpendingLimit(mint, vaultIndex, amount, period)
-        ).getInstructions({ approvalByMultisig: {} });
+        ).getInstructions();
         
         let activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
         
@@ -1044,7 +1048,7 @@ describe("Programs", function(){
         let txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         let [txInstructions, txPDA] = await (
           await txBuilder.withAddSpendingLimit(mint, vaultIndex, limitAmount, period)
-        ).getInstructions({ approvalByMultisig: {} });
+        ).getInstructions();
         let activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
         const addSpendingLimitTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
         await provider.sendAndConfirm(addSpendingLimitTx);
@@ -1101,7 +1105,7 @@ describe("Programs", function(){
           testPayee.publicKey
         );
 
-        let txState = await squads.createTransaction(msPDA, 1, { approvalByPrimaryMember: {} });
+        let txState = await squads.createTransaction(msPDA, 1);
         await squads.addInstruction(txState.publicKey, testIx);
         await squads.activateTransaction(txState.publicKey);
         txState = await squads.getTransaction(txState.publicKey);

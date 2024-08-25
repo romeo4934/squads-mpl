@@ -344,7 +344,6 @@ pub struct ExecuteInstruction<'info> {
         constraint = matches!(transaction.status, MsTransactionStatus::ExecuteReady { .. }) @MsError::InvalidTransactionState,
         constraint = transaction.ms == multisig.key() @MsError::InvalidInstructionAccount,
         constraint = transaction.transaction_index > multisig.ms_change_index @MsError::DeprecatedTransaction,
-        constraint = matches!(transaction.mode, ApprovalMode::ApprovalByMultisig) @MsError::InvalidApprovalModeForExecution,
     )]
     pub transaction: Account<'info, MsTransaction>,
 

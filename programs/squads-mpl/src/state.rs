@@ -144,8 +144,7 @@ pub struct MsTransaction {
     pub approved: Vec<Pubkey>,          // keys that have approved/signed
     pub rejected: Vec<Pubkey>,          // keys that have rejected
     pub cancelled: Vec<Pubkey>,         // keys that have cancelled (ExecuteReady only)
-    pub executed_index: u8,              // if Tx is executed sequentially, tracks which ix has been executed so far.      
-    pub mode: ApprovalMode,             // mode for approval                       
+    pub executed_index: u8,              // if Tx is executed sequentially, tracks which ix has been executed so far.                        
                                     
 }
 
@@ -159,15 +158,14 @@ impl MsTransaction {
         (8 * 6) +                          // the timestamp for each status variant
         1 +                                 // the number of instructions (attached)
         1 +                                 // space for tx bump
-        1 +                                // track index if executed sequentially
-        4;                               // ApprovalMode (4 bytes for enum on-chain)
+        1;                               // track index if executed sequentially
 
     pub fn initial_size_with_members(members_len: usize) -> usize {
         MsTransaction::MINIMUM_SIZE + (3 * (4 + (members_len * 32) ) )
     }
 
     /// initializes the transaction account
-    pub fn init(&mut self, creator: Pubkey, multisig: Pubkey, transaction_index: u32, bump: u8, authority_index: u32, authority_bump: u8, mode: ApprovalMode,) -> Result<()>{
+    pub fn init(&mut self, creator: Pubkey, multisig: Pubkey, transaction_index: u32, bump: u8, authority_index: u32, authority_bump: u8,) -> Result<()>{
         self.creator = creator;
         self.ms = multisig;
         self.transaction_index = transaction_index;
@@ -180,7 +178,6 @@ impl MsTransaction {
         self.cancelled = Vec::new();
         self.bump = bump;
         self.executed_index = 0;
-        self.mode = mode; // Initialize transaction with the specified mode
         Ok(())
     }
 

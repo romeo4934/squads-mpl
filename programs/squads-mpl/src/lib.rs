@@ -55,9 +55,9 @@ pub mod squads_mpl {
         create_key: Pubkey,   // the public key used to seed the original multisig creation
         members: Vec<Pubkey>, // a list of members (Public Keys) to use for the multisig
         _meta: String,        // a string of metadata that can be used to describe the multisig on-chain as a memo ie. '{"name":"My Multisig","description":"This is a my multisig"}'
-        primary_member: Option<Pubkey>, // Optional admin key
-        time_lock: u32, // time lock duration when a transaction is approved by admin
-        admin_revoker: Option<Pubkey>  // Optional Key that can revoke the admin privileges and cancel pending transactions
+        primary_member: Option<Pubkey>, // RENAME SIGNING_MEMBER
+        time_lock: u32, // time lock duration when a transaction is approved
+        admin_revoker: Option<Pubkey>  // RENAME SIGNING_MEMBER_REVOKER
     ) -> Result<()> {
         // sort the members and remove duplicates
         let mut members = members;
@@ -191,14 +191,7 @@ pub mod squads_mpl {
     /// creating the instruction below. authority 0 is reserved for internal
     /// instructions, whereas authorities 1 or greater refer to a vault,
     /// upgrade authority, or other.
-    pub fn create_transaction(ctx: Context<CreateTransaction>, authority_index: u32, mode: ApprovalMode,) -> Result<()> {
-        
-        if let ApprovalMode::ApprovalByPrimaryMember = mode {
-            let primary_member = ctx.accounts.multisig.primary_member.ok_or(MsError::NoPrimaryMemberSpecified)?;
-            if ctx.accounts.creator.key() != primary_member {
-                return err!(MsError::UnauthorizedMember);
-            }
-        }   
+    pub fn create_transaction(ctx: Context<CreateTransaction>, authority_index: u32,) -> Result<()> {
         
         let ms = &mut ctx.accounts.multisig;
         let authority_bump = match authority_index {
@@ -225,7 +218,6 @@ pub mod squads_mpl {
             ctx.bumps.transaction,
             authority_index,
             authority_bump,
-            mode, // Initialize with mode
         )
     }
 
@@ -278,24 +270,17 @@ pub mod squads_mpl {
             ctx.accounts.transaction.sign(ctx.accounts.member.key())?;
         }
 
+        match ctx.accounts.transaction.status {
+            MsTransactionStatus::Active { timestamp } => {
+                require!(Clock::get()?.unix_timestamp - timestamp >= i64::from(ctx.accounts.multisig.time_lock), MsError::TimeLockNotSatisfied);
+            }
+            _ => return err!(MsError::InvalidTransactionState),
+        };
+
         // if current number of signers reaches threshold, mark the transaction as execute ready
         if ctx.accounts.transaction.approved.len() >= usize::from(ctx.accounts.multisig.threshold) {
             ctx.accounts.transaction.ready_to_execute()?;
         }
-
-        // if ApprovalMode is ApprovalByPrimaryMember then Enforce time lock condition
-        if let ApprovalMode::ApprovalByPrimaryMember = ctx.accounts.transaction.mode {
-            
-            match ctx.accounts.transaction.status {
-                MsTransactionStatus::Active { timestamp } => {
-                    require!(Clock::get()?.unix_timestamp - timestamp >= i64::from(ctx.accounts.multisig.time_lock), MsError::TimeLockNotSatisfied);
-                }
-                _ => return err!(MsError::InvalidTransactionState),
-            };
-            ctx.accounts.transaction.ready_to_execute()?;
-        }
-            
-        
 
         Ok(())
     }

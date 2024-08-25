@@ -328,7 +328,6 @@ class Squads {
       multisigPDA: PublicKey,
       authorityIndex: number,
       transactionIndex: number,
-      approvalMode: ApprovalMode
   ): Promise<[SquadsMethods, PublicKey]> {
     const [transactionPDA] = getTxPDA(
         multisigPDA,
@@ -336,7 +335,7 @@ class Squads {
         this.multisigProgramId
     );
     return [
-      this.multisig.methods.createTransaction(authorityIndex, approvalMode).accounts({
+      this.multisig.methods.createTransaction(authorityIndex).accounts({
         multisig: multisigPDA,
         transaction: transactionPDA,
         creator: this.wallet.publicKey,
@@ -348,7 +347,6 @@ class Squads {
   async createTransaction(
       multisigPDA: PublicKey,
       authorityIndex: number,
-      approvalMode: ApprovalMode
   ): Promise<TransactionAccount> {
     const nextTransactionIndex = await this.getNextTransactionIndex(
         multisigPDA
@@ -356,8 +354,7 @@ class Squads {
     const [methods, transactionPDA] = await this._createTransaction(
         multisigPDA,
         authorityIndex,
-        nextTransactionIndex,
-        approvalMode
+        nextTransactionIndex
     );
     await methods.rpc();
     return await this.getTransaction(transactionPDA);
@@ -366,14 +363,12 @@ class Squads {
   async buildCreateTransaction(
       multisigPDA: PublicKey,
       authorityIndex: number,
-      transactionIndex: number,
-      approvalMode: ApprovalMode
+      transactionIndex: number
   ): Promise<TransactionInstruction> {
     const [methods] = await this._createTransaction(
         multisigPDA,
         authorityIndex,
-        transactionIndex,
-        approvalMode
+        transactionIndex
     );
     return await methods.instruction();
   }

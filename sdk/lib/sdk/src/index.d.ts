@@ -1,6 +1,6 @@
 import { Connection, PublicKey, Commitment, ConnectionConfig, TransactionInstruction, Signer } from "@solana/web3.js";
 import { Wallet } from "@coral-xyz/anchor";
-import { InstructionAccount, MultisigAccount, TransactionAccount, ApprovalMode, SpendingLimitAccount } from "./types";
+import { InstructionAccount, MultisigAccount, TransactionAccount, SpendingLimitAccount } from "./types";
 import BN from "bn.js";
 import * as anchor from "@coral-xyz/anchor";
 import { TransactionBuilder } from "./tx_builder";
@@ -48,8 +48,8 @@ declare class Squads {
     createMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, adminRevoker?: PublicKey | null): Promise<MultisigAccount>;
     buildCreateMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, adminRevoker?: PublicKey | null): Promise<TransactionInstruction>;
     private _createTransaction;
-    createTransaction(multisigPDA: PublicKey, authorityIndex: number, approvalMode: ApprovalMode): Promise<TransactionAccount>;
-    buildCreateTransaction(multisigPDA: PublicKey, authorityIndex: number, transactionIndex: number, approvalMode: ApprovalMode): Promise<TransactionInstruction>;
+    createTransaction(multisigPDA: PublicKey, authorityIndex: number): Promise<TransactionAccount>;
+    buildCreateTransaction(multisigPDA: PublicKey, authorityIndex: number, transactionIndex: number): Promise<TransactionInstruction>;
     private _addInstruction;
     addInstruction(transactionPDA: PublicKey, instruction: TransactionInstruction): Promise<InstructionAccount>;
     buildAddInstruction(multisigPDA: PublicKey, transactionPDA: PublicKey, instruction: TransactionInstruction, instructionIndex: number): Promise<TransactionInstruction>;
