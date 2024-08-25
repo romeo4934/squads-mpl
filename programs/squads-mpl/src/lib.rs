@@ -584,7 +584,7 @@ pub mod squads_mpl {
         // Update the primary member
         ctx.accounts.multisig.primary_member = new_primary_member;
 
-        // Update the admin revoker
+        // Update the primary member revoker
         ctx.accounts.multisig.primary_member_revoker = primary_member_revoker;
 
         // Mark the change by updating the change index to deprecate any active transactions
