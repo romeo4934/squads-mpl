@@ -696,14 +696,14 @@ describe("Programs", function(){
 
      
 
-      it(`Add a new member & change threshold to 3 (conjoined)`, async function(){
+      it(`Change threshold to 3 (conjoined)`, async function(){
         const newMember = anchor.web3.Keypair.generate().publicKey;
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         let msState =  await squads.getMultisig(msPDA);
         const startKeys = msState.keys.length;
         const startTxIndex = msState.transactionIndex;
         const [txInstructions, txPDA] = await (
-          await txBuilder.withAddMemberAndChangeThreshold(newMember, 3)
+          await txBuilder.withChangeThreshold(3)
         ).getInstructions({approvalByMultisig: {}});
         const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
 
@@ -777,7 +777,7 @@ describe("Programs", function(){
         expect(txState.status).has.property("executed");
         msState = await squads.getMultisig(msPDA);
         threshold = msState.threshold;
-        expect((msState.keys as any[]).length).to.equal(startKeys + 1);
+        expect((msState.keys as any[]).length).to.equal(startKeys);
         expect(msState.threshold).to.equal(3);
       });
 

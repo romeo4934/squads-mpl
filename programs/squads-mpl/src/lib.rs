@@ -161,55 +161,6 @@ pub mod squads_mpl {
         ctx.accounts.multisig.set_change_index(new_index)
     }
 
-    /// The instruction to change the threshold of the multisig and simultaneously remove a member
-    pub fn remove_member_and_change_threshold<'info>(
-        ctx: Context<'_, '_, '_, 'info, MsAuth<'info>>,
-        old_member: Pubkey,
-        new_threshold: u16,
-    ) -> Result<()> {
-        remove_member(
-            Context::new(
-                ctx.program_id,
-                ctx.accounts,
-                ctx.remaining_accounts,
-                MsAuthBumps{},
-            ),
-            old_member,
-        )?;
-        change_threshold(ctx, new_threshold)
-    }
-
-    /// The instruction to change the threshold of the multisig and simultaneously add a member
-    pub fn add_member_and_change_threshold<'info>(
-        ctx: Context<'_, '_, '_, 'info, MsAuthRealloc<'info>>,
-        new_member: Pubkey,
-        new_threshold: u16,
-    ) -> Result<()> {
-        // add the member
-        add_member(
-            Context::new(
-                ctx.program_id,
-                ctx.accounts,
-                ctx.remaining_accounts,
-                MsAuthReallocBumps{},
-            ),
-            new_member,
-        )?;
-
-        // check that the threshold value is valid
-        if ctx.accounts.multisig.keys.len() < usize::from(new_threshold) {
-            let new_threshold: u16 = ctx.accounts.multisig.keys.len().try_into().unwrap();
-            ctx.accounts.multisig.change_threshold(new_threshold)?;
-        } else if new_threshold < 1 {
-            return err!(MsError::InvalidThreshold);
-        } else {
-            ctx.accounts.multisig.change_threshold(new_threshold)?;
-        }
-        let new_index = ctx.accounts.multisig.transaction_index;
-        // update the change index to deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)
-    }
-
     /// The instruction to change the threshold of the multisig
     pub fn change_threshold(ctx: Context<MsAuth>, new_threshold: u16) -> Result<()> {
         // if the new threshold value is valid

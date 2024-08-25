@@ -4,6 +4,16 @@ solana-cli 1.18.22
 
 solana config set --keypair ~/.config/solana/id.json
 
+- remove primary member special case
+- make the time lock duration normal
+- make spending limit more generic and any person
+- inside member add revoker_key, member to remove OR PAUSE ?
+- create a special method to remove member calling multisaig.remove_member
+
+- pause all spending limits (pause with 1 and unpause methods with signature)
+
+- add invariant to the multisig state.rs
+
 <img width="2500" alt="Frame 13" src="https://user-images.githubusercontent.com/81624955/182874414-98d63f58-450d-4520-a440-4bfda8f5329f.png">
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)

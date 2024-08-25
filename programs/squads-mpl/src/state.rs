@@ -43,7 +43,7 @@ impl Ms {
     32 +        // creator
     4 +          // for vec length
     33 +        // primary member (one byte for option + 32 for Pubkey)
-    4 +        // time lock
+    4 +         // time lock
     33;         // admin_revoker  (one byte for option + 32 for Pubkey)
 
 
