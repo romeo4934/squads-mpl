@@ -28,9 +28,9 @@ pub struct Ms {
     pub create_key: Pubkey,             // random key(or not) used to seed the multisig pda.
 
     pub keys: Vec<Pubkey>,              // keys of the members/owners of the multisig.
-    pub primary_member: Option<Pubkey>, // Optional admin 
-    pub time_lock: u32,                 //// time lock duration in seconds when a transaction is approved by admin
-    pub admin_revoker: Option<Pubkey>,  // Key that can revoke the admin privileges and cancel pending transactions
+    pub time_lock: u32,                 //// time lock duration in seconds before a transaction can be executed
+    pub primary_member: Option<Pubkey>, // Optional primary member of the multisig
+    pub primary_member_revoker: Option<Pubkey>,  // Optional authority that can remove the primary member of the multisig
     pub spending_limit_enabled: bool,   // Spending limit enabled
     pub spending_limit_disabler_authority: Option<Pubkey>, // Spending limit disabler authority
 }
@@ -44,15 +44,15 @@ impl Ms {
     1 +         // PDA bump
     32 +        // creator
     4 +          // for vec length
-    33 +        // primary member (one byte for option + 32 for Pubkey)
     4 +         // time lock
-    33 +         // admin_revoker  (one byte for option + 32 for Pubkey)
+    33 +        // primary member (one byte for option + 32 for Pubkey)
+    33 +         // primary_member_revoker  (one byte for option + 32 for Pubkey)
     1 +         // spending limit enabled
     33;         // spending limit disabler authority (one byte for option + 32 for Pubkey)
 
 
     /// Initializes the new multisig account
-    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, bump: u8, time_lock: u32, primary_member: Option<Pubkey>, admin_revoker: Option<Pubkey>) -> Result<()> {
+    pub fn init (&mut self, threshold: u16, create_key: Pubkey, members: Vec<Pubkey>, bump: u8, time_lock: u32, primary_member: Option<Pubkey>, primary_member_revoker: Option<Pubkey>) -> Result<()> {
         self.threshold = threshold;
         self.keys = members;
         self.authority_index = 1;   // default vault is the first authority
@@ -62,7 +62,7 @@ impl Ms {
         self.create_key = create_key;
         self.time_lock = time_lock; // Initialize with the time_lock
         self.primary_member = primary_member;
-        self.admin_revoker = admin_revoker;
+        self.primary_member_revoker = primary_member_revoker;
         self.spending_limit_enabled = true;
         self.spending_limit_disabler_authority = None;
         Ok(())

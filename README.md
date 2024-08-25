@@ -6,9 +6,8 @@ solana config set --keypair ~/.config/solana/id.json
 
 - update settings method add parameters
 - update the tests
-- rename primary member and admin revoker
 
-FINALLY
+MAYBE
 
 - add invariant to the multisig state.rs
 - inside member add revoker_key, member to remove

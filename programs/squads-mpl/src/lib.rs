@@ -55,9 +55,9 @@ pub mod squads_mpl {
         create_key: Pubkey,   // the public key used to seed the original multisig creation
         members: Vec<Pubkey>, // a list of members (Public Keys) to use for the multisig
         _meta: String,        // a string of metadata that can be used to describe the multisig on-chain as a memo ie. '{"name":"My Multisig","description":"This is a my multisig"}'
-        time_lock: u32, // time lock duration when a transaction is approved
-        primary_member: Option<Pubkey>, // RENAME SIGNING_MEMBER
-        admin_revoker: Option<Pubkey>  // RENAME SIGNING_MEMBER_REVOKER
+        time_lock: u32, // time lock duration before a transaction can be approved
+        primary_member: Option<Pubkey>, // Optional primary member of the multisig
+        primary_member_revoker: Option<Pubkey>  // Optional authority that can remove the primary member of the multisig
     ) -> Result<()> {
         // sort the members and remove duplicates
         let mut members = members;
@@ -99,7 +99,7 @@ pub mod squads_mpl {
             ctx.bumps.multisig,
             time_lock,
             primary_member,
-            admin_revoker, 
+            primary_member_revoker, 
         )
     }
 
@@ -565,7 +565,7 @@ pub mod squads_mpl {
     }
 
        /// The instruction to update the multisig settings.
-    pub fn update_multisig_settings(ctx: Context<MsAuth>, new_primary_member: Option<Pubkey>, new_time_lock: u32, admin_revoker: Option<Pubkey>) -> Result<()> {
+    pub fn update_multisig_settings(ctx: Context<MsAuth>, new_primary_member: Option<Pubkey>, new_time_lock: u32, primary_member_revoker: Option<Pubkey>) -> Result<()> {
         // Ensure the new time lock is within the maximum allowable duration
         if new_time_lock > MAX_TIME_LOCK {
             return err!(MsError::TimeLockExceedsMaximum);
@@ -585,7 +585,7 @@ pub mod squads_mpl {
         ctx.accounts.multisig.primary_member = new_primary_member;
 
         // Update the admin revoker
-        ctx.accounts.multisig.admin_revoker = admin_revoker;
+        ctx.accounts.multisig.primary_member_revoker = primary_member_revoker;
 
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = ctx.accounts.multisig.transaction_index;
