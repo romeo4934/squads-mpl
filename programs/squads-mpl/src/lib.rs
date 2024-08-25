@@ -191,8 +191,7 @@ pub mod squads_mpl {
     /// creating the instruction below. authority 0 is reserved for internal
     /// instructions, whereas authorities 1 or greater refer to a vault,
     /// upgrade authority, or other.
-    pub fn create_transaction(ctx: Context<CreateTransaction>, authority_index: u32,) -> Result<()> {
-        
+    pub fn create_transaction(ctx: Context<CreateTransaction>, authority_index: u32) -> Result<()> {
         let ms = &mut ctx.accounts.multisig;
         let authority_bump = match authority_index {
             1.. => {
@@ -270,6 +269,7 @@ pub mod squads_mpl {
             ctx.accounts.transaction.sign(ctx.accounts.member.key())?;
         }
 
+        // verifying if the time lock duration has been satisfied
         match ctx.accounts.transaction.status {
             MsTransactionStatus::Active { timestamp } => {
                 require!(Clock::get()?.unix_timestamp - timestamp >= i64::from(ctx.accounts.multisig.time_lock), MsError::TimeLockNotSatisfied);
