@@ -350,6 +350,10 @@ impl IncomingInstruction {
 /// Spending Limit struct
 #[account]
 pub struct SpendingLimit {
+    
+    /// create key used to seed the spending limit pda
+    pub create_key: Pubkey,
+
     /// The multisig this belongs to.
     pub multisig: Pubkey,
 
@@ -365,6 +369,9 @@ pub struct SpendingLimit {
     /// This amount is in decimals of the mint,
     /// so 1 SOL would be `1_000_000_000` and 1 USDC would be `1_000_000`.
     pub amount: u64,
+
+    // The member that can use the spending limit
+    pub member: Pubkey,
 
     /// The reset period of the spending limit.
     /// When it passes, the remaining amount is reset, unless it's `Period::OneTime`.
@@ -382,21 +389,25 @@ pub struct SpendingLimit {
 }
 
 impl SpendingLimit {
-    pub const LEN: usize = 8 + 32 + 4 + 32 + 8 + 1 + 8 + 8 + 1;
+    pub const LEN: usize = 8 + 32 + 32 + 4 + 32 + 8 + 32 + 1 + 8 + 8 + 1;
 
     pub fn init(
         &mut self,
+        create_key: Pubkey,
         multisig: Pubkey,
         authority_index: u32,
         mint: Pubkey,
         amount: u64,
+        member: Pubkey,
         period: Period,
         bump: u8,
     ) -> Result<()> {
+        self.create_key = create_key;
         self.multisig = multisig;
         self.authority_index = authority_index;
         self.mint = mint;
         self.amount = amount;
+        self.member = member;
         self.period = period;
         self.remaining_amount = amount;
         self.last_reset = Clock::get()?.unix_timestamp;

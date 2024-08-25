@@ -603,7 +603,7 @@ pub mod squads_mpl {
         ctx.accounts.multisig.set_change_index(new_index)
     }
 
-    pub fn add_spending_limit(ctx: Context<CreateSpendingLimit>, mint: Pubkey, authority_index: u32, amount: u64, period: Period) -> Result<()> {
+    pub fn add_spending_limit(ctx: Context<CreateSpendingLimit>, create_key: Pubkey, mint: Pubkey, authority_index: u32, amount: u64, member: Pubkey, period: Period) -> Result<()> {
         // Ensure amount is strictly positive
         if amount == 0 {
             return err!(MsError::InvalidAmount);
@@ -613,10 +613,12 @@ pub mod squads_mpl {
         
         // Initialize the spending limit account
         spending_limit.init(
+            create_key,
             ctx.accounts.multisig.key(),
             authority_index,
             mint,
             amount,
+            member,
             period,
             ctx.bumps.spending_limit,
         )?;

@@ -432,7 +432,7 @@ pub struct MsAuthRealloc<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(mint: Pubkey, authority_index: u32 )]
+#[instruction(create_key: Pubkey, mint: Pubkey, authority_index: u32 )]
 pub struct CreateSpendingLimit<'info> {
     #[account(
         init,
@@ -441,8 +441,7 @@ pub struct CreateSpendingLimit<'info> {
         seeds = [
             b"squad",
             multisig.key().as_ref(),
-            mint.as_ref(),
-            &authority_index.to_le_bytes(),
+            create_key.as_ref(),
             b"spending_limit",
         ],
         bump,
@@ -468,8 +467,7 @@ pub struct RemoveSpendingLimit<'info> {
         seeds = [
             b"squad",
             multisig.key().as_ref(),
-            &spending_limit.mint.as_ref(),
-            &spending_limit.authority_index.to_le_bytes(),
+            &spending_limit.create_key.as_ref(),
             b"spending_limit",
         ],
         bump,
@@ -502,8 +500,7 @@ pub struct SpendingLimitUse<'info> {
         seeds = [
             b"squad",
             multisig.key().as_ref(),
-            &spending_limit.mint.as_ref(),
-            &spending_limit.authority_index.to_le_bytes(),
+            &spending_limit.create_key.as_ref(),
             b"spending_limit",
         ],
         bump = spending_limit.bump,
