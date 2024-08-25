@@ -664,7 +664,7 @@ export declare type SquadsMpl = {
                         "type": "bool";
                     },
                     {
-                        "name": "spendingLimitDisablerAuthority";
+                        "name": "guardian";
                         "type": {
                             "option": "publicKey";
                         };
@@ -874,10 +874,8 @@ export declare type SquadsMpl = {
                         "type": "publicKey";
                     },
                     {
-                        "name": "removerAuthority";
-                        "type": {
-                            "option": "publicKey";
-                        };
+                        "name": "guardianCanRemove";
+                        "type": "bool";
                     }
                 ];
             };
@@ -997,20 +995,6 @@ export declare type SquadsMpl = {
                                 "type": "i64";
                             }
                         ];
-                    }
-                ];
-            };
-        },
-        {
-            "name": "ApprovalMode";
-            "type": {
-                "kind": "enum";
-                "variants": [
-                    {
-                        "name": "ApprovalByPrimaryMember";
-                    },
-                    {
-                        "name": "ApprovalByMultisig";
                     }
                 ];
             };

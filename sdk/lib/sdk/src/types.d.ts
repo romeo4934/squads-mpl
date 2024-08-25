@@ -17,7 +17,6 @@ export declare type TransactionAccount = AccountDefDictionary<SquadsMpl>["msTran
 export declare type InstructionAccount = AccountDefDictionary<SquadsMpl>["msInstruction"];
 export declare type SquadsMethods = MethodsBuilder<SquadsMpl, AllInstructions<SquadsMpl>>;
 export declare type SquadsMethodsNamespace = MethodsNamespace<SquadsMpl, AllInstructions<SquadsMpl>>;
-export declare type ApprovalMode = IdlTypes<SquadsMpl>["ApprovalMode"];
 export declare type Member = IdlTypes<SquadsMpl>["Member"];
 export declare type Period = IdlTypes<SquadsMpl>["Period"];
 export declare type SpendingLimitAccount = AccountDefDictionary<SquadsMpl>["spendingLimit"];

@@ -114,7 +114,7 @@ class TransactionBuilder {
             return this.withInstruction(instruction);
         });
     }
-    withUpdateMultisigSettings(newPrimaryMember, newTimeLock, adminRevoker) {
+    withUpdateMultisigSettings(newTimeLock) {
         return __awaiter(this, void 0, void 0, function* () {
             const instruction = yield this.methods
                 .updateMultisigSettings(newTimeLock)

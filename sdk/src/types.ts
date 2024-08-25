@@ -36,8 +36,6 @@ export type SquadsMethodsNamespace = MethodsNamespace<
   AllInstructions<SquadsMpl>
 >;
 
-export type ApprovalMode = IdlTypes<SquadsMpl>["ApprovalMode"];
-
 export type Member = IdlTypes<SquadsMpl>["Member"];
 
 export type Period = IdlTypes<SquadsMpl>["Period"];

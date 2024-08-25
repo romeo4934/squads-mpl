@@ -262,7 +262,7 @@ class Squads {
     if (
         !initialMembers.find((member) => member.key.equals(this.wallet.publicKey))
     ) {
-      initialMembers.push({ key: this.wallet.publicKey, removerAuthority: null });
+      initialMembers.push({ key: this.wallet.publicKey, guardianCanRemove: false });
     }
     const [multisigPDA] = getMsPDA(createKey, this.multisigProgramId);
     return [

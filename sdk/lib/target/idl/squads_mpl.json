@@ -664,7 +664,7 @@
                         "type": "bool"
                     },
                     {
-                        "name": "spendingLimitDisablerAuthority",
+                        "name": "guardian",
                         "type": {
                             "option": "publicKey"
                         }
@@ -874,10 +874,8 @@
                         "type": "publicKey"
                     },
                     {
-                        "name": "removerAuthority",
-                        "type": {
-                            "option": "publicKey"
-                        }
+                        "name": "guardianCanRemove",
+                        "type": "bool"
                     }
                 ]
             }
@@ -997,20 +995,6 @@
                                 "type": "i64"
                             }
                         ]
-                    }
-                ]
-            }
-        },
-        {
-            "name": "ApprovalMode",
-            "type": {
-                "kind": "enum",
-                "variants": [
-                    {
-                        "name": "ApprovalByPrimaryMember"
-                    },
-                    {
-                        "name": "ApprovalByMultisig"
                     }
                 ]
             }

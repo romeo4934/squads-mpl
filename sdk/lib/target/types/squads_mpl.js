@@ -667,7 +667,7 @@ exports.IDL = {
                         "type": "bool"
                     },
                     {
-                        "name": "spendingLimitDisablerAuthority",
+                        "name": "guardian",
                         "type": {
                             "option": "publicKey"
                         }
@@ -877,10 +877,8 @@ exports.IDL = {
                         "type": "publicKey"
                     },
                     {
-                        "name": "removerAuthority",
-                        "type": {
-                            "option": "publicKey"
-                        }
+                        "name": "guardianCanRemove",
+                        "type": "bool"
                     }
                 ]
             }
@@ -1000,20 +998,6 @@ exports.IDL = {
                                 "type": "i64"
                             }
                         ]
-                    }
-                ]
-            }
-        },
-        {
-            "name": "ApprovalMode",
-            "type": {
-                "kind": "enum",
-                "variants": [
-                    {
-                        "name": "ApprovalByPrimaryMember"
-                    },
-                    {
-                        "name": "ApprovalByMultisig"
                     }
                 ]
             }

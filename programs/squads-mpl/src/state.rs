@@ -30,7 +30,7 @@ pub struct Ms {
     pub keys: Vec<Member>,              // keys of the members/owners of the multisig.
     pub time_lock: u32,                 //// time lock duration in seconds before a transaction can be executed
     pub spending_limit_enabled: bool,   // Spending limit enabled
-    pub spending_limit_disabler_authority: Option<Pubkey>, // Spending limit disabler authority
+    pub guardian: Option<Pubkey>,       // Guardian can pause spending limit and remove without a vote some members
 }
 
 impl Ms {
@@ -58,7 +58,7 @@ impl Ms {
         self.create_key = create_key;
         self.time_lock = time_lock; // Initialize with the time_lock
         self.spending_limit_enabled = true;
-        self.spending_limit_disabler_authority = None;
+        self.guardian = None;
         Ok(())
     }
 
@@ -110,7 +110,7 @@ impl Ms {
 #[derive(AnchorDeserialize, AnchorSerialize, InitSpace, Eq, PartialEq, Clone)]
 pub struct Member {
     pub key: Pubkey,
-    pub remover_authority: Option<Pubkey>,
+    pub guardian_can_remove: bool,
 }
 
 /// MsTransactionStatus enum of the current status of the Multisig Transaction.
@@ -122,12 +122,6 @@ pub enum MsTransactionStatus {
     Executed { timestamp: i64 },       // Transaction has been executed
     Rejected { timestamp: i64 },       // Transaction has been rejected
     Cancelled { timestamp: i64 },      // Transaction has been cancelled
-}
-
-#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
-pub enum ApprovalMode {
-    ApprovalByPrimaryMember,
-    ApprovalByMultisig,
 }
 
 /// The MsTransaction is the state account for a multisig transaction

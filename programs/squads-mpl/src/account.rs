@@ -493,7 +493,7 @@ pub struct PauseSpendingLimit<'info> {
         mut,
         seeds = [b"squad", multisig.create_key.as_ref(), b"multisig"],
         bump = multisig.bump,
-        constraint = multisig.spending_limit_disabler_authority.unwrap() == disabler.key() @ MsError::UnauthorizedMember,
+        constraint = multisig.guardian.unwrap() == disabler.key() @ MsError::UnauthorizedMember,
     )]
     pub multisig: Account<'info, Ms>,
 

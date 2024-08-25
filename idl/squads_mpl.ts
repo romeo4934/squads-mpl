@@ -664,7 +664,7 @@ export type SquadsMpl = {
             "type": "bool"
           },
           {
-            "name": "spendingLimitDisablerAuthority",
+            "name": "guardian",
             "type": {
               "option": "publicKey"
             }
@@ -874,10 +874,8 @@ export type SquadsMpl = {
             "type": "publicKey"
           },
           {
-            "name": "removerAuthority",
-            "type": {
-              "option": "publicKey"
-            }
+            "name": "guardianCanRemove",
+            "type": "bool"
           }
         ]
       }
@@ -997,20 +995,6 @@ export type SquadsMpl = {
                 "type": "i64"
               }
             ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "ApprovalMode",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "ApprovalByPrimaryMember"
-          },
-          {
-            "name": "ApprovalByMultisig"
           }
         ]
       }
@@ -1834,7 +1818,7 @@ export const IDL: SquadsMpl = {
             "type": "bool"
           },
           {
-            "name": "spendingLimitDisablerAuthority",
+            "name": "guardian",
             "type": {
               "option": "publicKey"
             }
@@ -2044,10 +2028,8 @@ export const IDL: SquadsMpl = {
             "type": "publicKey"
           },
           {
-            "name": "removerAuthority",
-            "type": {
-              "option": "publicKey"
-            }
+            "name": "guardianCanRemove",
+            "type": "bool"
           }
         ]
       }
@@ -2167,20 +2149,6 @@ export const IDL: SquadsMpl = {
                 "type": "i64"
               }
             ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "ApprovalMode",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "ApprovalByPrimaryMember"
-          },
-          {
-            "name": "ApprovalByMultisig"
           }
         ]
       }

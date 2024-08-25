@@ -143,7 +143,7 @@ class Squads {
     }
     _createMultisig(threshold, createKey, initialMembers, metadata, timeLock) {
         if (!initialMembers.find((member) => member.key.equals(this.wallet.publicKey))) {
-            initialMembers.push({ key: this.wallet.publicKey, removerAuthority: null });
+            initialMembers.push({ key: this.wallet.publicKey, guardianCanRemove: false });
         }
         const [multisigPDA] = (0, address_1.getMsPDA)(createKey, this.multisigProgramId);
         return [
