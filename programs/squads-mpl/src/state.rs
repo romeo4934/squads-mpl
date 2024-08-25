@@ -44,7 +44,7 @@ impl Ms {
     4 +          // for vec length
     4 +         // time lock
     1 +         // spending limit enabled
-    33;         // spending limit disabler authority (one byte for option + 32 for Pubkey)
+    33;         // guardian authority (one byte for option + 32 for Pubkey)
 
 
     /// Initializes the new multisig account
