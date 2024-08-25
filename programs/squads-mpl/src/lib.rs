@@ -55,8 +55,8 @@ pub mod squads_mpl {
         create_key: Pubkey,   // the public key used to seed the original multisig creation
         members: Vec<Pubkey>, // a list of members (Public Keys) to use for the multisig
         _meta: String,        // a string of metadata that can be used to describe the multisig on-chain as a memo ie. '{"name":"My Multisig","description":"This is a my multisig"}'
-        primary_member: Option<Pubkey>, // RENAME SIGNING_MEMBER
         time_lock: u32, // time lock duration when a transaction is approved
+        primary_member: Option<Pubkey>, // RENAME SIGNING_MEMBER
         admin_revoker: Option<Pubkey>  // RENAME SIGNING_MEMBER_REVOKER
     ) -> Result<()> {
         // sort the members and remove duplicates
@@ -80,6 +80,11 @@ pub mod squads_mpl {
             return err!(MsError::InvalidThreshold);
         }
 
+        // Ensure the time lock duration is within the maximum allowable duration
+        if time_lock > MAX_TIME_LOCK {
+            return err!(MsError::TimeLockExceedsMaximum);
+        }
+
         // Ensure primary member is in member list
         if let Some(primary_member) = primary_member {
             if !members.contains(&primary_member) {
@@ -87,18 +92,13 @@ pub mod squads_mpl {
             }
         }
 
-        // Ensure the time lock duration is within the maximum allowable duration
-        if time_lock > MAX_TIME_LOCK {
-            return err!(MsError::TimeLockExceedsMaximum);
-        }
-
         ctx.accounts.multisig.init(
             threshold,
             create_key,
             members,
             ctx.bumps.multisig,
-            primary_member,
             time_lock,
+            primary_member,
             admin_revoker, 
         )
     }

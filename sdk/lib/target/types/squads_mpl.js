@@ -47,14 +47,14 @@ exports.IDL = {
                     "type": "string"
                 },
                 {
+                    "name": "timeLock",
+                    "type": "u32"
+                },
+                {
                     "name": "primaryMember",
                     "type": {
                         "option": "publicKey"
                     }
-                },
-                {
-                    "name": "timeLock",
-                    "type": "u32"
                 },
                 {
                     "name": "adminRevoker",

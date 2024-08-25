@@ -150,7 +150,7 @@ class Squads {
         const [multisigPDA] = (0, address_1.getMsPDA)(createKey, this.multisigProgramId);
         return [
             this.multisig.methods
-                .create(threshold, createKey, initialMembers, metadata, primaryMember, timeLock, adminRevoker)
+                .create(threshold, createKey, initialMembers, metadata, timeLock, primaryMember, adminRevoker)
                 .accounts({ multisig: multisigPDA, creator: this.wallet.publicKey }),
             multisigPDA,
         ];

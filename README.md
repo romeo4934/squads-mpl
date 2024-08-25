@@ -4,7 +4,7 @@ solana-cli 1.18.22
 
 solana config set --keypair ~/.config/solana/id.json
 
-- update settings method
+- update settings method add parameters
 - update the tests
 - rename primary member and admin revoker
 
