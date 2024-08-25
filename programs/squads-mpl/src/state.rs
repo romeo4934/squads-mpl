@@ -28,9 +28,9 @@ pub struct Ms {
     pub create_key: Pubkey,             // random key(or not) used to seed the multisig pda.
 
     pub keys: Vec<Member>,              // keys of the members/owners of the multisig.
-    pub time_lock: u32,                 //// time lock duration in seconds before a transaction can be executed
+    pub time_lock: u32,                 // time lock duration in seconds before a transaction can be executed
     pub spending_limit_enabled: bool,   // Spending limit enabled
-    pub guardian: Option<Pubkey>,       // Guardian can disable spending limit and remove some members without a vote 
+    pub guardian: Option<Pubkey>,       // Guardian authority can disable spending limit and remove some members without a multisig vote 
 }
 
 impl Ms {
