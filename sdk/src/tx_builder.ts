@@ -118,13 +118,13 @@ export class TransactionBuilder {
     return this.withInstruction(instruction);
   }
 
-  async withUpdateAdminSettings(
+  async withUpdateMultisigSettings(
     newPrimaryMember: PublicKey | null,
     newTimeLock: number,
     adminRevoker: PublicKey | null
   ): Promise<TransactionBuilder> {
     const instruction = await this.methods
-      .updateAdminSettings(newPrimaryMember,newTimeLock,adminRevoker)
+      .updateMultisigSettings(newPrimaryMember,newTimeLock,adminRevoker)
       .accounts({
         multisig: this.multisig.publicKey,
       })

@@ -114,10 +114,10 @@ class TransactionBuilder {
             return this.withInstruction(instruction);
         });
     }
-    withUpdateAdminSettings(newPrimaryMember, newTimeLock, adminRevoker) {
+    withUpdateMultisigSettings(newPrimaryMember, newTimeLock, adminRevoker) {
         return __awaiter(this, void 0, void 0, function* () {
             const instruction = yield this.methods
-                .updateAdminSettings(newPrimaryMember, newTimeLock, adminRevoker)
+                .updateMultisigSettings(newPrimaryMember, newTimeLock, adminRevoker)
                 .accounts({
                 multisig: this.multisig.publicKey,
             })

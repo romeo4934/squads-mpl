@@ -449,7 +449,7 @@ class Squads {
             return yield methods.instruction();
         });
     }
-    _spendingLimitUse(multisig, createKey, mint, vaultIndex, amount, decimals, destination, destinationTokenAccount, vaultTokenAccount, primaryMember) {
+    _spendingLimitUse(multisig, createKey, mint, vaultIndex, amount, decimals, destination, destinationTokenAccount, vaultTokenAccount, member) {
         return __awaiter(this, void 0, void 0, function* () {
             const authorityIndexBN = new bn_js_1.default(vaultIndex, 10);
             const spendingLimitPDA = this.getSpendingLimitPDA(multisig, createKey);
@@ -463,7 +463,7 @@ class Squads {
                 destinationTokenAccount: !isSol ? destinationTokenAccount : null,
                 vault: vaultPDA,
                 vaultTokenAccount: !isSol ? vaultTokenAccount : null,
-                primaryMember,
+                member,
                 mint: !isSol ? mint : null,
                 tokenProgram: !isSol ? spl_token_1.TOKEN_PROGRAM_ID : null,
                 systemProgram: isSol ? anchor.web3.SystemProgram.programId : null,

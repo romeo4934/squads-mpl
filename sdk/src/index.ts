@@ -745,7 +745,7 @@ class Squads {
     destination: PublicKey,
     destinationTokenAccount: PublicKey | null,
     vaultTokenAccount: PublicKey | null,
-    primaryMember: PublicKey
+    member: PublicKey
   ): Promise<SquadsMethods> {
   const authorityIndexBN = new BN(vaultIndex, 10);
   const spendingLimitPDA = this.getSpendingLimitPDA(
@@ -765,7 +765,7 @@ class Squads {
     destinationTokenAccount: !isSol ? destinationTokenAccount : null, // If SPL, provide destination token account
     vault: vaultPDA, // Use the computed vault PDA
     vaultTokenAccount: !isSol ? vaultTokenAccount : null, // Vault token account for SPL
-    primaryMember,
+    member,
     mint: !isSol ? mint : null, // If SPL, provide the mint
     tokenProgram: !isSol ? TOKEN_PROGRAM_ID : null, // If SPL, provide the token program
     systemProgram: isSol ? anchor.web3.SystemProgram.programId : null,

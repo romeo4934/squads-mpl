@@ -564,15 +564,8 @@ pub mod squads_mpl {
         Ok(())
     }
 
-       /// The instruction to update the primary member of the multisig.
-    pub fn update_admin_settings(ctx: Context<MsAuth>, new_primary_member: Option<Pubkey>, new_time_lock: u32, admin_revoker: Option<Pubkey>) -> Result<()> {
-        // If a new primary member is provided, ensure it is in the member list
-        if let Some(ref primary_member) = new_primary_member {
-            if !ctx.accounts.multisig.keys.contains(primary_member) {
-                return err!(MsError::PrimaryMemberNotInMultisig);
-            }
-        }
-
+       /// The instruction to update the multisig settings.
+    pub fn update_multisig_settings(ctx: Context<MsAuth>, new_primary_member: Option<Pubkey>, new_time_lock: u32, admin_revoker: Option<Pubkey>) -> Result<()> {
         // Ensure the new time lock is within the maximum allowable duration
         if new_time_lock > MAX_TIME_LOCK {
             return err!(MsError::TimeLockExceedsMaximum);
@@ -580,7 +573,14 @@ pub mod squads_mpl {
 
         // Update the time lock duration
         ctx.accounts.multisig.time_lock = new_time_lock;
-        
+
+        // If a new primary member is provided, ensure it is in the member list
+        if let Some(ref primary_member) = new_primary_member {
+            if !ctx.accounts.multisig.keys.contains(primary_member) {
+                return err!(MsError::PrimaryMemberNotInMultisig);
+            }
+        }
+
         // Update the primary member
         ctx.accounts.multisig.primary_member = new_primary_member;
 

@@ -418,9 +418,9 @@ exports.IDL = {
             "args": []
         },
         {
-            "name": "updateAdminSettings",
+            "name": "updateMultisigSettings",
             "docs": [
-                "The instruction to update the primary member of the multisig."
+                "The instruction to update the multisig settings."
             ],
             "accounts": [
                 {
@@ -545,6 +545,22 @@ exports.IDL = {
             "args": []
         },
         {
+            "name": "pauseSpendingLimit",
+            "accounts": [
+                {
+                    "name": "multisig",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "disabler",
+                    "isMut": true,
+                    "isSigner": true
+                }
+            ],
+            "args": []
+        },
+        {
             "name": "spendingLimitUse",
             "accounts": [
                 {
@@ -563,7 +579,7 @@ exports.IDL = {
                     "isSigner": false
                 },
                 {
-                    "name": "primaryMember",
+                    "name": "member",
                     "isMut": true,
                     "isSigner": true
                 },
@@ -672,6 +688,16 @@ exports.IDL = {
                     },
                     {
                         "name": "adminRevoker",
+                        "type": {
+                            "option": "publicKey"
+                        }
+                    },
+                    {
+                        "name": "spendingLimitEnabled",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "spendingLimitDisablerAuthority",
                         "type": {
                             "option": "publicKey"
                         }
@@ -1149,6 +1175,10 @@ exports.IDL = {
         {
             "code": 6030,
             "name": "InvalidDecimals"
+        },
+        {
+            "code": 6031,
+            "name": "SpendingLimitDisabled"
         }
     ]
 };

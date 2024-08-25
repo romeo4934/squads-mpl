@@ -415,9 +415,9 @@ export declare type SquadsMpl = {
             "args": [];
         },
         {
-            "name": "updateAdminSettings";
+            "name": "updateMultisigSettings";
             "docs": [
-                "The instruction to update the primary member of the multisig."
+                "The instruction to update the multisig settings."
             ];
             "accounts": [
                 {
@@ -542,6 +542,22 @@ export declare type SquadsMpl = {
             "args": [];
         },
         {
+            "name": "pauseSpendingLimit";
+            "accounts": [
+                {
+                    "name": "multisig";
+                    "isMut": true;
+                    "isSigner": false;
+                },
+                {
+                    "name": "disabler";
+                    "isMut": true;
+                    "isSigner": true;
+                }
+            ];
+            "args": [];
+        },
+        {
             "name": "spendingLimitUse";
             "accounts": [
                 {
@@ -560,7 +576,7 @@ export declare type SquadsMpl = {
                     "isSigner": false;
                 },
                 {
-                    "name": "primaryMember";
+                    "name": "member";
                     "isMut": true;
                     "isSigner": true;
                 },
@@ -669,6 +685,16 @@ export declare type SquadsMpl = {
                     },
                     {
                         "name": "adminRevoker";
+                        "type": {
+                            "option": "publicKey";
+                        };
+                    },
+                    {
+                        "name": "spendingLimitEnabled";
+                        "type": "bool";
+                    },
+                    {
+                        "name": "spendingLimitDisablerAuthority";
                         "type": {
                             "option": "publicKey";
                         };
@@ -1146,6 +1172,10 @@ export declare type SquadsMpl = {
         {
             "code": 6030;
             "name": "InvalidDecimals";
+        },
+        {
+            "code": 6031;
+            "name": "SpendingLimitDisabled";
         }
     ];
 };
