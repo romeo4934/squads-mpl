@@ -92,8 +92,8 @@ impl Ms {
     }
 
     /// Removes a member from the multisig. Is a no-op if the member is not in the multisig.
-    pub fn remove_member(&mut self, member_key: Pubkey) -> Result<()>{
-        if let Some(index) = self.is_member(member_key) {
+    pub fn remove_member(&mut self, member: Pubkey) -> Result<()>{
+        if let Some(index) = self.is_member(member) {
             self.keys.remove(index);
         }
         Ok(())
