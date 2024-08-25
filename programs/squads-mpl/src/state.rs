@@ -142,8 +142,7 @@ pub struct MsTransaction {
     pub rejected: Vec<Pubkey>,          // keys that have rejected
     pub cancelled: Vec<Pubkey>,         // keys that have cancelled (ExecuteReady only)
     pub executed_index: u8,              // if Tx is executed sequentially, tracks which ix
-                                         // has been executed so far.                        
-                                    
+                                         // has been executed so far.
 }
 
 impl MsTransaction {
