@@ -108,12 +108,12 @@ pub mod squads_mpl {
         }
         let curr_data_size = multisig_account_info.data.borrow().len();
         let spots_left =
-            ((curr_data_size - Ms::SIZE_WITHOUT_MEMBERS) / 32) - ctx.accounts.multisig.keys.len();
+            ((curr_data_size - Ms::SIZE_WITHOUT_MEMBERS) /  Member::INIT_SPACE) - ctx.accounts.multisig.keys.len();
 
         // if not enough, add (10 * 32) to size - bump it up by 10 accounts
         if spots_left < 1 {
             // add space for 10 more keys
-            let needed_len = curr_data_size + (10 * 32);
+            let needed_len = curr_data_size + (10 * Member::INIT_SPACE);
             // reallocate more space
             AccountInfo::realloc(&multisig_account_info, needed_len, false)?;
             // if more lamports are needed, transfer them to the account

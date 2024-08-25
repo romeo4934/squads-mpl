@@ -412,26 +412,24 @@ describe("Programs", function(){
         // get the current number of keys
         const currNumKeys = msStateCheck.keys.length;
         // get the number of spots left
-        const SIZE_WITHOUT_MEMBERS = 8 + // Anchor discriminator
-        2 +         // threshold value
-        2 +         // authority index
-        4 +         // transaction index
-        4 +         // processed internal transaction index
-        1 +         // PDA bump
-        32 +        // creator
-        4 +         // for vec length
-        33 +        // primary member (one byte for option + 32 for Pubkey)
-        4 +         // time lock
-        33 +         // admin_revoker
-        1 +         // spending limit enabled
-        33;         // spending limit disabler authority (one byte for option + 32 for Pubkey)
+        const SIZE_WITHOUT_MEMBERS = 8 +  // Anchor discriminator
+        2 +   // threshold value
+        2 +   // authority index
+        4 +   // transaction index
+        4 +   // processed internal transaction index
+        1 +   // PDA bump
+        32 +  // creator
+        4 +   // for vec length
+        4 +   // time lock
+        1 +   // spending limit enabled
+        33;   // spending limit disabler authority (one byte for option + 32 for Pubkey)
         
-        const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 32) - currNumKeys;
+        const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 65) - currNumKeys;
         // if there is less than 1 spot left, calculate rent needed for realloc of 10 more keys
         if(spotsLeft < 1){
           console.log("            MS needs more space")
           // add space for 10 more keys
-          const neededLen = currDataSize + (10 * 32);
+          const neededLen = currDataSize + (10 * 65);
           // rent exempt lamports
           const rentExemptLamports = await squads.connection.getMinimumBalanceForRentExemption(neededLen);
           // top up lamports
@@ -451,7 +449,7 @@ describe("Programs", function(){
         // use 0 as authority index
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         const [txInstructions, txPDA] = await (
-          await txBuilder.withAddMember(member2.publicKey)
+          await txBuilder.withAddMember({key: member2.publicKey, removerAuthority: null})
         ).getInstructions();
         const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
 
@@ -503,7 +501,7 @@ describe("Programs", function(){
         let msState = await squads.getMultisig(msPDA);
         const startKeys = msState.keys.length;
         const [txInstructions, txPDA] = await (
-          await txBuilder.withAddMember(newMember)
+          await txBuilder.withAddMember({key: newMember, removerAuthority: null})
         ).getInstructions();
         const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
 
