@@ -493,6 +493,10 @@ exports.IDL = {
             ],
             "args": [
                 {
+                    "name": "createKey",
+                    "type": "publicKey"
+                },
+                {
                     "name": "mint",
                     "type": "publicKey"
                 },
@@ -503,6 +507,10 @@ exports.IDL = {
                 {
                     "name": "amount",
                     "type": "u64"
+                },
+                {
+                    "name": "member",
+                    "type": "publicKey"
                 },
                 {
                     "name": "period",
@@ -784,6 +792,13 @@ exports.IDL = {
                 "kind": "struct",
                 "fields": [
                     {
+                        "name": "createKey",
+                        "docs": [
+                            "create key used to seed the spending limit pda"
+                        ],
+                        "type": "publicKey"
+                    },
+                    {
                         "name": "multisig",
                         "docs": [
                             "The multisig this belongs to."
@@ -814,6 +829,10 @@ exports.IDL = {
                             "so 1 SOL would be `1_000_000_000` and 1 USDC would be `1_000_000`."
                         ],
                         "type": "u64"
+                    },
+                    {
+                        "name": "member",
+                        "type": "publicKey"
                     },
                     {
                         "name": "period",

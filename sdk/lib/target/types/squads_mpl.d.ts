@@ -490,6 +490,10 @@ export declare type SquadsMpl = {
             ];
             "args": [
                 {
+                    "name": "createKey";
+                    "type": "publicKey";
+                },
+                {
                     "name": "mint";
                     "type": "publicKey";
                 },
@@ -500,6 +504,10 @@ export declare type SquadsMpl = {
                 {
                     "name": "amount";
                     "type": "u64";
+                },
+                {
+                    "name": "member";
+                    "type": "publicKey";
                 },
                 {
                     "name": "period";
@@ -781,6 +789,13 @@ export declare type SquadsMpl = {
                 "kind": "struct";
                 "fields": [
                     {
+                        "name": "createKey";
+                        "docs": [
+                            "create key used to seed the spending limit pda"
+                        ];
+                        "type": "publicKey";
+                    },
+                    {
                         "name": "multisig";
                         "docs": [
                             "The multisig this belongs to."
@@ -811,6 +826,10 @@ export declare type SquadsMpl = {
                             "so 1 SOL would be `1_000_000_000` and 1 USDC would be `1_000_000`."
                         ];
                         "type": "u64";
+                    },
+                    {
+                        "name": "member";
+                        "type": "publicKey";
                     },
                     {
                         "name": "period";

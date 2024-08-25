@@ -134,15 +134,17 @@ export class TransactionBuilder {
 
   // Add this after other methods inside the TransactionBuilder class
   async withAddSpendingLimit(
+    createKey: PublicKey,
     mint: PublicKey,
     vaultIndex: number,
     amount: number,
+    member: PublicKey,
     period: Period
   ): Promise<TransactionBuilder> {
-    const [spendingLimitPDA] = await getSpendingLimitPDA(this.multisig.publicKey, mint, new BN(vaultIndex,10), this.programId);
+    const [spendingLimitPDA] = await getSpendingLimitPDA(this.multisig.publicKey, createKey, this.programId);
 
     const instruction = await this.methods
-      .addSpendingLimit(mint, vaultIndex, new BN(amount), period)
+      .addSpendingLimit(createKey, mint, vaultIndex, new BN(amount),member,period)
       .accounts({
         multisig: this.multisig.publicKey,
         spendingLimit: spendingLimitPDA,
@@ -154,10 +156,9 @@ export class TransactionBuilder {
   }
 
   async withRemoveSpendingLimit(
-    mint: PublicKey,
-    vaultIndex: number
+    createKey: PublicKey,
   ): Promise<TransactionBuilder> {
-    const [spendingLimitPDA] = await getSpendingLimitPDA(this.multisig.publicKey, mint, new BN(vaultIndex,10), this.programId);
+    const [spendingLimitPDA] = await getSpendingLimitPDA(this.multisig.publicKey, createKey, this.programId);
 
     const instruction = await this.methods
       .removeSpendingLimit()

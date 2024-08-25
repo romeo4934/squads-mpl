@@ -42,8 +42,8 @@ declare class Squads {
     getNextTransactionIndex(multisigPDA: PublicKey): Promise<number>;
     getNextInstructionIndex(transactionPDA: PublicKey): Promise<number>;
     getAuthorityPDA(multisigPDA: PublicKey, authorityIndex: number): PublicKey;
-    getSpendingLimitPDA(multisigPDA: PublicKey, mint: PublicKey, vaultIndex: number): PublicKey;
-    getSpendingLimit(multisig: PublicKey, mint: PublicKey, vaultIndex: number, commitment?: Commitment): Promise<SpendingLimitAccount>;
+    getSpendingLimitPDA(multisigPDA: PublicKey, createKey: PublicKey): PublicKey;
+    getSpendingLimit(multisig: PublicKey, createKey: PublicKey, commitment?: Commitment): Promise<SpendingLimitAccount>;
     private _createMultisig;
     createMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, adminRevoker?: PublicKey | null): Promise<MultisigAccount>;
     buildCreateMultisig(threshold: number, createKey: PublicKey, initialMembers: PublicKey[], name?: string, description?: string, image?: string, primaryMember?: PublicKey | null, timeLock?: number, adminRevoker?: PublicKey | null): Promise<TransactionInstruction>;
@@ -75,7 +75,7 @@ declare class Squads {
     removePrimaryMember(multisigPDA: PublicKey, removerSigner: anchor.web3.Keypair): Promise<MultisigAccount>;
     buildRemovePrimaryMember(multisigPDA: PublicKey, removerSigner: anchor.web3.Keypair): Promise<TransactionInstruction>;
     private _spendingLimitUse;
-    spendingLimitUse(multisig: PublicKey, mint: PublicKey, vaultIndex: number, amount: BN, decimals: number, destination: PublicKey, destinationTokenAccount: PublicKey | null, vaultTokenAccount: PublicKey | null, primaryMember: PublicKey): Promise<void>;
+    spendingLimitUse(multisig: PublicKey, createKey: PublicKey, mint: PublicKey, vaultIndex: number, amount: BN, decimals: number, destination: PublicKey, destinationTokenAccount: PublicKey | null, vaultTokenAccount: PublicKey | null, primaryMember: PublicKey): Promise<void>;
     checkGetTopUpInstruction(publicKey: PublicKey): Promise<TransactionInstruction | null>;
 }
 export default Squads;

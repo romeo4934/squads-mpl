@@ -233,22 +233,20 @@ class Squads {
     )[0];
   }
 
-  getSpendingLimitPDA(multisigPDA: PublicKey, mint: PublicKey, vaultIndex: number): PublicKey {
+  getSpendingLimitPDA(multisigPDA: PublicKey, createKey: PublicKey): PublicKey {
     return getSpendingLimitPDA(
         multisigPDA,
-        mint,
-        new BN(vaultIndex,10),
+        createKey,
         this.multisigProgramId
     )[0];
   }
 
   async getSpendingLimit(
     multisig: PublicKey,
-    mint: PublicKey,
-    vaultIndex: number,
+    createKey: PublicKey,
     commitment: Commitment = "processed"
   ): Promise<SpendingLimitAccount> {
-    const [spendingLimitPDA] = getSpendingLimitPDA(multisig, mint, new BN(vaultIndex,10), this.multisigProgramId);
+    const [spendingLimitPDA] = getSpendingLimitPDA(multisig, createKey, this.multisigProgramId);
 
     const accountData = await this.multisig.account.spendingLimit.fetch(spendingLimitPDA, commitment);
     return {...accountData, publicKey: spendingLimitPDA} as SpendingLimitAccount;
@@ -739,6 +737,7 @@ class Squads {
 
   private async _spendingLimitUse(
     multisig: PublicKey,
+    createKey: PublicKey,
     mint: PublicKey,
     vaultIndex: number,
     amount: BN,
@@ -751,8 +750,7 @@ class Squads {
   const authorityIndexBN = new BN(vaultIndex, 10);
   const spendingLimitPDA = this.getSpendingLimitPDA(
     multisig,
-    mint,
-    vaultIndex
+    createKey
   );
       
   const [vaultPDA] = getAuthorityPDA(multisig, authorityIndexBN, this.multisigProgramId);
@@ -776,6 +774,7 @@ class Squads {
 
   async spendingLimitUse(
     multisig: PublicKey,
+    createKey: PublicKey,
     mint: PublicKey,
     vaultIndex: number,
     amount: BN,
@@ -787,6 +786,7 @@ class Squads {
   ): Promise<void> {
     const methods = await this._spendingLimitUse(
       multisig,
+      createKey,
       mint,
       vaultIndex,
       amount,

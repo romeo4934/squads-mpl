@@ -50,11 +50,10 @@ const getProgramUpgradePDA = (managedProgramPDA, upgradeIndexBN, programId) => w
     anchor_1.utils.bytes.utf8.encode("pupgrade"),
 ], programId);
 exports.getProgramUpgradePDA = getProgramUpgradePDA;
-const getSpendingLimitPDA = (msPDA, mint, authorityIndexBN, programId) => web3_js_1.PublicKey.findProgramAddressSync([
+const getSpendingLimitPDA = (msPDA, create_key, programId) => web3_js_1.PublicKey.findProgramAddressSync([
     anchor_1.utils.bytes.utf8.encode("squad"),
     msPDA.toBuffer(),
-    mint.toBuffer(),
-    authorityIndexBN.toArrayLike(Buffer, "le", 4),
+    create_key.toBuffer(),
     anchor_1.utils.bytes.utf8.encode("spending_limit"),
 ], programId);
 exports.getSpendingLimitPDA = getSpendingLimitPDA;
