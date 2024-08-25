@@ -393,19 +393,19 @@ impl SpendingLimit {
 
     pub fn init(
         &mut self,
-        create_key: Pubkey,
         multisig: Pubkey,
-        authority_index: u32,
+        create_key: Pubkey,
         mint: Pubkey,
+        authority_index: u32,
         amount: u64,
         member: Pubkey,
         period: Period,
         bump: u8,
     ) -> Result<()> {
-        self.create_key = create_key;
         self.multisig = multisig;
-        self.authority_index = authority_index;
+        self.create_key = create_key;
         self.mint = mint;
+        self.authority_index = authority_index;
         self.amount = amount;
         self.member = member;
         self.period = period;

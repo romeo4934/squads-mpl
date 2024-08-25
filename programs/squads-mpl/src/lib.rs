@@ -613,10 +613,10 @@ pub mod squads_mpl {
         
         // Initialize the spending limit account
         spending_limit.init(
-            create_key,
             ctx.accounts.multisig.key(),
-            authority_index,
+            create_key,
             mint,
+            authority_index,
             amount,
             member,
             period,

@@ -95,6 +95,9 @@ describe("Programs", function(){
     let creator;
     let programManagerProgram;
     let randomCreateKey;
+    let randomCreateKeySpendingLimit;
+    let randomCreateKeySpendingLimitSOL;
+    let randomCreateKeySpendingLimitSPL;
     let msPDA;
     let pmPDA;
     let member2;
@@ -127,6 +130,10 @@ describe("Programs", function(){
         // the Multisig PDA to use for the test run
         randomCreateKey = anchor.web3.Keypair.generate().publicKey;
         [msPDA] = getMsPDA(randomCreateKey, squads.multisigProgramId);
+
+        randomCreateKeySpendingLimit = anchor.web3.Keypair.generate().publicKey;
+        randomCreateKeySpendingLimitSOL = anchor.web3.Keypair.generate().publicKey;
+        randomCreateKeySpendingLimitSPL = anchor.web3.Keypair.generate().publicKey;
       
         member2 = anchor.web3.Keypair.generate();
       });
@@ -901,9 +908,11 @@ describe("Programs", function(){
         const period = { daily: {} }; // Daily reset period
 
         
+
+        
         // Step 2: Add instruction to add the spending limit
         let [txInstructions, txPDA] = await (
-          await txBuilder.withAddSpendingLimit(mint, vaultIndex, amount, period)
+          await txBuilder.withAddSpendingLimit(randomCreateKeySpendingLimit, mint, vaultIndex, amount, creator.publicKey, period)
         ).getInstructions();
 
         // Step 3: Add activation instruction
@@ -920,14 +929,14 @@ describe("Programs", function(){
         const msState = await squads.getMultisig(msPDA);
 
         // Assuming there's a method in your SDK like `getSpendingLimit`
-        let spendingLimit = await squads.getSpendingLimit(msPDA, mint, vaultIndex);
+        let spendingLimit = await squads.getSpendingLimit(msPDA, randomCreateKeySpendingLimit);
         expect(spendingLimit.amount.toString()).to.equal(amount.toString());
         expect(spendingLimit.period).to.deep.equal(period);
 
         // Now test removing the spending limit
         txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         [txInstructions, txPDA] = await (
-          await txBuilder.withRemoveSpendingLimit(mint, vaultIndex)
+          await txBuilder.withRemoveSpendingLimit(randomCreateKeySpendingLimit)
         ).getInstructions();
 
         activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
@@ -937,7 +946,7 @@ describe("Programs", function(){
         await squads.executeTransaction(txPDA);
         // Verify the spending limit was removed
         try {
-          spendingLimit = await squads.getSpendingLimit(msPDA, mint, vaultIndex);
+          spendingLimit = await squads.getSpendingLimit(msPDA, randomCreateKeySpendingLimit);
           throw new Error("Spending limit was not removed correctly.");
         } catch (e) {
           expect(e.message).to.include("Account does not exist");
@@ -955,7 +964,7 @@ describe("Programs", function(){
 
         let txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         let [txInstructions, txPDA] = await (
-          await txBuilder.withAddSpendingLimit(mint, vaultIndex, amount, period)
+          await txBuilder.withAddSpendingLimit(randomCreateKeySpendingLimitSOL, mint, vaultIndex, amount, creator.publicKey, period)
         ).getInstructions();
         
         let activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
@@ -970,7 +979,7 @@ describe("Programs", function(){
         const transferAmount = 0.5 * LAMPORTS_PER_SOL; // Transfer 0.5 SOL
 
        // use spendingLimitUse from the sdk
-       await squads.spendingLimitUse(msPDA, mint, vaultIndex, new BN(transferAmount), solDecimals, destination, null, null,creator.publicKey);
+       await squads.spendingLimitUse(msPDA, randomCreateKeySpendingLimitSOL,mint, vaultIndex, new BN(transferAmount), solDecimals, destination, null, null,creator.publicKey);
       
 
         // Verifications
@@ -978,7 +987,7 @@ describe("Programs", function(){
         expect(destinationAccount.lamports).to.equal(transferAmount);
 
         // Step 3: Verify remaining amount in spending limit
-        const spendingLimit = await squads.getSpendingLimit(msPDA, mint, vaultIndex);
+        const spendingLimit = await squads.getSpendingLimit(msPDA, randomCreateKeySpendingLimitSOL);
         const expectedRemaining = amount - transferAmount;
         expect(spendingLimit.remainingAmount.toString()).to.equal(expectedRemaining.toString());
 
@@ -986,7 +995,7 @@ describe("Programs", function(){
         const excessiveTransferAmount = expectedRemaining + 0.1 * LAMPORTS_PER_SOL; // Exceeds the remaining amount
 
         try {
-            await squads.spendingLimitUse(msPDA, mint, vaultIndex, new BN(excessiveTransferAmount), solDecimals, destination, null, null,creator.publicKey);
+            await squads.spendingLimitUse(msPDA, randomCreateKeySpendingLimitSOL,mint, vaultIndex, new BN(excessiveTransferAmount), solDecimals, destination, null, null,creator.publicKey);
             throw new Error("Spending limit transaction succeeded when it should have failed due to exceeding limit.");
         } catch (e) {
             expect(e.message).to.include("SpendingLimitExceeded");
@@ -1047,7 +1056,7 @@ describe("Programs", function(){
         const period = { daily: {} }; // Daily reset period
         let txBuilder = await squads.getTransactionBuilder(msPDA, 0);
         let [txInstructions, txPDA] = await (
-          await txBuilder.withAddSpendingLimit(mint, vaultIndex, limitAmount, period)
+          await txBuilder.withAddSpendingLimit(randomCreateKeySpendingLimitSPL, mint, vaultIndex, limitAmount, creator.publicKey, period)
         ).getInstructions();
         let activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
         const addSpendingLimitTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
@@ -1072,13 +1081,13 @@ describe("Programs", function(){
         await setTimeout(2000);
 
         const transferAmount = new BN(300 * 10 ** 9); // Transfer 300 tokens
-        await squads.spendingLimitUse(msPDA, mint, vaultIndex, transferAmount, 9, destination, destinationTokenAccount, vaultTokenAccount.address, creator.publicKey);
+        await squads.spendingLimitUse(msPDA, randomCreateKeySpendingLimitSPL,mint, vaultIndex, transferAmount, 9, destination, destinationTokenAccount, vaultTokenAccount.address, creator.publicKey);
         // Verifications
         const destinationAccountInfo = await getAccount(provider.connection, destinationTokenAccount);
         expect(destinationAccountInfo.amount.toString()).to.equal(transferAmount.toString());
 
         // Step 6: Verify the remaining amount in the spending limit
-        const spendingLimit = await squads.getSpendingLimit(msPDA, mint, vaultIndex);
+        const spendingLimit = await squads.getSpendingLimit(msPDA, randomCreateKeySpendingLimitSPL);
         const expectedRemaining = limitAmount.sub(transferAmount);
         expect(spendingLimit.remainingAmount.toString()).to.equal(expectedRemaining.toString());
 
@@ -1086,7 +1095,7 @@ describe("Programs", function(){
         const excessiveTransferAmount = expectedRemaining.add(new BN(100 * 10 ** 9)); // Exceeds the remaining amount
 
         try {
-            await squads.spendingLimitUse(msPDA, mint, vaultIndex, excessiveTransferAmount, 9, destination, destinationTokenAccount, vaultTokenAccount.address, creator.publicKey);
+            await squads.spendingLimitUse(msPDA, randomCreateKeySpendingLimitSPL, mint, vaultIndex, excessiveTransferAmount, 9, destination, destinationTokenAccount, vaultTokenAccount.address, creator.publicKey);
             throw new Error("Spending limit transaction succeeded when it should have failed due to exceeding limit.");
         } catch (e) {
             expect(e.message).to.include("SpendingLimitExceeded");
