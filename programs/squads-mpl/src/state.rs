@@ -152,10 +152,10 @@ impl MsTransaction {
         4 +                                 // the transaction index
         4 +                                 // the authority index (for this proposal)
         1 +                                 // the authority bump
-        (8 * 6) +                          // the timestamp for each status variant
+        (8 * 6) +                           // the timestamp for each status variant
         1 +                                 // the number of instructions (attached)
         1 +                                 // space for tx bump
-        1;                               // track index if executed sequentially
+        1;                                  // track index if executed sequentially
 
     pub fn initial_size_with_members(members_len: usize) -> usize {
         MsTransaction::MINIMUM_SIZE + (3 * (4 + (members_len * 32) ) )
