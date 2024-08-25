@@ -95,6 +95,9 @@ impl Ms {
     pub fn remove_member(&mut self, member: Pubkey) -> Result<()>{
         if let Some(index) = self.is_member(member) {
             self.keys.remove(index);
+            if self.keys.len() < usize::from(self.threshold) {
+                self.threshold = self.keys.len().try_into().unwrap();
+            }
         }
         Ok(())
     }
