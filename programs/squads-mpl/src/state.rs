@@ -162,7 +162,7 @@ impl MsTransaction {
     }
 
     /// initializes the transaction account
-    pub fn init(&mut self, creator: Pubkey, multisig: Pubkey, transaction_index: u32, bump: u8, authority_index: u32, authority_bump: u8,) -> Result<()>{
+    pub fn init(&mut self, creator: Pubkey, multisig: Pubkey, transaction_index: u32, bump: u8, authority_index: u32, authority_bump: u8) -> Result<()>{
         self.creator = creator;
         self.ms = multisig;
         self.transaction_index = transaction_index;
