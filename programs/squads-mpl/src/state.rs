@@ -7,6 +7,9 @@ use std::convert::TryInto;
 
 use anchor_lang::{prelude::*, solana_program::instruction::Instruction};
 use anchor_lang::solana_program::borsh0_10::get_instance_packed_len;
+use crate::errors::*;
+
+pub const MAX_TIME_LOCK: u32 = 3 * 30 * 24 * 60 * 60; // 3 months
 
 /// Ms is the basic state account for a multisig.
 #[account]
@@ -59,6 +62,40 @@ impl Ms {
         self.time_lock = time_lock; // Initialize with the time_lock
         self.spending_limit_enabled = true;
         self.guardian = None;
+        Ok(())
+    }
+
+        /// Checks the invariants of the multisig state.
+    /// Returns an error if any invariant is violated.
+    pub fn check_invariants(&self) -> Result<()> {
+        // Check that the number of members is within the valid range
+        if self.keys.len() < 1 {
+            return err!(MsError::EmptyMembers);
+        }
+
+        if self.keys.len() > usize::from(u16::MAX) {
+            return err!(MsError::MaxMembersReached);
+        }
+
+        // Ensure the threshold is within the valid range
+        if usize::from(self.threshold) < 1 || usize::from(self.threshold) > self.keys.len() {
+            return err!(MsError::InvalidThreshold);
+        }
+
+        // Ensure the time lock duration is within the maximum allowable duration
+        if self.time_lock > MAX_TIME_LOCK {
+            return err!(MsError::TimeLockExceedsMaximum);
+        }
+
+        // Ensure there are no duplicate members
+        let mut keys = self.keys.iter().map(|m| m.key).collect::<Vec<_>>();
+        keys.sort();
+        if keys.windows(2).any(|w| w[0] == w[1]) {
+            return err!(MsError::DuplicateMembers);
+        }
+
+        // Additional custom invariants can be added here if needed
+
         Ok(())
     }
 

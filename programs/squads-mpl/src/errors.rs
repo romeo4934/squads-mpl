@@ -39,4 +39,5 @@ pub enum MsError {
     InvalidAmount, // Error for invalid amount
     InvalidDecimals, // Error for incorrect decimals
     SpendingLimitDisabled, // Error for spending limit disabled
+    DuplicateMembers, // Error for duplicate members
 }

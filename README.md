@@ -4,6 +4,7 @@ solana-cli 1.18.22
 
 solana config set --keypair ~/.config/solana/id.json
 
+- rename remove_primary_member by remove_member_by_guardian
 - add invariant to the multisig state.rs
 
 <img width="2500" alt="Frame 13" src="https://user-images.githubusercontent.com/81624955/182874414-98d63f58-450d-4520-a440-4bfda8f5329f.png">

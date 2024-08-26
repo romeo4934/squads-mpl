@@ -45,8 +45,6 @@ pub mod squads_mpl {
 
     use super::*;
 
-    pub const MAX_TIME_LOCK: u32 = 3 * 30 * 24 * 60 * 60; // 3 months
-
     /// Creates a new multisig account
     // instruction to create a multisig
     pub fn create(
@@ -61,34 +59,22 @@ pub mod squads_mpl {
         let mut members = members;
         members.sort_by_key(|m| m.key);
 
-        // check we don't exceed u16
-        let total_members = members.len();
-        if total_members < 1 {
-            return err!(MsError::EmptyMembers);
-        }
+        // Mutable reference to the multisig account
+        let multisig = &mut ctx.accounts.multisig;
 
-        // make sure we don't exceed u16 on first call
-        if total_members > usize::from(u16::MAX) {
-            return err!(MsError::MaxMembersReached);
-        }
-
-        // make sure threshold is valid
-        if usize::from(threshold) < 1 || usize::from(threshold) > total_members {
-            return err!(MsError::InvalidThreshold);
-        }
-
-        // Ensure the time lock duration is within the maximum allowable duration
-        if time_lock > MAX_TIME_LOCK {
-            return err!(MsError::TimeLockExceedsMaximum);
-        }
-
-        ctx.accounts.multisig.init(
+        // Initialize the multisig account
+        multisig.init(
             threshold,
             create_key,
             members,
             ctx.bumps.multisig,
             time_lock,
-        )
+        )?;
+
+        // Check the invariants after initialization
+        multisig.check_invariants()?;
+
+        Ok(())
     }
 
     /// The instruction to add a new member to the multisig.
