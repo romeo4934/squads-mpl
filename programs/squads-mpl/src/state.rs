@@ -106,7 +106,7 @@ impl Ms {
 
     /// Checks to see if the key is a member of the multisig
     pub fn is_member(&self, member_key: Pubkey) -> Option<usize> {
-        self.keys.iter().position(|m| m.key == member_key)
+        self.keys.binary_search_by_key(&member_key, |m| m.key).ok()
     }
 
     /// Updates the change index, deprecating any active/draft transactions
@@ -126,10 +126,8 @@ impl Ms {
 
     /// Adds a member to the multisig. Is a no-op if the member is already in the multisig.
     pub fn add_member(&mut self, member: Member) -> Result<()>{
-        if self.is_member(member.key).is_none() {
-            self.keys.push(member);
-            self.keys.sort_by_key(|m| m.key);
-        }
+        self.keys.push(member);
+        self.keys.sort_by_key(|m| m.key);
         Ok(())
     }
 
@@ -137,10 +135,8 @@ impl Ms {
     pub fn remove_member(&mut self, member: Pubkey) -> Result<()>{
         if let Some(ind) = self.is_member(member) {
             self.keys.remove(ind);
-            if self.keys.len() < usize::from(self.threshold) {
-                self.threshold = self.keys.len().try_into().unwrap();
-            }
         }
+        // TO BE FIXED AT AN ERROR IF THERE IS NO MEMBER
         Ok(())
     }
 

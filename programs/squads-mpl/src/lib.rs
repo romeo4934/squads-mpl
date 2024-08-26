@@ -129,12 +129,7 @@ pub mod squads_mpl {
             return err!(MsError::CannotRemoveSoloMember);
         }
         ctx.accounts.multisig.remove_member(old_member)?;
-
-        // if the number of keys is now less than the threshold, adjust it
-        if ctx.accounts.multisig.keys.len() < usize::from(ctx.accounts.multisig.threshold) {
-            let new_threshold: u16 = ctx.accounts.multisig.keys.len().try_into().unwrap();
-            ctx.accounts.multisig.change_threshold(new_threshold)?;
-        }
+        
         let new_index = ctx.accounts.multisig.transaction_index;
         // update the change index to deprecate any active transactions
         ctx.accounts.multisig.set_change_index(new_index)?;
