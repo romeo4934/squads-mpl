@@ -568,7 +568,7 @@ pub mod squads_mpl {
         ctx.accounts.multisig.set_change_index(new_index)
     }
 
-    pub fn remove_primary_member(ctx: Context<RemovePrimaryMember>) -> Result<()> {
+    pub fn remove_primary_member(ctx: Context<RemovePrimaryMember>, old_member: Pubkey) -> Result<()> {
         // Ensure there is a primary member to remove
         // TO BE FIXED
 
