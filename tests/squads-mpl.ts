@@ -1134,7 +1134,7 @@ describe("Programs", function(){
       }); 
 
       
-      it(`Guardian removes primary member, and verify that the primary member cannot execute the previously approved transaction`, async function() {
+      it(`Guardian can removes a member`, async function() {
         // Step 2: Primary member drafts and approves a transaction
         const authorityPDA = squads.getAuthorityPDA(msPDA, 1);
 
