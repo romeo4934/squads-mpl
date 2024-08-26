@@ -569,12 +569,23 @@ pub mod squads_mpl {
     }
 
     pub fn remove_primary_member(ctx: Context<RemovePrimaryMember>, old_member: Pubkey) -> Result<()> {
+        let multisig = &mut ctx.accounts.multisig;
+
         // Ensure there is a primary member to remove
-        // TO BE FIXED
+        let old_member_index = multisig.is_member(old_member)
+            .ok_or(MsError::PrimaryMemberNotInMultisig)?;
+
+        // Ensure the guardian has permission to remove this member
+        if !multisig.keys[old_member_index].guardian_can_remove {
+            return err!(MsError::UnauthorizedMember);
+        }
+
+        // Remove the member from the multisig
+        multisig.remove_member(old_member)?;
 
         // Mark the change by updating the change index to deprecate any active transactions
-        let new_index = ctx.accounts.multisig.transaction_index;
-        ctx.accounts.multisig.set_change_index(new_index)
+        let new_index = multisig.transaction_index;
+        multisig.set_change_index(new_index)
     }
 
     pub fn add_spending_limit(ctx: Context<CreateSpendingLimit>, create_key: Pubkey, mint: Pubkey, authority_index: u32, amount: u64, member: Pubkey, period: Period) -> Result<()> {
