@@ -424,12 +424,12 @@ describe("Programs", function(){
         1 +   // spending limit enabled
         33;   // spending limit disabler authority (one byte for option + 32 for Pubkey)
         
-        const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 65) - currNumKeys;
+        const spotsLeft = ((currDataSize - SIZE_WITHOUT_MEMBERS) / 33) - currNumKeys;
         // if there is less than 1 spot left, calculate rent needed for realloc of 10 more keys
         if(spotsLeft < 1){
           console.log("            MS needs more space")
           // add space for 10 more keys
-          const neededLen = currDataSize + (10 * 65);
+          const neededLen = currDataSize + (10 * 33);
           // rent exempt lamports
           const rentExemptLamports = await squads.connection.getMinimumBalanceForRentExemption(neededLen);
           // top up lamports
@@ -770,8 +770,8 @@ describe("Programs", function(){
         
         // Step 2: Add instruction to update the timelock
         const [txInstructions, txPDA] = await ( await txBuilder
-            .withUpdateAdminSettings(creator.publicKey, ONE_MINUTE, initialGuardiansKeys.publicKey)
-            ).getInstructions({ approvalByMultisig: {} });
+            .withUpdateMultisigSettings(ONE_MINUTE, true, initialGuardiansKeys.publicKey)
+            ).getInstructions();
 
         // Step 3: Add activation instruction
         const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
@@ -795,7 +795,7 @@ describe("Programs", function(){
 
       
 
-      it(`Create Tx with ApprovalByPrimaryMember and enforce time lock delay`, async function() {     
+      it(`Create Tx and enforce time lock delay`, async function() {     
         
         
         // create authority to use (Vault, index 1)
@@ -893,6 +893,35 @@ describe("Programs", function(){
         expect(msState.threshold).to.equal(1);
         expect(txState.status).to.have.property("executed");
         threshold = msState.threshold;
+      });
+
+      it(`Update the timelock to O second`, async function() {  
+        // Step 1: Get the transaction builder
+        const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
+        
+        // Step 2: Add instruction to update the timelock
+        const [txInstructions, txPDA] = await ( await txBuilder
+            .withUpdateMultisigSettings(0, true, initialGuardiansKeys.publicKey)
+            ).getInstructions();
+
+        // Step 3: Add activation instruction
+        const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
+
+        // Step 4: Create and send the transaction updating the timelock
+        const updateTimeLockTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
+
+        await provider.sendAndConfirm(updateTimeLockTx, undefined, { commitment: "confirmed" });
+          
+        await setTimeout((60) * 1000);  // Adding extra buffer to account for any delay in execution
+        // Step 5: Approve the transaction
+        await squads.approveTransaction(txPDA);
+
+        // Step 6: Execute the transaction
+        await squads.executeTransaction(txPDA);
+
+        // Verify the timelock was updated
+        let msState = await squads.getMultisig(msPDA);
+        expect(msState.timeLock).to.equal(0);
       });
 
       // Add this inside the describe block named "SMPL Basic functionality"
