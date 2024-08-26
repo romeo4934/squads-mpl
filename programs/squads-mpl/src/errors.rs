@@ -40,4 +40,5 @@ pub enum MsError {
     InvalidDecimals, // Error for incorrect decimals
     SpendingLimitDisabled, // Error for spending limit disabled
     DuplicateMembers, // Error for duplicate members
+    ChangeIndexExceedsTransactionIndex, // Error for change index exceeding transaction index
 }

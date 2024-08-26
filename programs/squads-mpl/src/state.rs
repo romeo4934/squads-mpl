@@ -94,6 +94,11 @@ impl Ms {
             return err!(MsError::DuplicateMembers);
         }
 
+        // Ensure ms_change_index is less than or equal to transaction_index
+        if self.ms_change_index > self.transaction_index {
+            return err!(MsError::ChangeIndexExceedsTransactionIndex);
+        }
+
         // Additional custom invariants can be added here if needed
 
         Ok(())

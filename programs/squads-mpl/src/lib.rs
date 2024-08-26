@@ -561,12 +561,7 @@ pub mod squads_mpl {
         guardian: Option<Pubkey>,
     ) -> Result<()> {
         let multisig = &mut ctx.accounts.multisig;
-
-        // Ensure the new time lock is within the maximum allowable duration
-        if new_time_lock > MAX_TIME_LOCK {
-            return err!(MsError::TimeLockExceedsMaximum);
-        }
-
+        
         // Update the time lock duration
         multisig.time_lock = new_time_lock;
 
