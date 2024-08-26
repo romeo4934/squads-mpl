@@ -1134,7 +1134,7 @@ describe("Programs", function(){
       }); 
 
       
-      it(`Guardian can removes a member`, async function() {
+      it(`Guardian can removes a member if guardianCanRemove is set to true`, async function() {
         // Step 1: Add a new member with guardianCanRemove set to true
         const newMember = anchor.web3.Keypair.generate().publicKey;
 
@@ -1144,9 +1144,31 @@ describe("Programs", function(){
         ).getInstructions();
         let activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
         
-        const addMemberTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
-        await provider.sendAndConfirm(addMemberTx);
-        await squads.approveTransaction(txPDA);
+        let addMemberTx = await createBlankTransaction(
+          squads.connection,
+          creator.publicKey
+        );
+        addMemberTx.add(...txInstructions);
+        addMemberTx.add(activateIx);
+
+        try {
+          await provider.sendAndConfirm(addMemberTx, undefined, {commitment: "confirmed"});
+        } catch (e) {
+          console.log("Error creating addMember transaction", e);
+          throw e;
+        }
+
+        let txState = await squads.getTransaction(txPDA);
+        try {
+          await squads.approveTransaction(txPDA);
+        }catch(e){
+          console.log("error approving transaction", e);
+          throw e;
+        }
+
+        txState = await squads.getTransaction(txPDA);
+        expect(txState.status).has.property("executeReady");
+
         await squads.executeTransaction(txPDA);
 
         let msState = await squads.getMultisig(msPDA);
@@ -1157,6 +1179,7 @@ describe("Programs", function(){
           initialGuardiansKeys.publicKey,
           anchor.web3.LAMPORTS_PER_SOL
         );
+
         const removeMemberTx = await program.methods
           .removePrimaryMember(newMember)
           .accounts({
