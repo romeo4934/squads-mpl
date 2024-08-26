@@ -1135,29 +1135,30 @@ describe("Programs", function(){
 
       
       it(`Guardian can removes a member`, async function() {
-        // Step 2: Primary member drafts and approves a transaction
-        const authorityPDA = squads.getAuthorityPDA(msPDA, 1);
+        // Step 1: Add a new member with guardianCanRemove set to true
+        const newMember = anchor.web3.Keypair.generate().publicKey;
 
-        const testPayee = anchor.web3.Keypair.generate();
-        const testIx = await createTestTransferTransaction(
-          authorityPDA,
-          testPayee.publicKey
-        );
-
-        let txState = await squads.createTransaction(msPDA, 1);
-        await squads.addInstruction(txState.publicKey, testIx);
-        await squads.activateTransaction(txState.publicKey);
-        txState = await squads.getTransaction(txState.publicKey);
-        expect(txState.status).to.have.property("active");  
-
-        // Step 3: Guardian drafts and approves a transaction to remove the primary member
+        let txBuilder = await squads.getTransactionBuilder(msPDA, 0);
+        let [txInstructions, txPDA] = await (
+          await txBuilder.withAddMember({ key: newMember, guardianCanRemove: true })
+        ).getInstructions();
+        let activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
         
+        const addMemberTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
+        await provider.sendAndConfirm(addMemberTx);
+        await squads.approveTransaction(txPDA);
+        await squads.executeTransaction(txPDA);
+
+        let msState = await squads.getMultisig(msPDA);
+        expect(msState.keys.some(member => member.key.toBase58() === newMember.toBase58())).to.be.true;
+
+        // Step 2: Remove the new member using guardian
         await provider.connection.requestAirdrop(
           initialGuardiansKeys.publicKey,
           anchor.web3.LAMPORTS_PER_SOL
         );
-        const removePrimaryMemberTx = await program.methods
-          .removePrimaryMember()
+        const removeMemberTx = await program.methods
+          .removePrimaryMember(newMember)
           .accounts({
             multisig: msPDA,
             remover: initialGuardiansKeys.publicKey,
@@ -1165,22 +1166,34 @@ describe("Programs", function(){
           .signers([initialGuardiansKeys])
           .transaction();
         try {
-          await provider.sendAndConfirm(removePrimaryMemberTx, [initialGuardiansKeys], undefined, {commitment: "confirmed"});
+          await provider.sendAndConfirm(removeMemberTx, [initialGuardiansKeys], undefined, {commitment: "confirmed"});
         } catch (e) {
           console.log(initialGuardiansKeys.publicKey.toBase58(), " signing error");
+          throw e;
         }
-          
-        // Verify the state has no primary member
-        const msState = await squads.getMultisig(msPDA);
-        expect(msState.primaryMember).to.be.null;
-        await setTimeout(2000);
-        // Step 4: Verify the primary member cannot execute the previously approved transaction
+
+        // Verify the member is removed
+        msState = await squads.getMultisig(msPDA);
+        expect(msState.keys.some(member => member.key.toBase58() === newMember.toBase58())).to.be.false;
+
+        // Step 3: Attempt to remove an original member (should fail)
+        const originalMember = memberList[0].publicKey;
+        const removeOriginalMemberTx = await program.methods
+          .removePrimaryMember(originalMember)
+          .accounts({
+            multisig: msPDA,
+            remover: initialGuardiansKeys.publicKey,
+          })
+          .signers([initialGuardiansKeys])
+          .transaction();
+
         try {
-          await squads.approveTransaction(txState.publicKey);
-          throw new Error("Transaction was incorrectly executed by primary member.");
+          await provider.sendAndConfirm(removeOriginalMemberTx, [initialGuardiansKeys], undefined, {commitment: "confirmed"});
+          throw new Error("Original member was incorrectly removed by guardian.");
         } catch (e) {
-          expect(e.message).to.include("DeprecatedTransaction");
-        }        
+          // Ensure the failure is due to UnauthorizedMember error
+          expect(e.message).to.include("UnauthorizedMember");
+        }
       });
       
     });
