@@ -564,36 +564,7 @@ describe("Programs", function(){
         expect(txState.status).to.have.property("executeReady");
       });
 
-/*
-      it(`Update the timelock to 1 minute`, async function() {  
-        // Step 1: Get the transaction builder
-        const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
-        
-        // Step 2: Add instruction to update the timelock
-        const [txInstructions, txPDA] = await ( await txBuilder
-            .withUpdateAdminSettings(creator.publicKey, ONE_MINUTE, initialGuardiansKeys.publicKey)
-            ).getInstructions({ approvalByMultisig: {} });
 
-        // Step 3: Add activation instruction
-        const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
-
-        // Step 4: Create and send the transaction updating the timelock
-        const updateTimeLockTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
-
-        await provider.sendAndConfirm(updateTimeLockTx, undefined, { commitment: "confirmed" });
-
-        // Step 5: Approve the transaction
-        await squads.approveTransaction(txPDA);
-
-        // Step 6: Execute the transaction
-        await squads.executeTransaction(txPDA);
-
-        // Verify the timelock was updated
-        let msState = await squads.getMultisig(msPDA);
-        expect(msState.timeLock).to.equal(ONE_MINUTE);
-      });
-
-*/
 
       it(`Change threshold to 2`, async function(){
         const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
@@ -791,6 +762,36 @@ describe("Programs", function(){
         expect(msState.threshold).to.equal(1);
         await setTimeout(2000);
       });
+
+      
+      it(`Update the timelock to 1 minute`, async function() {  
+        // Step 1: Get the transaction builder
+        const txBuilder = await squads.getTransactionBuilder(msPDA, 0);
+        
+        // Step 2: Add instruction to update the timelock
+        const [txInstructions, txPDA] = await ( await txBuilder
+            .withUpdateAdminSettings(creator.publicKey, ONE_MINUTE, initialGuardiansKeys.publicKey)
+            ).getInstructions({ approvalByMultisig: {} });
+
+        // Step 3: Add activation instruction
+        const activateIx = await squads.buildActivateTransaction(msPDA, txPDA);
+
+        // Step 4: Create and send the transaction updating the timelock
+        const updateTimeLockTx = new anchor.web3.Transaction().add(...txInstructions).add(activateIx);
+
+        await provider.sendAndConfirm(updateTimeLockTx, undefined, { commitment: "confirmed" });
+
+        // Step 5: Approve the transaction
+        await squads.approveTransaction(txPDA);
+
+        // Step 6: Execute the transaction
+        await squads.executeTransaction(txPDA);
+
+        // Verify the timelock was updated
+        let msState = await squads.getMultisig(msPDA);
+        expect(msState.timeLock).to.equal(ONE_MINUTE);
+      });
+
 
       
 

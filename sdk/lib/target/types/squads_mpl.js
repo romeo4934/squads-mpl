@@ -425,6 +425,16 @@ exports.IDL = {
                 {
                     "name": "newTimeLock",
                     "type": "u32"
+                },
+                {
+                    "name": "spendingLimitEnabled",
+                    "type": "bool"
+                },
+                {
+                    "name": "guardian",
+                    "type": {
+                        "option": "publicKey"
+                    }
                 }
             ]
         },
@@ -442,7 +452,12 @@ exports.IDL = {
                     "isSigner": true
                 }
             ],
-            "args": []
+            "args": [
+                {
+                    "name": "oldMember",
+                    "type": "publicKey"
+                }
+            ]
         },
         {
             "name": "addSpendingLimit",

@@ -422,6 +422,16 @@ export declare type SquadsMpl = {
                 {
                     "name": "newTimeLock";
                     "type": "u32";
+                },
+                {
+                    "name": "spendingLimitEnabled";
+                    "type": "bool";
+                },
+                {
+                    "name": "guardian";
+                    "type": {
+                        "option": "publicKey";
+                    };
                 }
             ];
         },
@@ -439,7 +449,12 @@ export declare type SquadsMpl = {
                     "isSigner": true;
                 }
             ];
-            "args": [];
+            "args": [
+                {
+                    "name": "oldMember";
+                    "type": "publicKey";
+                }
+            ];
         },
         {
             "name": "addSpendingLimit";

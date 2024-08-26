@@ -120,9 +120,11 @@ export class TransactionBuilder {
 
   async withUpdateMultisigSettings(
     newTimeLock: number,
+    spendingLimitEnabled: boolean,
+    guardian: PublicKey | null,
   ): Promise<TransactionBuilder> {
     const instruction = await this.methods
-      .updateMultisigSettings(newTimeLock)
+      .updateMultisigSettings(newTimeLock, spendingLimitEnabled, guardian)
       .accounts({
         multisig: this.multisig.publicKey,
       })

@@ -424,9 +424,9 @@ class Squads {
             return yield methods.instruction();
         });
     }
-    _removePrimaryMember(multisigPDA, removerSigner) {
+    _removePrimaryMember(multisigPDA, oldMember, removerSigner) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.multisig.methods.removePrimaryMember().accounts({
+            return this.multisig.methods.removePrimaryMember(oldMember).accounts({
                 multisig: multisigPDA,
                 remover: removerSigner.publicKey,
             })
@@ -434,16 +434,16 @@ class Squads {
             ;
         });
     }
-    removePrimaryMember(multisigPDA, removerSigner) {
+    removePrimaryMember(multisigPDA, oldMember, removerSigner) {
         return __awaiter(this, void 0, void 0, function* () {
-            const methods = yield this._removePrimaryMember(multisigPDA, removerSigner);
+            const methods = yield this._removePrimaryMember(multisigPDA, oldMember, removerSigner);
             yield methods.rpc();
             return yield this.getMultisig(multisigPDA);
         });
     }
-    buildRemovePrimaryMember(multisigPDA, removerSigner) {
+    buildRemovePrimaryMember(multisigPDA, oldMember, removerSigner) {
         return __awaiter(this, void 0, void 0, function* () {
-            const methods = yield this._removePrimaryMember(multisigPDA, removerSigner);
+            const methods = yield this._removePrimaryMember(multisigPDA, oldMember, removerSigner);
             return yield methods.instruction();
         });
     }

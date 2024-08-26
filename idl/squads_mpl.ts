@@ -422,6 +422,16 @@ export type SquadsMpl = {
         {
           "name": "newTimeLock",
           "type": "u32"
+        },
+        {
+          "name": "spendingLimitEnabled",
+          "type": "bool"
+        },
+        {
+          "name": "guardian",
+          "type": {
+            "option": "publicKey"
+          }
         }
       ]
     },
@@ -1581,6 +1591,16 @@ export const IDL: SquadsMpl = {
         {
           "name": "newTimeLock",
           "type": "u32"
+        },
+        {
+          "name": "spendingLimitEnabled",
+          "type": "bool"
+        },
+        {
+          "name": "guardian",
+          "type": {
+            "option": "publicKey"
+          }
         }
       ]
     },

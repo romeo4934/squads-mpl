@@ -552,20 +552,36 @@ pub mod squads_mpl {
         Ok(())
     }
 
-       /// The instruction to update the multisig settings.
-    pub fn update_multisig_settings(ctx: Context<MsAuth>, new_time_lock: u32,) -> Result<()> {
+    /// The instruction to update the multisig settings.
+    pub fn update_multisig_settings(
+        ctx: Context<MsAuth>,
+        new_time_lock: u32,
+        spending_limit_enabled: bool,
+        guardian: Option<Pubkey>,
+    ) -> Result<()> {
+        let multisig = &mut ctx.accounts.multisig;
+
         // Ensure the new time lock is within the maximum allowable duration
         if new_time_lock > MAX_TIME_LOCK {
             return err!(MsError::TimeLockExceedsMaximum);
         }
 
         // Update the time lock duration
-        ctx.accounts.multisig.time_lock = new_time_lock;
+        multisig.time_lock = new_time_lock;
+
+        // Update the spending limit enabled flag
+        multisig.spending_limit_enabled = spending_limit_enabled;
+
+        // Update the guardian if provided
+        if let Some(new_guardian) = guardian {
+            multisig.guardian = Some(new_guardian);
+        } else {
+            multisig.guardian = None;
+        }
 
         // Mark the change by updating the change index to deprecate any active transactions
-        let new_index = ctx.accounts.multisig.transaction_index;
-        // set the change index, which will deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)
+        let new_index = multisig.transaction_index;
+        multisig.set_change_index(new_index)
     }
 
     pub fn remove_primary_member(ctx: Context<RemovePrimaryMember>, old_member: Pubkey) -> Result<()> {

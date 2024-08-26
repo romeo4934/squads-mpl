@@ -4,7 +4,6 @@ solana-cli 1.18.22
 
 solana config set --keypair ~/.config/solana/id.json
 
-- FIX TO BE FIXED
 - Fix the tests
 - update settings method add parameters
 - update the tests

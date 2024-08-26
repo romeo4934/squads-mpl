@@ -114,10 +114,10 @@ class TransactionBuilder {
             return this.withInstruction(instruction);
         });
     }
-    withUpdateMultisigSettings(newTimeLock) {
+    withUpdateMultisigSettings(newTimeLock, spendingLimitEnabled, guardian) {
         return __awaiter(this, void 0, void 0, function* () {
             const instruction = yield this.methods
-                .updateMultisigSettings(newTimeLock)
+                .updateMultisigSettings(newTimeLock, spendingLimitEnabled, guardian)
                 .accounts({
                 multisig: this.multisig.publicKey,
             })
