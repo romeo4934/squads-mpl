@@ -114,7 +114,12 @@ pub mod squads_mpl {
         ctx.accounts.multisig.add_member(new_member)?;
         let new_index = ctx.accounts.multisig.transaction_index;
         // set the change index, which will deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)
+        ctx.accounts.multisig.set_change_index(new_index)?;
+
+        // Check the invariants after adding a member
+        ctx.accounts.multisig.check_invariants()?;
+
+        Ok(())
     }
 
     /// The instruction to remove a member from the multisig
@@ -132,7 +137,12 @@ pub mod squads_mpl {
         }
         let new_index = ctx.accounts.multisig.transaction_index;
         // update the change index to deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)
+        ctx.accounts.multisig.set_change_index(new_index)?;
+
+        // Check the invariants after removing a member
+        ctx.accounts.multisig.check_invariants()?;
+
+        Ok(())
     }
 
     /// The instruction to change the threshold of the multisig
@@ -148,7 +158,12 @@ pub mod squads_mpl {
         }
         let new_index = ctx.accounts.multisig.transaction_index;
         // update the change index to deprecate any active transactions
-        ctx.accounts.multisig.set_change_index(new_index)
+        ctx.accounts.multisig.set_change_index(new_index)?;
+
+        // Check the invariants after changing the threshold
+        ctx.accounts.multisig.check_invariants()?;
+
+        Ok(())
     }
 
     /// instruction to increase the authority value tracked in the multisig
@@ -567,7 +582,12 @@ pub mod squads_mpl {
 
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = multisig.transaction_index;
-        multisig.set_change_index(new_index)
+        multisig.set_change_index(new_index)?;
+
+        // Check the invariants after updating multisig settings
+        multisig.check_invariants()?;
+
+        Ok(())
     }
 
     pub fn remove_primary_member(ctx: Context<RemovePrimaryMember>, old_member: Pubkey) -> Result<()> {
@@ -587,7 +607,12 @@ pub mod squads_mpl {
 
         // Mark the change by updating the change index to deprecate any active transactions
         let new_index = multisig.transaction_index;
-        multisig.set_change_index(new_index)
+        multisig.set_change_index(new_index)?;
+
+        // Check the invariants after removing a primary member
+        multisig.check_invariants()?;
+
+        Ok(())
     }
 
     pub fn add_spending_limit(ctx: Context<CreateSpendingLimit>, create_key: Pubkey, mint: Pubkey, authority_index: u32, amount: u64, member: Pubkey, period: Period) -> Result<()> {
