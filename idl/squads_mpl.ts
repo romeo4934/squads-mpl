@@ -439,7 +439,12 @@ export type SquadsMpl = {
           "isSigner": true
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "oldMember",
+          "type": "publicKey"
+        }
+      ]
     },
     {
       "name": "addSpendingLimit",
@@ -1593,7 +1598,12 @@ export const IDL: SquadsMpl = {
           "isSigner": true
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "oldMember",
+          "type": "publicKey"
+        }
+      ]
     },
     {
       "name": "addSpendingLimit",
