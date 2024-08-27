@@ -135,8 +135,9 @@ impl Ms {
     pub fn remove_member(&mut self, member: Pubkey) -> Result<()>{
         if let Some(ind) = self.is_member(member) {
             self.keys.remove(ind);
+        }else{
+            return err!(MsError::MemberNotFound);
         }
-        // TO BE FIXED AT AN ERROR IF THERE IS NO MEMBER
         Ok(())
     }
 

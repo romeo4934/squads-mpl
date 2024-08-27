@@ -19,10 +19,10 @@ pub enum MsError {
     InstructionFailed,
     MaxMembersReached,
     EmptyMembers,
+    MemberNotFound,
     PartialExecution,
     NotEnoughLamports,
     TimeLockNotSatisfied, // Custom error for time lock condition
-    NoPrimaryMemberSpecified, // Error for missing primary member in primary member approval mode
     PrimaryMemberNotInMultisig, // Error for primary member not being in the multisig
     UnauthorizedMember, // Error for member unauthorized to execute transaction
     TimeLockExceedsMaximum, // Error for time lock exceeding the maximum allowable duration
