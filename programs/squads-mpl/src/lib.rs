@@ -82,10 +82,6 @@ pub mod squads_mpl {
     /// If the multisig needs to be reallocated, it must be prefunded with
     /// enough lamports to cover the new size.
     pub fn add_member(ctx: Context<MsAuthRealloc>, new_member: Member) -> Result<()> {
-        // if max is already reached, we can't have more members
-        if ctx.accounts.multisig.keys.len() >= usize::from(u16::MAX) {
-            return err!(MsError::MaxMembersReached);
-        }
 
         // check if realloc is needed
         let multisig_account_info = ctx.accounts.multisig.to_account_info();
