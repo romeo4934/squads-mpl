@@ -69,8 +69,8 @@ impl Ms {
     /// Returns an error if any invariant is violated.
     pub fn check_invariants(&self) -> Result<()> {
         // Check that the number of members is within the valid range
-        if self.keys.len() < 1 {
-            return err!(MsError::EmptyMembers);
+        if self.keys.len() <= 1 {
+            return err!(MsError::CannotRemoveSoloMember);
         }
 
         if self.keys.len() > usize::from(u16::MAX) {

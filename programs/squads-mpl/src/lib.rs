@@ -121,7 +121,7 @@ pub mod squads_mpl {
     /// The instruction to remove a member from the multisig
     pub fn remove_member(ctx: Context<MsAuth>, old_member: Pubkey) -> Result<()> {
         // if there is only one key in this multisig, reject the removal
-        if ctx.accounts.multisig.keys.len() == 1 {
+        if ctx.accounts.multisig.keys.len() <= 1 {
             return err!(MsError::CannotRemoveSoloMember);
         }
         ctx.accounts.multisig.remove_member(old_member)?;
@@ -577,26 +577,26 @@ pub mod squads_mpl {
     }
 
     pub fn remove_primary_member(ctx: Context<RemovePrimaryMember>, old_member: Pubkey) -> Result<()> {
-        let multisig = &mut ctx.accounts.multisig;
-
-        // Ensure there is a primary member to remove
-        let old_member_index = multisig.is_member(old_member)
-            .ok_or(MsError::PrimaryMemberNotInMultisig)?;
+        let old_member_index = ctx.accounts.multisig.is_member(old_member)
+            .ok_or(MsError::MemberNotFound)?;
 
         // Ensure the guardian has permission to remove this member
-        if !multisig.keys[old_member_index].guardian_can_remove {
+        if !ctx.accounts.multisig.keys[old_member_index].guardian_can_remove {
             return err!(MsError::UnauthorizedMember);
         }
 
-        // Remove the member from the multisig
-        multisig.remove_member(old_member)?;
+        // if there is only one key in this multisig, reject the removal
+        if ctx.accounts.multisig.keys.len() <= 1 {
+            return err!(MsError::CannotRemoveSoloMember);
+        }
+        ctx.accounts.multisig.remove_member(old_member)?;
+        
+        let new_index = ctx.accounts.multisig.transaction_index;
+        // update the change index to deprecate any active transactions
+        ctx.accounts.multisig.set_change_index(new_index)?;
 
-        // Mark the change by updating the change index to deprecate any active transactions
-        let new_index = multisig.transaction_index;
-        multisig.set_change_index(new_index)?;
-
-        // Check the invariants after removing a primary member
-        multisig.check_invariants()?;
+        // Check the invariants after removing a member
+        ctx.accounts.multisig.check_invariants()?;
 
         Ok(())
     }
