@@ -576,7 +576,7 @@ pub mod squads_mpl {
         Ok(())
     }
 
-    pub fn remove_primary_member(ctx: Context<RemovePrimaryMember>, old_member: Pubkey) -> Result<()> {
+    pub fn remove_member_with_guardian(ctx: Context<RemoveMemberWithGuardian>, old_member: Pubkey) -> Result<()> {
         let old_member_index = ctx.accounts.multisig.is_member(old_member)
             .ok_or(MsError::MemberNotFound)?;
 

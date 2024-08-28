@@ -71,9 +71,9 @@ declare class Squads {
     private _executeInstruction;
     executeInstruction(transactionPDA: PublicKey, instructionPDA: PublicKey): Promise<InstructionAccount>;
     buildExecuteInstruction(transactionPDA: PublicKey, instructionPDA: PublicKey): Promise<TransactionInstruction>;
-    private _removePrimaryMember;
-    removePrimaryMember(multisigPDA: PublicKey, oldMember: PublicKey, removerSigner: anchor.web3.Keypair): Promise<MultisigAccount>;
-    buildRemovePrimaryMember(multisigPDA: PublicKey, oldMember: PublicKey, removerSigner: anchor.web3.Keypair): Promise<TransactionInstruction>;
+    private _removeMemberWithGuardian;
+    removeMemberWithGuardian(multisigPDA: PublicKey, oldMember: PublicKey, removerSigner: anchor.web3.Keypair): Promise<MultisigAccount>;
+    buildRemoveMemberWithGuardian(multisigPDA: PublicKey, oldMember: PublicKey, removerSigner: anchor.web3.Keypair): Promise<TransactionInstruction>;
     private _spendingLimitUse;
     spendingLimitUse(multisig: PublicKey, createKey: PublicKey, mint: PublicKey, vaultIndex: number, amount: BN, decimals: number, destination: PublicKey, destinationTokenAccount: PublicKey | null, vaultTokenAccount: PublicKey | null, primaryMember: PublicKey): Promise<void>;
     checkGetTopUpInstruction(publicKey: PublicKey): Promise<TransactionInstruction | null>;

@@ -698,12 +698,12 @@ class Squads {
     return await methods.instruction();
   }
 
-  private async _removePrimaryMember(
+  private async _removeMemberWithGuardian(
     multisigPDA: PublicKey,
     oldMember: PublicKey,
     removerSigner: anchor.web3.Keypair
   ): Promise<SquadsMethods> {
-    return this.multisig.methods.removePrimaryMember(oldMember).accounts({
+    return this.multisig.methods.removeMemberWithGuardian(oldMember).accounts({
       multisig: multisigPDA,
       remover: removerSigner.publicKey,
     })
@@ -711,22 +711,22 @@ class Squads {
     ;
   }
 
-  async removePrimaryMember(
+  async removeMemberWithGuardian(
     multisigPDA: PublicKey,
     oldMember: PublicKey,
     removerSigner: anchor.web3.Keypair
   ): Promise<MultisigAccount> {
-    const methods = await this._removePrimaryMember(multisigPDA,oldMember,removerSigner);
+    const methods = await this._removeMemberWithGuardian(multisigPDA,oldMember,removerSigner);
     await methods.rpc();
     return await this.getMultisig(multisigPDA);
   }
 
-  async buildRemovePrimaryMember(
+  async buildRemoveMemberWithGuardian(
     multisigPDA: PublicKey,
     oldMember: PublicKey,
     removerSigner: anchor.web3.Keypair
   ): Promise<TransactionInstruction> {
-    const methods = await this._removePrimaryMember(multisigPDA,oldMember,removerSigner);
+    const methods = await this._removeMemberWithGuardian(multisigPDA,oldMember,removerSigner);
     return await methods.instruction();
   }
 

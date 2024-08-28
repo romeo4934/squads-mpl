@@ -384,7 +384,7 @@ pub struct MsAuth<'info> {
 }
 
 #[derive(Accounts)]
-pub struct RemovePrimaryMember<'info> {
+pub struct RemoveMemberWithGuardian<'info> {
     #[account(
         mut,
         seeds = [

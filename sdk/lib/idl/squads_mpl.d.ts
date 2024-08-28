@@ -436,7 +436,7 @@ export declare type SquadsMpl = {
             ];
         },
         {
-            "name": "removePrimaryMember";
+            "name": "removeMemberWithGuardian";
             "accounts": [
                 {
                     "name": "multisig";
@@ -1082,7 +1082,7 @@ export declare type SquadsMpl = {
         },
         {
             "code": 6011;
-            "name": "EmptyMembers";
+            "name": "MemberNotFound";
         },
         {
             "code": 6012;
@@ -1098,71 +1098,51 @@ export declare type SquadsMpl = {
         },
         {
             "code": 6015;
-            "name": "NoPrimaryMemberSpecified";
-        },
-        {
-            "code": 6016;
-            "name": "PrimaryMemberNotInMultisig";
-        },
-        {
-            "code": 6017;
             "name": "UnauthorizedMember";
         },
         {
-            "code": 6018;
+            "code": 6016;
             "name": "TimeLockExceedsMaximum";
         },
         {
-            "code": 6019;
-            "name": "GuardianAlreadyExists";
-        },
-        {
-            "code": 6020;
-            "name": "GuardianNotFound";
-        },
-        {
-            "code": 6021;
-            "name": "MaxGuardiansReached";
-        },
-        {
-            "code": 6022;
-            "name": "InvalidApprovalModeForExecution";
-        },
-        {
-            "code": 6023;
+            "code": 6017;
             "name": "TimeError";
         },
         {
-            "code": 6024;
+            "code": 6018;
             "name": "MissingAccount";
         },
         {
-            "code": 6025;
+            "code": 6019;
             "name": "SpendingLimitNotFound";
         },
         {
-            "code": 6026;
+            "code": 6020;
             "name": "SpendingLimitExceeded";
         },
         {
-            "code": 6027;
-            "name": "SpendingLimitMustBeForSol";
-        },
-        {
-            "code": 6028;
+            "code": 6021;
             "name": "InvalidMint";
         },
         {
-            "code": 6029;
+            "code": 6022;
             "name": "InvalidAmount";
         },
         {
-            "code": 6030;
+            "code": 6023;
             "name": "InvalidDecimals";
         },
         {
-            "code": 6031;
+            "code": 6024;
             "name": "SpendingLimitDisabled";
+        },
+        {
+            "code": 6025;
+            "name": "DuplicateMembers";
+        },
+        {
+            "code": 6026;
+            "name": "ChangeIndexExceedsTransactionIndex";
         }
     ];
 };

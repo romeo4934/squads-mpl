@@ -1181,7 +1181,7 @@ describe("Programs", function(){
         );
 
         const removeMemberTx = await program.methods
-          .removePrimaryMember(newMember)
+          .removeMemberWithGuardian(newMember)
           .accounts({
             multisig: msPDA,
             remover: initialGuardiansKeys.publicKey,
@@ -1202,7 +1202,7 @@ describe("Programs", function(){
         // Step 3: Attempt to remove an original member (should fail)
         const originalMember = memberList[0].publicKey;
         const removeOriginalMemberTx = await program.methods
-          .removePrimaryMember(originalMember)
+          .removeMemberWithGuardian(originalMember)
           .accounts({
             multisig: msPDA,
             remover: initialGuardiansKeys.publicKey,
