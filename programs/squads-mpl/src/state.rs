@@ -132,12 +132,13 @@ impl Ms {
     }
 
     /// Removes a member from the multisig. Is a no-op if the member is not in the multisig.
-    pub fn remove_member(&mut self, member: Pubkey) -> Result<()>{
-        if let Some(ind) = self.is_member(member) {
-            self.keys.remove(ind);
-        }else{
-            return err!(MsError::MemberNotFound);
-        }
+    pub fn remove_member(&mut self, member_pubkey: Pubkey) -> Result<()>{
+        let old_member_index = match self.is_member(member_pubkey) {
+            Some(old_member_index) => old_member_index,
+            None => return err!(MsError::MemberNotFound),
+        };
+        self.keys.remove(old_member_index);
+        
         Ok(())
     }
 
