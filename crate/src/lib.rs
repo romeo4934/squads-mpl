@@ -84,14 +84,6 @@ pub mod cpi {
         squads_mpl::cpi::add_member(ctx, new_member)
     }
 
-    pub fn add_member_and_change_threshold<'info>(
-        ctx: CpiContext<'_, '_, '_, 'info, MsAuthRealloc<'info>>,
-        new_member: Pubkey,
-        new_threshold: u16,
-    ) -> Result<()> {
-        squads_mpl::cpi::add_member_and_change_threshold(ctx, new_member, new_threshold)
-    }
-
     pub fn change_threshold<'info>(
         ctx: CpiContext<'_, '_, '_, 'info, MsAuth<'info>>,
         new_threshold: u16,
@@ -112,13 +104,6 @@ pub mod cpi {
     ) -> Result<()> {
         squads_mpl::cpi::remove_member(ctx, member)
     }
-
-    pub fn remove_member_and_change_threshold<'info>(
-        ctx: CpiContext<'_, '_, '_, 'info, MsAuth<'info>>,
-        member: Pubkey,
-        new_threshold: u16,
-    ) -> Result<()> {
-        squads_mpl::cpi::remove_member_and_change_threshold(ctx, member, new_threshold)
-    }
+    
 
 }
