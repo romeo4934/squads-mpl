@@ -5,7 +5,7 @@ pub use squads_mpl::program::SquadsMpl;
 
 pub mod state {
     pub use squads_mpl::state::{
-       IncomingInstruction, MsTransaction, MsAccountMeta, Ms, MsTransactionStatus 
+       IncomingInstruction, MsTransaction, MsAccountMeta, Ms, MsTransactionStatus, Member
     };
 }
 
@@ -15,15 +15,18 @@ pub mod cpi {
     pub use squads_mpl::cpi::accounts::{
         ActivateTransaction, VoteTransaction, AddInstruction,CancelTransaction, Create, CreateTransaction, ExecuteInstruction, MsAuth, MsAuthRealloc, ExecuteTransaction
     };
+
+    use squads_mpl::state::Member;
     
     pub fn create_multisig<'info>(
         ctx: CpiContext<'_, '_, '_, 'info, Create<'info>>,
         creator: Pubkey,
         threshold: u16,
-        members: Vec<Pubkey>,
+        members: Vec<Member>,
         name: String,
+        time_lock: u32, 
     ) -> Result<()> {
-        squads_mpl::cpi::create(ctx, threshold, creator, members, name)
+        squads_mpl::cpi::create(ctx, threshold, creator, members, name, time_lock)
     }
 
     pub fn create_transaction<'info>(
@@ -79,7 +82,7 @@ pub mod cpi {
 
     pub fn add_member<'info>(
         ctx: CpiContext<'_, '_, '_, 'info, MsAuthRealloc<'info>>,
-        new_member: Pubkey,
+        new_member: Member,
     ) -> Result<()> {
         squads_mpl::cpi::add_member(ctx, new_member)
     }
@@ -104,6 +107,6 @@ pub mod cpi {
     ) -> Result<()> {
         squads_mpl::cpi::remove_member(ctx, member)
     }
-    
+
 
 }

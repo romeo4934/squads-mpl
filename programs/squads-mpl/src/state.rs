@@ -3,7 +3,6 @@
     https://github.com/squads-protocol/squads-mpl
 */
 
-use std::convert::TryInto;
 
 use anchor_lang::{prelude::*, solana_program::instruction::Instruction};
 use anchor_lang::solana_program::borsh0_10::get_instance_packed_len;

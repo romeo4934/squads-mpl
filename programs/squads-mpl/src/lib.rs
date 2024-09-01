@@ -3,6 +3,12 @@
     https://github.com/squads-protocol/squads-mpl
 */
 
+#![allow(clippy::result_large_err)]
+#![deny(arithmetic_overflow)]
+#![deny(unused_must_use)]
+// #![deny(clippy::arithmetic_side_effects)]
+// #![deny(clippy::integer_arithmetic)]
+
 use anchor_lang::{
     prelude::*,
     solana_program::{
